@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:AuthPage x:Class="MedReminder.Pages.HomePage"
+                xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:pages="clr-namespace:MedReminder.Pages"
+                xmlns:model="clr-namespace:MedReminder.Models"
+                Title="Home">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Logout" Clicked="OnLogoutClicked" />
+    </ContentPage.ToolbarItems>
+
+    <Grid Padding="16"
+          RowDefinitions="Auto,Auto,*"
+          RowSpacing="16">
+
+        <!-- ========== 1. Search by resident ========== -->
+        <Grid Grid.Row="0"
+              RowDefinitions="Auto,Auto"
+              RowSpacing="8">
+
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                <Label Text="1. Search by resident"
+                       Grid.Column="0"
+                       FontAttributes="Bold"
+                       FontSize="18"
+                       TextColor="#001524" />
+
+                <ImageButton Grid.Column="1"
+                             Source="icons8_help_100.png"
+                             WidthRequest="28"
+                             HeightRequest="28"
+                             BackgroundColor="Transparent"
+                             Padding="0"
+                             Clicked="OnHelpClicked" />
+            </Grid>
+
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*,Auto,Auto"
+                  ColumnSpacing="8">
+
+                <Entry x:Name="ResidentSearchEntry"
+                       Grid.Column="0"
+                       Placeholder="Search by resident name"
+                       TextColor="#001524"
+                       ClearButtonVisibility="WhileEditing"
+                       ReturnType="Search"
+                       Completed="OnResidentSearchClicked" />
+
+                <ImageButton Grid.Column="1"
+                             Source="icons8_search_100.png"
+                             WidthRequest="28"
+                             HeightRequest="28"
+                             BackgroundColor="Transparent"
+                             Padding="0"
+                             Clicked="OnResidentSearchClicked" />
+
+                <ImageButton Grid.Column="2"
+                             Source="icons8_adduser_100.png"
+                             WidthRequest="28"
+                             HeightRequest="28"
+                             BackgroundColor="Transparent"
+                             Padding="0"
+                             Clicked="OnAddResidentClicked" />
+            </Grid>
+        </Grid>
+
+        <!-- ========== 2. Search by day & time ========== -->
+        <Border Grid.Row="1"
+                Stroke="#FFE2A8"
+                StrokeThickness="1"
+                BackgroundColor="#FFF5DA"
+                Padding="12">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="16" />
+            </Border.StrokeShape>
+
+            <VerticalStackLayout Spacing="8">
+
+                <Label Text="2. Search by day &amp; time"
+                       FontAttributes="Bold"
+                       FontSize="16"
+                       TextColor="#001524" />
+
+                <Grid ColumnDefinitions="*,70,70,Auto,Auto"
+                      RowDefinitions="Auto,Auto"
+                      ColumnSpacing="6">
+
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+                        <Label Text="Day" FontSize="11" TextColor="#001524" />
+                        <Picker x:Name="DayPicker">
+                            <Picker.Items>
+                                <x:String>Mon</x:String>
+                                <x:String>Tue</x:String>
+                                <x:String>Wed</x:String>
+                                <x:String>Thu</x:String>
+                                <x:String>Fri</x:String>
+                                <x:String>Sat</x:String>
+                                <x:String>Sun</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                        <Label Text="Hour" FontSize="11" TextColor="#001524" />
+                        <Picker x:Name="HourPicker" WidthRequest="65">
+                            <Picker.Items>
+                                <x:String>0</x:String>
+                                <x:String>1</x:String>
+                                <x:String>2</x:String>
+                                <x:String>3</x:String>
+                                <x:String>4</x:String>
+                                <x:String>5</x:String>
+                                <x:String>6</x:String>
+                                <x:String>7</x:String>
+                                <x:String>8</x:String>
+                                <x:String>9</x:String>
+                                <x:String>10</x:String>
+                                <x:String>11</x:String>
+                                <x:String>12</x:String>
+                                <x:String>13</x:String>
+                                <x:String>14</x:String>
+                                <x:String>15</x:String>
+                                <x:String>16</x:String>
+                                <x:String>17</x:String>
+                                <x:String>18</x:String>
+                                <x:String>19</x:String>
+                                <x:String>20</x:String>
+                                <x:String>21</x:String>
+                                <x:String>22</x:String>
+                                <x:String>23</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Row="0" Grid.Column="2">
+                        <Label Text="Min" FontSize="11" TextColor="#001524" />
+                        <Picker x:Name="MinutePicker" WidthRequest="65">
+                            <Picker.Items>
+                                <x:String>00</x:String>
+                                <x:String>15</x:String>
+                                <x:String>30</x:String>
+                                <x:String>45</x:String>
+                            </Picker.Items>
+                        </Picker>
+                    </VerticalStackLayout>
+
+                    <ImageButton Grid.Row="0"
+                                 Grid.Column="3"
+                                 Source="icons8_clear_100.png"
+                                 WidthRequest="28"
+                                 HeightRequest="28"
+                                 BackgroundColor="Transparent"
+                                 VerticalOptions="End"
+                                 Margin="0,0,0,4"
+                                 Padding="0"
+                                 Clicked="OnClearDayTimeClicked" />
+
+                    <ImageButton Grid.Row="0"
+                                 Grid.Column="4"
+                                 Source="icons8_search_100.png"
+                                 WidthRequest="28"
+                                 HeightRequest="28"
+                                 BackgroundColor="Transparent"
+                                 VerticalOptions="End"
+                                 Margin="0,0,0,4"
+                                 Padding="0"
+                                 Clicked="OnSearchClicked" />
+
+                    <Label Grid.Row="1"
+                           Grid.ColumnSpan="5"
+                           Margin="0,6,0,0"
+                           FontSize="10"
+                           TextColor="#78290F"
+                           Text="Tip: Search by resident, time, or both." />
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ========== 3. Medications list ========== -->
+        <VerticalStackLayout Grid.Row="2" Spacing="8">
+
+            <Label Text="3. Medications"
+                   FontAttributes="Bold"
+                   FontSize="18"
+                   TextColor="#001524" />
+
+            <CollectionView x:Name="MedList"
+                            ItemsSource="{Binding Medications}"
+                            SelectionMode="Single"
+                            SelectionChanged="OnSelectionChanged"
+                            Grid.Row="2">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:Medication">
+                        <Border Margin="0,4"
+                                Padding="12"
+                                BackgroundColor="White"
+                                Stroke="#15616D"
+                                StrokeThickness="1">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+
+                            <Grid ColumnDefinitions="*,Auto">
+
+                                <!-- LEFT: All medication info -->
+                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+
+                                    <!-- Resident Name -->
+                                    <Label Text="{Binding ResidentName}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="#001524" />
+
+                                    <!-- Medication Name -->
+                                    <Label Text="{Binding MedName}"
+                                           FontSize="14"
+                                           TextColor="#001524" />
+
+                                    <!-- Quantity + Unit -->
+                                    <Label FontSize="13" TextColor="#001524">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Qty: " />
+                                                <Span Text="{Binding Quantity}" />
+                                                <Span Text=" " />
+                                                <Span Text="{Binding QuantityUnit}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+
+                                    <!-- Condition/Usage -->
+                                    <Label Text="{Binding Usage, StringFormat='For: {0}'}"
+                                           FontSize="13"
+                                           TextColor="#15616D" />
+
+                                    <!-- Schedule Summary (days + times) -->
+                                    <Label Text="{Binding ScheduleSummary}"
+                                           FontSize="11"
+                                           TextColor="#78290F" />
+
+                                </VerticalStackLayout>
+
+                                <!-- RIGHT: Time + Completed checkbox -->
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Spacing="10"
+                                                     VerticalOptions="Center"
+                                                     HorizontalOptions="End">
+
+                                    <!-- Time badge -->
+                                    <Border Padding="10,6"
+                                            BackgroundColor="#FF7D00"
+                                            HorizontalOptions="End">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="8" />
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding ReminderTime, StringFormat='{}{0:hh\\:mm}'}"
+                                               FontSize="14"
+                                               FontAttributes="Bold"
+                                               TextColor="White" />
+                                    </Border>
+
+                                    <!-- Completed (bigger tap target) -->
+                                    <Border Padding="10,6"
+                                            Stroke="#15616D"
+                                            StrokeThickness="1"
+                                            BackgroundColor="#FFF5DA"
+                                            HorizontalOptions="End">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="10" />
+                                        </Border.StrokeShape>
+
+                                        <HorizontalStackLayout Spacing="8"
+                                                               HorizontalOptions="End"
+                                                               VerticalOptions="Center">
+
+                                            <CheckBox IsChecked="{Binding IsDone}"
+                                                      CheckedChanged="OnDoneCheckedChanged"
+                                                      VerticalOptions="Center" />
+
+                                            <Label Text="Completed"
+                                                   FontSize="13"
+                                                   TextColor="#001524"
+                                                   VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+                                    </Border>
+
+                                </VerticalStackLayout>
+
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+
+    </Grid>
+</pages:AuthPage>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MedReminder.Pages.EditResidentPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:MedReminder.Pages"
+    Title="Resident"
+    BackgroundColor="#FFECD1">
+
+    <ContentPage.Content>
+        <Grid RowDefinitions="Auto,Auto,Auto,*"
+              Padding="20"
+              RowSpacing="12">
+
+            <!-- Action buttons -->
+            <HorizontalStackLayout Grid.Row="0"
+                                   HorizontalOptions="End"
+                                   Spacing="10">
+                <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                    <ImageButton Source="icons8_edit_100.png"
+                                 WidthRequest="28"
+                                 HeightRequest="28"
+                                 CornerRadius="14"
+                                 Padding="4"
+                                 Clicked="OnSaveClicked" />
+                    <Label Text="Save" FontSize="10" TextColor="#001524" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                    <ImageButton Source="icons8_pill_100.png"
+                                 WidthRequest="28"
+                                 HeightRequest="28"
+                                 CornerRadius="14"
+                                 Padding="4"
+                                 Clicked="OnSaveAndAddMedClicked" />
+                    <Label Text="Add Med" FontSize="10" TextColor="#001524" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                    <ImageButton Source="icons8_close_100.png"
+                                 WidthRequest="28"
+                                 HeightRequest="28"
+                                 CornerRadius="14"
+                                 Padding="4"
+                                 Clicked="OnCancelClicked" />
+                    <Label Text="Close" FontSize="10" TextColor="#001524" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+
+            <!-- Title -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                <Label Grid.Column="0"
+                       Text="Resident Information"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       TextColor="#001524" />
+                <Label Grid.Column="1"
+                       Text="* Required fields"
+                       FontSize="12"
+                       TextColor="#78290F"
+                       VerticalOptions="Center" />
+            </Grid>
+
+            <!-- Basic info card -->
+            <Border Grid.Row="2" Padding="16" BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12"/>
+                </Border.StrokeShape>
+                <Border.Stroke>
+                    <SolidColorBrush Color="#15616D"/>
+                </Border.Stroke>
+                
+                <VerticalStackLayout Spacing="10">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Resident Name *" FontAttributes="Bold" TextColor="#001524" />
+                        <Entry Text="{Binding Name}" Placeholder="Resident Name" TextColor="#001524" />
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="SIN *" FontAttributes="Bold" TextColor="#001524" />
+                            <Entry Text="{Binding SIN}" Placeholder="000-000-000" Keyboard="Numeric" TextColor="#001524">
+                                <Entry.Behaviors>
+                                    <pages:SinBehavior />
+                                </Entry.Behaviors>
+                            </Entry>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="DOB *" FontAttributes="Bold" TextColor="#001524" />
+                            <Entry Text="{Binding DOB}" Placeholder="YYYY-MM-DD" TextColor="#001524">
+                                <Entry.Behaviors>
+                                    <pages:DobBehavior />
+                                </Entry.Behaviors>
+                            </Entry>
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Scrollable details -->
+            <ScrollView Grid.Row="3">
+                <VerticalStackLayout Spacing="16">
+
+                    <!-- Emergency Contacts -->
+                    <Border Padding="16" BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.Stroke>
+                            <SolidColorBrush Color="#FF7D00"/>
+                        </Border.Stroke>
+                        
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Emergency Contacts" FontAttributes="Bold" FontSize="16" TextColor="#FF7D00" />
+
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                                <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
+                                    <Label Text="Contact 1 *" FontAttributes="Bold" TextColor="#001524" />
+                                    <Entry Text="{Binding EmergencyContactName1}" Placeholder="Name" TextColor="#001524" />
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4">
+                                    <Label Text="Contact 2 (Optional)" FontAttributes="Bold" TextColor="#001524" />
+                                    <Entry Text="{Binding EmergencyContactName2}" Placeholder="Name" TextColor="#001524" />
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="4">
+                                    <Label Text="Phone *" TextColor="#001524" />
+                                    <Entry Text="{Binding EmergencyContactPhone1}" Placeholder="(999) 999-9999" TextColor="#001524">
+                                        <Entry.Behaviors>
+                                            <pages:PhoneNumberBehavior />
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4">
+                                    <Label Text="Phone" TextColor="#001524" />
+                                    <Entry Text="{Binding EmergencyContactPhone2}" Placeholder="Phone" TextColor="#001524">
+                                        <Entry.Behaviors>
+                                            <pages:PhoneNumberBehavior />
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Row="2" Grid.Column="0" Spacing="4">
+                                    <Label Text="Relationship *" TextColor="#001524" />
+                                    <Picker SelectedItem="{Binding EmergencyRelationship1}">
+                                        <Picker.Items>
+                                            <x:String>Spouse</x:String>
+                                            <x:String>Son</x:String>
+                                            <x:String>Daughter</x:String>
+                                            <x:String>Sibling</x:String>
+                                            <x:String>Parent</x:String>
+                                            <x:String>Friend</x:String>
+                                            <x:String>Other</x:String>
+                                            <x:String>Select Relationship</x:String>
+                                        </Picker.Items>
+                                    </Picker>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="4">
+                                    <Label Text="Relationship" TextColor="#001524" />
+                                    <Picker SelectedItem="{Binding EmergencyRelationship2}">
+                                        <Picker.Items>
+                                            <x:String>Spouse</x:String>
+                                            <x:String>Son</x:String>
+                                            <x:String>Daughter</x:String>
+                                            <x:String>Sibling</x:String>
+                                            <x:String>Parent</x:String>
+                                            <x:String>Friend</x:String>
+                                            <x:String>Other</x:String>
+                                            <x:String>Select Relationship</x:String>
+                                        </Picker.Items>
+                                    </Picker>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Doctor -->
+                    <Border Padding="16" BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.Stroke>
+                            <SolidColorBrush Color="#15616D"/>
+                        </Border.Stroke>
+                        
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Doctor *" FontAttributes="Bold" FontSize="16" TextColor="#15616D" />
+                            <Entry Text="{Binding DoctorName}" Placeholder="Doctor Name" TextColor="#001524" />
+                            <Entry Text="{Binding DoctorContact}" Placeholder="Phone" TextColor="#001524">
+                                <Entry.Behaviors>
+                                    <pages:PhoneNumberBehavior />
+                                </Entry.Behaviors>
+                            </Entry>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Allergies -->
+                    <Border Padding="16" BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.Stroke>
+                            <SolidColorBrush Color="#78290F"/>
+                        </Border.Stroke>
+                        
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Allergies *" FontAttributes="Bold" FontSize="16" TextColor="#78290F" />
+                            <Entry Text="{Binding AllergyItems}" Placeholder="Known allergies" TextColor="#001524" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Remarks -->
+                    <Border Padding="16" Margin="0,0,0,20" BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.Stroke>
+                            <SolidColorBrush Color="#15616D"/>
+                        </Border.Stroke>
+                        
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Remarks" FontAttributes="Bold" FontSize="16" TextColor="#001524" />
+                            <Editor Text="{Binding Remarks}" AutoSize="TextChanges" Placeholder="Additional notes" TextColor="#001524" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:AuthPage x:Class="MedReminder.Pages.ResidentMedicationsPage"
+                xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:pages="clr-namespace:MedReminder.Pages"
+                xmlns:model="clr-namespace:MedReminder.Models">
+
+
+    <VerticalStackLayout Padding="24" Spacing="20">
+
+        <Label x:Name="HeaderLabel"
+                   Text="Medications"
+                   FontSize="26"
+                   FontAttributes="Bold"
+                   TextColor="#001524"
+                   HorizontalOptions="Center" />
+
+        <VerticalStackLayout HorizontalOptions="End" Spacing="2">
+            <ImageButton Source="icons8_add_100.png"
+                             WidthRequest="32"
+                             HeightRequest="32"
+                             BackgroundColor="Transparent"
+                             Padding="2"
+                             CornerRadius="16"
+                             Clicked="OnAddMedicationClicked" />
+            <Label Text="Add Meds" FontSize="10" TextColor="#001524" HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+        <CollectionView ItemsSource="{Binding Medications}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:Medication">
+                    <Border Padding="16" Margin="0,0,0,12" BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.Stroke>
+                            <SolidColorBrush Color="#15616D"/>
+                        </Border.Stroke>
+
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+
+                            <Label Grid.Row="0" Grid.Column="0"
+                                       Text="{Binding MedName}"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="#001524" />
+
+                            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding Usage}"
+                                       FontSize="13"
+                                       TextColor="#001524"
+                                       Margin="0,4,0,0" />
+
+                            <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                       Text="{Binding ScheduleSummary}"
+                                       FontSize="12"
+                                       TextColor="#15616D"
+                                       Margin="0,4,0,0" />
+
+                            <HorizontalStackLayout Grid.Row="3" Grid.Column="1"
+                                                       Spacing="12"
+                                                       HorizontalOptions="End"
+                                                       Margin="0,12,0,0">
+
+                                <ImageButton Source="icons8_edit_100.png"
+                                                 WidthRequest="28"
+                                                 HeightRequest="28"
+                                                 BackgroundColor="Transparent"
+                                                 CornerRadius="14"
+                                                 Padding="4"
+                                                 Clicked="OnEditClicked"
+                                                 CommandParameter="{Binding .}" />
+
+                                <ImageButton Source="icons8_delete_100.png"
+                                                 WidthRequest="28"
+                                                 HeightRequest="28"
+                                                 BackgroundColor="#ff8fab"
+                                                 CornerRadius="14"
+                                                 Padding="4"
+                                                 Clicked="OnDeleteClicked"
+                                                 CommandParameter="{Binding .}" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+            <ImageButton Source="icons8_close_100.png"
+                             WidthRequest="32"
+                             HeightRequest="32"
+                             BackgroundColor="Transparent"
+                             CornerRadius="16"
+                             Padding="2"
+                             Clicked="OnCloseClicked"
+                             CommandParameter="{Binding .}" />
+            <Label Text="Close" FontSize="10" TextColor="#001524" HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
+    </VerticalStackLayout>
+</pages:AuthPage>

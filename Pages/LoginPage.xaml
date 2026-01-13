@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MedReminder.Pages.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Staff Login">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+
+            <Label
+                Text="MedReminder Pro"
+                FontSize="24"
+                FontAttributes="Bold" />
+
+            <Label
+                Text="Staff Login"
+                FontSize="18" />
+
+            <Entry
+                Placeholder="Username"
+                Text="{Binding Username}" />
+
+            <Entry
+                Placeholder="Password"
+                IsPassword="True"
+                Text="{Binding Password}" />
+
+            <Button
+                Text="Login"
+                Command="{Binding LoginCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
