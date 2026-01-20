@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:AuthPage
+    x:Name="Root"
+    x:Class="MedReminder.Pages.Desktop.MedicationOrdersPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:MedReminder.Pages"
+    xmlns:vm="clr-namespace:MedReminder.ViewModels"
+    Title="Orders">
+
+    <Grid Padding="16" RowDefinitions="Auto,*" RowSpacing="12">
+
+        <!-- Top bar -->
+        <HorizontalStackLayout Spacing="10">
+            <Button Text="Refresh" Command="{Binding RefreshCommand}" />
+            <Button Text="Cancel" Clicked="OnCloseClicked" />
+            <Button Text="New Order" Clicked="OnNewOrderClicked" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+        </HorizontalStackLayout>
+
+        <!-- Orders list -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Orders}">
+            <CollectionView.EmptyView>
+                <Label Text="No orders yet."
+                       Opacity="0.6"
+                       HorizontalOptions="Start"
+                       VerticalOptions="Center" />
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:MedicationOrderRow">
+                    <Border Padding="14"
+                            Margin="0,0,0,12"
+                            BackgroundColor="White"
+                            Stroke="LightGray"
+                            StrokeThickness="1">
+
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto"
+                              ColumnDefinitions="*,Auto"
+                              RowSpacing="12"
+                              ColumnSpacing="12">
+
+                            <!-- Row 0: Title + Status badge -->
+                            <Label Grid.Row="0"
+                                   Grid.Column="0"
+                                   Text="{Binding MedicationName}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   LineBreakMode="TailTruncation" />
+
+                            <Border Grid.Row="0"
+                                    Grid.Column="1"
+                                    Padding="12,8"
+                                    BackgroundColor="{Binding StatusBadgeColor}"
+                                    StrokeThickness="0"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="Start">
+                                <Label Text="{Binding StatusDisplay}"
+                                       TextColor="White"
+                                       FontAttributes="Bold"
+                                       FontSize="12" />
+                            </Border>
+
+                            <!-- Row 1: Qty -->
+                            <Label Grid.Row="1"
+                                   Grid.ColumnSpan="2"
+                                   Text="{Binding QuantityText}"
+                                   Opacity="0.85"
+                                   FontSize="16" />
+
+                            <!-- Row 2: Timeline (no blank lines when hidden) -->
+                            <VerticalStackLayout Grid.Row="2"
+                                                 Grid.ColumnSpan="2"
+                                                 Spacing="10">
+
+                                <!-- Requested (always visible) -->
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <Border Padding="10,6"
+                                            BackgroundColor="{Binding RequestedTagColor}"
+                                            StrokeThickness="0"
+                                            VerticalOptions="Start">
+                                        <Label Text="Requested"
+                                               TextColor="White"
+                                               FontSize="12"
+                                               FontAttributes="Bold" />
+                                    </Border>
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding RequestedLine}"
+                                           Opacity="0.75"
+                                           LineBreakMode="WordWrap"
+                                           FontSize="15" />
+                                </Grid>
+
+                                <!-- Ordered (only when ShowOrderedRow) -->
+                                <Grid ColumnDefinitions="Auto,*"
+                                      ColumnSpacing="12"
+                                      IsVisible="{Binding ShowOrderedRow}">
+                                    <Border Padding="10,6"
+                                            BackgroundColor="{Binding OrderedTagColor}"
+                                            StrokeThickness="0"
+                                            VerticalOptions="Start">
+                                        <Label Text="Ordered"
+                                               TextColor="White"
+                                               FontSize="12"
+                                               FontAttributes="Bold" />
+                                    </Border>
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding OrderedLine}"
+                                           Opacity="0.75"
+                                           LineBreakMode="WordWrap"
+                                           FontSize="15" />
+                                </Grid>
+
+                                <!-- Third row (Received OR Cancelled) only when ShowThirdRow -->
+                                <Grid ColumnDefinitions="Auto,*"
+                                      ColumnSpacing="12"
+                                      IsVisible="{Binding ShowThirdRow}">
+                                    <Border Padding="10,6"
+                                            BackgroundColor="{Binding ThirdTagColor}"
+                                            StrokeThickness="0"
+                                            VerticalOptions="Start">
+                                        <Label Text="{Binding ThirdTagText}"
+                                               TextColor="White"
+                                               FontSize="12"
+                                               FontAttributes="Bold" />
+                                    </Border>
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding ThirdLineText}"
+                                           Opacity="0.75"
+                                           LineBreakMode="WordWrap"
+                                           FontSize="15" />
+                                </Grid>
+
+                            </VerticalStackLayout>
+
+                            <!-- Row 3: Actions (no Delete) -->
+                            <HorizontalStackLayout Grid.Row="3"
+                                                   Grid.ColumnSpan="2"
+                                                   Spacing="12"
+                                                   HorizontalOptions="End">
+
+                                <!-- Requested state -->
+                                <Button Text="Ordered"
+                                        IsVisible="{Binding ShowMarkOrdered}"
+                                        Command="{Binding Source={x:Reference Root}, Path=BindingContext.MarkOrderedCommand}"
+                                        CommandParameter="{Binding .}" />
+
+                                <Button Text="Cancel Request"
+                                        IsVisible="{Binding ShowCancelRequest}"
+                                        Command="{Binding Source={x:Reference Root}, Path=BindingContext.CancelCommand}"
+                                        CommandParameter="{Binding .}" />
+
+                                <!-- Ordered state -->
+                                <Button Text="Received"
+                                        IsVisible="{Binding ShowMarkReceived}"
+                                        Command="{Binding Source={x:Reference Root}, Path=BindingContext.MarkReceivedCommand}"
+                                        CommandParameter="{Binding .}" />
+
+                                <Button Text="Cancel Order"
+                                        IsVisible="{Binding ShowCancelOrder}"
+                                        Command="{Binding Source={x:Reference Root}, Path=BindingContext.CancelCommand}"
+                                        CommandParameter="{Binding .}" />
+                            </HorizontalStackLayout>
+
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</pages:AuthPage>

@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Floor Plan palette -->
+    <Color x:Key="FpPageBg">#F7F7F7</Color>
+
+    <!-- Room tile backgrounds -->
+    <Color x:Key="FpRoomEmptyBg">#F3F4F6</Color>
+    <Color x:Key="FpRoomOccupiedBg">#FFFFFF</Color>
+
+    <!-- Room type tint (S vs D) -->
+    <Color x:Key="FpSingleTint">#E8F6FF</Color>
+    <Color x:Key="FpDoubleTint">#FFF3E6</Color>
+
+    <!-- Selected -->
+    <Color x:Key="FpSelectedBg">#D9F2F5</Color>
+    <Color x:Key="FpSelectedStroke">#2E7D8A</Color>
+
+    <!-- Borders / text -->
+    <Color x:Key="FpStroke">#E5E7EB</Color>
+    <Color x:Key="FpText">#111827</Color>
+    <Color x:Key="FpSubText">#6B7280</Color>
+
+    <!-- Badges -->
+    <Color x:Key="FpBadgeSingle">#1D4ED8</Color>
+    <Color x:Key="FpBadgeDouble">#B45309</Color>
+
+</ResourceDictionary>

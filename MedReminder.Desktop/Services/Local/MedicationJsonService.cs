@@ -1,0 +1,106 @@
+﻿using System.Text.Json;
+using MedReminder.Models;
+using MedReminder.Services.Abstractions;
+
+namespace MedReminder.Services.Local
+{
+    public class MedicationJsonService : IMedicationService
+    {
+        private readonly string _filePath;
+
+        public MedicationJsonService()
+        {
+            // This is the real persistent store for inventory
+            _filePath = Path.Combine(FileSystem.AppDataDirectory, "Medications.json");
+        }
+
+        private async Task EnsureInitialInventoryAsync()
+        {
+            if (File.Exists(_filePath))
+                return;
+
+            await using var inStream = await FileSystem.OpenAppPackageFileAsync("Inventory.json");
+            await using var outStream = File.Create(_filePath);
+            await inStream.CopyToAsync(outStream);
+        }
+
+        public async Task<List<Medication>> LoadAsync()
+        {
+            await EnsureInitialInventoryAsync();
+
+            if (!File.Exists(_filePath))
+                return new List<Medication>();
+
+            await using var stream = File.OpenRead(_filePath);
+
+            var items = await JsonSerializer.DeserializeAsync<List<Medication>>(stream)
+                        ?? new List<Medication>();
+
+            return items;
+        }
+
+        private async Task SaveAsync(List<Medication> items)
+        {
+            await using var stream = File.Create(_filePath);
+            await JsonSerializer.SerializeAsync(
+                stream,
+                items,
+                new JsonSerializerOptions { WriteIndented = true });
+        }
+
+        public async Task UpsertAsync(Medication item)
+        {
+            var list = await LoadAsync();
+
+            if (item.Id == 0)
+            {
+                item.Id = list.Count == 0 ? 1 : list.Max(m => m.Id) + 1;
+                list.Add(item);
+            }
+            else
+            {
+                var existing = list.FirstOrDefault(m => m.Id == item.Id);
+                if (existing != null)
+                    list.Remove(existing);
+
+                list.Add(item);
+            }
+
+            await SaveAsync(list);
+        }
+
+        public async Task DeleteAsync(Medication item)
+        {
+            var list = await LoadAsync();
+            list.RemoveAll(m => m.Id == item.Id);
+            await SaveAsync(list);
+        }
+
+        public async Task<List<Medication>> GetLowStockAsync()
+        {
+            var list = await LoadAsync();
+
+            // Global inventory (whole retirement home): ResidentId is null (or 0 for older data)
+            var inventory = list.Where(m => m.ResidentId == null || m.ResidentId <= 0);
+
+            return inventory
+                .Where(m => m.StockQuantity <= m.ReorderLevel)
+                .OrderBy(m => m.MedName)
+                .ToList();
+        }
+
+        public async Task AdjustStockAsync(int medicationId, int delta)
+        {
+            var list = await LoadAsync();
+            var med = list.FirstOrDefault(m => m.Id == medicationId);
+            if (med == null)
+                return;
+
+            med.StockQuantity += delta;
+            if (med.StockQuantity < 0)
+                med.StockQuantity = 0;
+
+            await SaveAsync(list);
+        }
+    }
+}

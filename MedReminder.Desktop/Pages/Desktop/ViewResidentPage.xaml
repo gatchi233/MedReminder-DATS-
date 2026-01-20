@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:AuthPage
+    x:Class="MedReminder.Pages.Desktop.ViewResidentPage"
+    x:Name="ThisPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:MedReminder.Pages"
+    xmlns:model="clr-namespace:MedReminder.Models"
+    Title="Resident">
+
+    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
+
+        <!-- Top action buttons -->
+        <HorizontalStackLayout Grid.Row="0" Spacing="10">
+            <Button Text="Edit" Clicked="OnEditClicked"/>
+            <Button Text="Medications" Clicked="OnViewMedicationsClicked"/>
+            <Button Text="Report" Clicked="OnReportClicked"/>
+            <Button Text="Close" Clicked="OnCloseClicked"/>
+        </HorizontalStackLayout>
+
+        <!-- Main content -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="12">
+
+                <Grid ColumnDefinitions="2*,*" ColumnSpacing="12">
+                    <Label Grid.Column="0"
+                           Text="{Binding FullName}"
+                           FontSize="22"
+                           FontAttributes="Bold"/>
+
+                    <Grid Grid.Column="1"
+                          ColumnDefinitions="Auto,Auto"
+                          ColumnSpacing="8"
+                          HorizontalOptions="End">
+                        <Label Grid.Column="0"
+                               Text="{Binding RoomNumber, StringFormat='Room: {0}'}" />
+                        <Label Grid.Column="1"
+                               Text="{Binding BedLabel, StringFormat='Bed: {0}'}" />
+                    </Grid>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Label Grid.Column="0"
+                           x:Name="DobAgeLabel"
+                           Text="DOB: "
+                           FontSize="14"
+                           Opacity="0.8"/>
+
+                    <Label Grid.Column="1"
+                           Text="{Binding Gender, StringFormat='Gender: {0}'}"
+                           FontSize="14"
+                           Opacity="0.8"/>
+                </Grid>
+
+                <Label Text="{Binding DoctorName, StringFormat='Doctor: {0}'}" />
+                <Label Text="{Binding DoctorContact, StringFormat='Doctor Contact: {0}'}" />
+
+                <Label Text="{Binding EmergencyContactName1, StringFormat='Emergency Contact: {0}'}" />
+                <Label Text="{Binding EmergencyContactPhone1, StringFormat='Emergency Phone: {0}'}" />
+
+                <!-- Medication schedule -->
+                <Label Text="Medication schedule"
+                       FontAttributes="Bold"
+                       Margin="0,16,0,6" />
+
+                <!-- IMPORTANT: No ScrollView wrapping CollectionView -->
+                <CollectionView ItemsSource="{Binding Source={x:Reference ThisPage}, Path=MedicationSchedules}">
+                    <CollectionView.EmptyView>
+                        <Label Text="No medications assigned." Opacity="0.6" />
+                    </CollectionView.EmptyView>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="model:Medication">
+                            <Border Padding="10" Margin="0,0,0,8" BackgroundColor="White">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{Binding MedName}" FontAttributes="Bold" />
+                                    <Label Text="{Binding Dosage}" Opacity="0.7" FontSize="12"/>
+                                    <Label Text="{Binding ScheduleSummary}" Opacity="0.7" FontSize="12"/>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</pages:AuthPage>

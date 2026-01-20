@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:AuthPage
+    x:Class="MedReminder.Pages.Desktop.ResidentMedicationsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:MedReminder.Pages"
+    xmlns:model="clr-namespace:MedReminder.Models"
+    Title="Medications">
+
+    <Grid Padding="16" RowDefinitions="Auto,*" RowSpacing="12">
+
+        <Grid RowDefinitions="Auto" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10">
+            <Label x:Name="HeaderLabel"
+                   Text="Medications"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"/>
+
+            <Button Grid.Column="1"
+                    Text="Add"
+                    Clicked="OnAddMedicationClicked"/>
+
+            <Button Grid.Column="2"
+                    Text="Close"
+                    Clicked="OnCloseClicked"/>
+        </Grid>
+
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Medications}"
+                        SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:Medication">
+                    <Border Padding="12"
+                            Stroke="#E5E7EB"
+                            StrokeThickness="1"
+                            BackgroundColor="White">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding MedName}" FontAttributes="Bold"/>
+                                <Label Text="{Binding Dosage, StringFormat='Dosage: {0}'}"
+                                       FontSize="12" Opacity="0.75"/>
+                            </VerticalStackLayout>
+
+                            <Button Grid.Column="1" Text="Edit" Clicked="OnEditClicked"/>
+                            <Button Grid.Column="2" Text="Delete" Clicked="OnDeleteClicked"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</pages:AuthPage>

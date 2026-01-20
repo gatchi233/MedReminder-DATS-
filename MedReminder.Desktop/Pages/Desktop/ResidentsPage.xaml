@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:AuthPage
+    x:Class="MedReminder.Pages.Desktop.ResidentsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:MedReminder.Pages"
+    xmlns:model="clr-namespace:MedReminder.Models"
+    Title="Residents">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Logout" Clicked="OnLogoutClicked" Priority="0" Order="Primary" />
+    </ContentPage.ToolbarItems>
+
+    <Grid Padding="16" RowDefinitions="Auto,*" RowSpacing="12">
+
+        <!-- Top bar -->
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <SearchBar x:Name="NameSearchBar"
+                       Placeholder="Search resident..."
+                       TextChanged="OnFilterChanged" />
+
+            <Button Grid.Column="1"
+                    Text="Add"
+                    Clicked="OnAddResidentClicked" />
+        </Grid>
+
+        <!-- List -->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Residents}"
+                        SelectionMode="Single"
+                        SelectionChanged="OnResidentClicked">
+
+            <CollectionView.EmptyView>
+                <Label Text="No residents found."
+                       Opacity="0.6" />
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:Resident">
+                    <Border Padding="12"
+                            Stroke="#E5E7EB"
+                            StrokeThickness="1"
+                            BackgroundColor="White"
+                            Margin="0,0,0,10">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
+                            <VerticalStackLayout>
+                                <Label Text="{Binding FullName}"
+                                       FontAttributes="Bold" />
+                                <Label Text="{Binding Gender, StringFormat='Gender: {0}'}"
+                                       FontSize="12"
+                                       Opacity="0.7" />
+                            </VerticalStackLayout>
+
+                            <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                                <Button Text="View" Clicked="OnViewResidentClicked" />
+                                <Button Text="Edit" Clicked="OnEditResidentClicked" />
+                                <Button Text="Meds" Clicked="OnViewMedClicked" />
+                                <Button Text="Delete" Clicked="OnDeleteResidentClicked" />
+                            </HorizontalStackLayout>
+                        </Grid>
+
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+
+    </Grid>
+</pages:AuthPage>

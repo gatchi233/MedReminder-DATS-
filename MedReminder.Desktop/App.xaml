@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:conv="clr-namespace:MedReminder.Pages.UI.Converters"
+             xmlns:beh="clr-namespace:MedReminder.Pages.UI.Behaviors"
+             x:Class="MedReminder.App">
+
+    <Application.Resources>
+
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+
+        <!-- Colors -->
+        <Color x:Key="AppBackground">#FFECD1</Color>
+        <Color x:Key="AppText">#001524</Color>
+        <Color x:Key="AccentTeal">#15616D</Color>
+        <Color x:Key="AccentOrange">#FF7D00</Color>
+        <Color x:Key="AccentBrown">#78290F</Color>
+        <Color x:Key="DeletePink">#ff8fab</Color>
+
+        <!-- General -->
+        <Style TargetType="ContentPage">
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="BackgroundColor" Value="{StaticResource AppBackground}" />
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="BackgroundColor" Value="{StaticResource AccentTeal}"/>
+            <Setter Property="TextColor" Value="White"/>
+        </Style>
+
+        <Style TargetType="ImageButton" x:Key="BorderlessIcon">
+            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="BorderWidth" Value="0" />
+            <Setter Property="BorderColor" Value="Transparent" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="VisualStateManager.VisualStateGroups" Value="{x:Null}" />
+        </Style>
+
+        <!-- Converters -->
+        <conv:ReminderTimeToColorConverter x:Key="ReminderTimeToColorConverter" />
+        <conv:IntToDoubleConverter x:Key="IntToDoubleConverter" />
+        <conv:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+        
+
+    </Application.Resources>
+</Application>

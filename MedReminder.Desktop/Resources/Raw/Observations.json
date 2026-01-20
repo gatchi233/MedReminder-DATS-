@@ -1,0 +1,142 @@
+[
+  {
+    "Id": 1,
+    "ResidentId": 13,
+    "ResidentName": "Benjamin Wilson",
+    "ObservedAt": "2026-01-15T08:40:00-07:00",
+    "ObservedBy": "Nurse Alice",
+    "Category": "Medication",
+    "Severity": "Normal",
+    "Note": "Morning medications taken without difficulty. No adverse reactions."
+  },
+  {
+    "Id": 2,
+    "ResidentId": 13,
+    "ResidentName": "Benjamin Wilson",
+    "ObservedAt": "2026-01-15T20:15:00-07:00",
+    "ObservedBy": "Nurse Alice",
+    "Category": "Symptom",
+    "Severity": "Low",
+    "Note": "Resident reported mild dizziness before bedtime. Resolved after rest."
+  },
+  {
+    "Id": 3,
+    "ResidentId": 1,
+    "ResidentName": "Liam Johnson",
+    "ObservedAt": "2026-01-16T09:10:00-07:00",
+    "ObservedBy": "Nurse Brian",
+    "Category": "Mobility",
+    "Severity": "Medium",
+    "Note": "Required assistance transferring from bed to wheelchair."
+  },
+  {
+    "Id": 4,
+    "ResidentId": 6,
+    "ResidentName": "Ava Miller",
+    "ObservedAt": "2026-01-16T07:55:00-07:00",
+    "ObservedBy": "Nurse Clara",
+    "Category": "General",
+    "Severity": "Normal",
+    "Note": "Slept well overnight. Appetite normal at breakfast."
+  },
+  {
+    "Id": 5,
+    "ResidentId": 3,
+    "ResidentName": "Noah Brown",
+    "ObservedAt": "2026-01-16T12:30:00-07:00",
+    "ObservedBy": "Nurse Brian",
+    "Category": "Diet",
+    "Severity": "Low",
+    "Note": "Blood sugar slightly elevated before lunch. Diabetic diet reinforced."
+  },
+  {
+    "Id": 6,
+    "ResidentId": 4,
+    "ResidentName": "Emma Jones",
+    "ObservedAt": "2026-01-16T22:10:00-07:00",
+    "ObservedBy": "Nurse Alice",
+    "Category": "Sleep",
+    "Severity": "Medium",
+    "Note": "Difficulty falling asleep. Resident requested sleep aid."
+  },
+  {
+    "Id": 7,
+    "ResidentId": 10,
+    "ResidentName": "Isabella Hernandez",
+    "ObservedAt": "2026-01-17T09:00:00-07:00",
+    "ObservedBy": "Nurse Clara",
+    "Category": "Vital Signs",
+    "Severity": "Normal",
+    "Note": "Blood pressure and heart rate within normal range."
+  },
+  {
+    "Id": 8,
+    "ResidentId": 11,
+    "ResidentName": "James Lopez",
+    "ObservedAt": "2026-01-17T10:45:00-07:00",
+    "ObservedBy": "Nurse Brian",
+    "Category": "Hearing",
+    "Severity": "Low",
+    "Note": "Resident had difficulty hearing instructions. Repeated slowly."
+  },
+  {
+    "Id": 9,
+    "ResidentId": 14,
+    "ResidentName": "Charlotte Anderson",
+    "ObservedAt": "2026-01-17T13:20:00-07:00",
+    "ObservedBy": "Nurse Alice",
+    "Category": "Diet",
+    "Severity": "Medium",
+    "Note": "Accidentally served food containing gluten. No reaction observed."
+  },
+  {
+    "Id": 10,
+    "ResidentId": 2,
+    "ResidentName": "Olivia Williams",
+    "ObservedAt": "2026-01-17T19:30:00-07:00",
+    "ObservedBy": "Nurse Clara",
+    "Category": "Medication",
+    "Severity": "Medium",
+    "Note": "Evening medication delayed due to resident being asleep."
+  },
+  {
+    "Id": 11,
+    "ResidentId": 5,
+    "ResidentName": "Oliver Garcia",
+    "ObservedAt": "2026-01-18T08:20:00-07:00",
+    "ObservedBy": "Nurse Brian",
+    "Category": "Respiratory",
+    "Severity": "Low",
+    "Note": "Mild coughing noted in the morning. No fever."
+  },
+  {
+    "Id": 12,
+    "ResidentId": 7,
+    "ResidentName": "Elijah Davis",
+    "ObservedAt": "2026-01-18T14:50:00-07:00",
+    "ObservedBy": "Nurse Alice",
+    "Category": "General",
+    "Severity": "Normal",
+    "Note": "Participated in group activity. Appeared in good spirits."
+  },
+  {
+    "Id": 13,
+    "ResidentId": 9,
+    "ResidentName": "William Martinez",
+    "ObservedAt": "2026-01-18T18:40:00-07:00",
+    "ObservedBy": "Nurse Clara",
+    "Category": "Allergy",
+    "Severity": "Low",
+    "Note": "Reported mild itching after outdoor walk. No swelling observed."
+  },
+  {
+    "Id": 14,
+    "ResidentId": 15,
+    "ResidentName": "Lucas Thomas",
+    "ObservedAt": "2026-01-18T21:05:00-07:00",
+    "ObservedBy": "Nurse Brian",
+    "Category": "Medication",
+    "Severity": "Medium",
+    "Note": "Refused evening dose stating nausea. Will monitor."
+  }
+]

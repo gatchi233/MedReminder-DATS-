@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:AuthPage
+    x:Class="MedReminder.Pages.Desktop.FloorPlanPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:MedReminder.Pages"
+    xmlns:vm="clr-namespace:MedReminder.ViewModels"
+    Title="Floor Plan">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Logout" Clicked="OnLogoutClicked" Priority="0" Order="Primary" />
+    </ContentPage.ToolbarItems>
+
+    <!-- Whole page -->
+    <Grid Padding="16"
+          ColumnDefinitions="3*,2*"
+          RowDefinitions="Auto,*"
+          ColumnSpacing="16"
+          RowSpacing="12">
+
+        <!-- ===== Left top: Floor controls ===== -->
+        <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="12" VerticalOptions="Center">
+            <Button Text="1 / F"
+                    WidthRequest="90"
+                    Clicked="OnFloor1Clicked" />
+            <Button Text="2 / F"
+                    WidthRequest="90"
+                    Clicked="OnFloor2Clicked" />
+
+            <Label Text="{Binding SelectedRoomTitle}"
+                   FontAttributes="Bold"
+                   FontSize="16"
+                   VerticalOptions="Center"
+                   Margin="12,0,0,0" />
+        </HorizontalStackLayout>
+
+        <!-- ===== Right top: Title ===== -->
+        <Label Grid.Row="0" Grid.Column="1"
+               Text="Residents in selected room"
+               FontAttributes="Bold"
+               FontSize="16"
+               VerticalOptions="Center" />
+
+        <!-- ===== Left: Rooms grid ===== -->
+        <CollectionView Grid.Row="1" Grid.Column="0"
+                        ItemsSource="{Binding Rooms}"
+                        SelectionMode="Single"
+                        SelectedItem="{Binding SelectedRoom}">
+
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="4" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:RoomTile">
+                    <Border Padding="10"
+                            Margin="6"
+                            StrokeThickness="1"
+                            Stroke="#E5E7EB"
+                            BackgroundColor="White"
+                            HeightRequest="82">
+
+                        <Grid RowDefinitions="Auto,*">
+                            <HorizontalStackLayout Spacing="8">
+                                <Label Text="{Binding RoomLabel}"
+                                       FontSize="16"
+                                       FontAttributes="Bold" />
+                                <Label Text="{Binding KindShort}"
+                                       FontSize="12"
+                                       TextColor="#6B7280"
+                                       VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+
+                            <Label Grid.Row="1"
+                                   Text="{Binding OccupancyText}"
+                                   FontSize="12"
+                                   TextColor="#374151"
+                                   LineBreakMode="TailTruncation" />
+                        </Grid>
+
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- ===== Right: Selected residents panel ===== -->
+        <Border Grid.Row="1" Grid.Column="1"
+                StrokeThickness="1"
+                Stroke="#E5E7EB"
+                BackgroundColor="White"
+                Padding="12">
+
+            <Grid RowDefinitions="Auto,*" RowSpacing="8">
+                <Label Text="{Binding SelectedRoomTitle}"
+                       FontAttributes="Bold"
+                       FontSize="14" />
+
+                <CollectionView Grid.Row="1"
+                                ItemsSource="{Binding SelectedResidents}"
+                                SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="10"
+                                    Margin="0,0,0,10"
+                                    StrokeThickness="1"
+                                    Stroke="#E5E7EB"
+                                    BackgroundColor="#F9FAFB">
+
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Name}"
+                                           FontAttributes="Bold"
+                                           FontSize="14" />
+
+                                    <HorizontalStackLayout Spacing="12">
+                                        <Label Text="{Binding Gender}"
+                                               FontSize="12"
+                                               TextColor="#6B7280" />
+                                        <Label Text="{Binding AgeText}"
+                                               FontSize="12"
+                                               TextColor="#6B7280" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnResidentTapped" />
+                                </Border.GestureRecognizers>
+
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </Grid>
+        </Border>
+
+    </Grid>
+</pages:AuthPage>
