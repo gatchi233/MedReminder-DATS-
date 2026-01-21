@@ -69,7 +69,7 @@
 
                         <VerticalStackLayout Grid.Column="2" Spacing="4">
                             <Label Text="Gender" FontAttributes="Bold" TextColor="#001524" />
-                            <Picker SelectedItem="{Binding Gender, Mode=TwoWay}" TextColor="#001524">
+                            <Picker Title="Select" ItemsSource="{Binding GenderOptions}" SelectedItem="{Binding Gender, Mode=TwoWay}" TextColor="#001524">
                                 <Picker.Items>
                                     <x:String>Male</x:String>
                                     <x:String>Female</x:String>
@@ -82,7 +82,7 @@
                     <!-- Address -->
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Address" FontAttributes="Bold" TextColor="#001524" />
-                        <Entry Text="{Binding Address}" Placeholder="Street address" TextColor="#001524" />
+                        <Entry Text="{Binding Address, Mode=TwoWay}" Placeholder="Street address" TextColor="#001524" />
                     </VerticalStackLayout>
 
                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">

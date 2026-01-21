@@ -57,6 +57,9 @@
     <MauiXaml Update="Pages\Desktop\FloorPlanPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="Pages\Desktop\StaffManagementPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Pages\Desktop\ResidentReportPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -96,6 +99,9 @@
     </Compile>
     <Compile Update="Pages\Desktop\FloorPlanPage.xaml.cs">
       <DependentUpon>FloorPlanPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Pages\Desktop\StaffManagementPage.xaml.cs">
+      <DependentUpon>StaffManagementPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Pages\Desktop\ResidentReportPage.xaml.cs">
       <DependentUpon>ResidentReportPage.xaml</DependentUpon>

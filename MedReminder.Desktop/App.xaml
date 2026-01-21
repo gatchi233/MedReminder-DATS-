@@ -48,7 +48,8 @@
         <conv:ReminderTimeToColorConverter x:Key="ReminderTimeToColorConverter" />
         <conv:IntToDoubleConverter x:Key="IntToDoubleConverter" />
         <conv:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
-        
+        <conv:BoolToEnableDisableTextConverter x:Key="BoolToEnableDisableTextConverter" />
+
 
     </Application.Resources>
 </Application>

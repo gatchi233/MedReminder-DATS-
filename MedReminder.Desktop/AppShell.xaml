@@ -35,6 +35,12 @@
             Title="Inventory"
             ContentTemplate="{DataTemplate desktop:MedicationInventoryPage}" />
 
+        <ShellContent
+            Route="StaffManagementPage"
+            Title="Staff"
+            ContentTemplate="{DataTemplate desktop:StaffManagementPage}" />
+
+
     </TabBar>
 
 </Shell>

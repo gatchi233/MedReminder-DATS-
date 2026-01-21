@@ -9,6 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedReminder.Desktop", "MedR
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B4FC8ABA-4ED2-485D-A187-DFC5E44EF2E2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Updates", "Updates", "{C5E1426A-3CC6-449E-9F44-D69F572AE8EC}"
+	ProjectSection(SolutionItems) = preProject
+		Updates20260120.md = Updates20260120.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +33,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C5E1426A-3CC6-449E-9F44-D69F572AE8EC} = {B4FC8ABA-4ED2-485D-A187-DFC5E44EF2E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {36FCFD82-71DD-4CB8-B6B9-BAC79D3787CD}

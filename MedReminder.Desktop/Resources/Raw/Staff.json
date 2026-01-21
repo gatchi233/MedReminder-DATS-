@@ -1,0 +1,254 @@
+[
+  {
+    "EmployeeId": "EMP-001",
+    "FirstName": "Sarah",
+    "LastName": "Chen",
+    "JobTitle": "General Manager",
+    "Department": "Administration",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 48.50,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2027-03-15",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-002",
+    "FirstName": "Marcus",
+    "LastName": "Thompson",
+    "JobTitle": "Lead PSW",
+    "Department": "Care",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 28.00,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2026-11-20",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-003",
+    "FirstName": "Anita",
+    "LastName": "Desai",
+    "JobTitle": "Head Cook",
+    "Department": "Kitchen",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 32.00,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2025-05-20",
+      "FoodSafeCertified": true
+    }
+  },
+  {
+    "EmployeeId": "EMP-004",
+    "FirstName": "James",
+    "LastName": "Wilson",
+    "JobTitle": "LPN (Nurse)",
+    "Department": "Care",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 38.00,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2026-08-12",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-005",
+    "FirstName": "Linda",
+    "LastName": "Gomez",
+    "JobTitle": "PSW",
+    "Department": "Care",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 26.50,
+    "ShiftPreference": "Evening",
+    "Compliance": {
+      "FirstAidExpiry": "2026-01-30",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-006",
+    "FirstName": "Kevin",
+    "LastName": "Park",
+    "JobTitle": "Night PSW",
+    "Department": "Care",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 29.00,
+    "ShiftPreference": "Night",
+    "Compliance": {
+      "FirstAidExpiry": "2027-02-14",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-007",
+    "FirstName": "Elena",
+    "LastName": "Vasiliev",
+    "JobTitle": "Housekeeping",
+    "Department": "Cleaning",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 22.00,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2026-09-01",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-008",
+    "FirstName": "Robert",
+    "LastName": "O'Neill",
+    "JobTitle": "Activities Coordinator",
+    "Department": "Administration",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 30.00,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2025-12-25",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-009",
+    "FirstName": "Sita",
+    "LastName": "Patel",
+    "JobTitle": "Dietary Aide",
+    "Department": "Kitchen",
+    "EmploymentStatus": "Part-time",
+    "HourlyWage": 21.50,
+    "ShiftPreference": "Evening",
+    "Compliance": {
+      "FirstAidExpiry": "2026-04-10",
+      "FoodSafeCertified": true
+    }
+  },
+  {
+    "EmployeeId": "EMP-010",
+    "FirstName": "David",
+    "LastName": "Lee",
+    "JobTitle": "PSW",
+    "Department": "Care",
+    "EmploymentStatus": "Part-time",
+    "HourlyWage": 26.50,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2026-07-22",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-011",
+    "FirstName": "Chloe",
+    "LastName": "Smith",
+    "JobTitle": "PSW",
+    "Department": "Care",
+    "EmploymentStatus": "Casual",
+    "HourlyWage": 27.00,
+    "ShiftPreference": "Any",
+    "Compliance": {
+      "FirstAidExpiry": "2025-11-11",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-012",
+    "FirstName": "Michael",
+    "LastName": "Jordan",
+    "JobTitle": "Maintenance",
+    "Department": "Facilities",
+    "EmploymentStatus": "Part-time",
+    "HourlyWage": 35.00,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2027-05-05",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-013",
+    "FirstName": "Sofia",
+    "LastName": "Rossi",
+    "JobTitle": "Night PSW",
+    "Department": "Care",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 29.00,
+    "ShiftPreference": "Night",
+    "Compliance": {
+      "FirstAidExpiry": "2026-10-31",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-014",
+    "FirstName": "Jordan",
+    "LastName": "Blake",
+    "JobTitle": "Housekeeping",
+    "Department": "Cleaning",
+    "EmploymentStatus": "Part-time",
+    "HourlyWage": 22.00,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2026-03-20",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-015",
+    "FirstName": "Amina",
+    "LastName": "Bello",
+    "JobTitle": "PSW",
+    "Department": "Care",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 26.50,
+    "ShiftPreference": "Evening",
+    "Compliance": {
+      "FirstAidExpiry": "2026-06-18",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-016",
+    "FirstName": "Tom",
+    "LastName": "Baker",
+    "JobTitle": "Second Cook",
+    "Department": "Kitchen",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 28.00,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2027-01-10",
+      "FoodSafeCertified": true
+    }
+  },
+  {
+    "EmployeeId": "EMP-017",
+    "FirstName": "Grace",
+    "LastName": "Kim",
+    "JobTitle": "LPN (Nurse)",
+    "Department": "Care",
+    "EmploymentStatus": "Part-time",
+    "HourlyWage": 38.00,
+    "ShiftPreference": "Evening",
+    "Compliance": {
+      "FirstAidExpiry": "2026-02-28",
+      "FoodSafeCertified": false
+    }
+  },
+  {
+    "EmployeeId": "EMP-018",
+    "FirstName": "Lucas",
+    "LastName": "Müller",
+    "JobTitle": "Dietary Aide",
+    "Department": "Kitchen",
+    "EmploymentStatus": "Full-time",
+    "HourlyWage": 21.50,
+    "ShiftPreference": "Day",
+    "Compliance": {
+      "FirstAidExpiry": "2025-09-15",
+      "FoodSafeCertified": true
+    }
+  }
+]

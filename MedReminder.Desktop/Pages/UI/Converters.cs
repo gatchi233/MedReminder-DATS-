@@ -53,4 +53,18 @@ namespace MedReminder.Pages.UI.Converters
             => throw new NotImplementedException();
     }
 
+    public class BoolToEnableDisableTextConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool b)
+                return b ? "Disable" : "Enable";
+
+            return "Enable/Disable";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+            => throw new NotSupportedException();
+    }
+
 }

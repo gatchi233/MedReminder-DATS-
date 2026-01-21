@@ -11,6 +11,11 @@ using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI;
+using MedMinder.Services.Abstractions;
+using MedMinder.Services.Abstractions;
+
+
+
 
 
 #if WINDOWS
@@ -76,6 +81,7 @@ namespace MedReminder
             builder.Services.AddSingleton<IMedicationOrderService, MedicationOrderJsonService>();
             builder.Services.AddSingleton<IObservationService, ObservationJsonService>();
             builder.Services.AddSingleton<IResidentService, ResidentJsonService>();
+            builder.Services.AddSingleton<IStaffService, StaffJsonService>();
             builder.Services.AddSingleton<AuthService>();
 
             // ViewModels
@@ -87,6 +93,7 @@ namespace MedReminder
             builder.Services.AddTransient<MedicationViewModel>();
             builder.Services.AddTransient<ResidentReportViewModel>();
             builder.Services.AddTransient<ResidentsPageViewModel>();
+            builder.Services.AddTransient<StaffManagementViewModel>();
 
             // Pages
             builder.Services.AddTransient<EditMedicationPage>();
@@ -99,7 +106,9 @@ namespace MedReminder
             builder.Services.AddTransient<ResidentReportPage>();
             builder.Services.AddTransient<ResidentsPage>();
             builder.Services.AddTransient<ViewResidentPage>();
+            builder.Services.AddTransient<StaffManagementPage>();
             builder.Services.AddTransient<LoginPage>();
+
 
 #if DEBUG
             builder.Logging.AddDebug();
