@@ -2,141 +2,225 @@
   {
     "Id": 1,
     "ResidentId": 13,
-    "ResidentName": "Benjamin Wilson",
     "ObservedAt": "2026-01-15T08:40:00-07:00",
-    "ObservedBy": "Nurse Alice",
+    "ObservedByStaffId": "EMP-004",
     "Category": "Medication",
     "Severity": "Normal",
-    "Note": "Morning medications taken without difficulty. No adverse reactions."
+    "Note": "Morning medications taken without difficulty. No adverse reactions.",
+    "Vitals": {
+      "TemperatureC": 36.6,
+      "Systolic": 124,
+      "Diastolic": 78,
+      "HeartRate": 74,
+      "OxygenSaturation": 96
+    }
   },
   {
     "Id": 2,
     "ResidentId": 13,
-    "ResidentName": "Benjamin Wilson",
     "ObservedAt": "2026-01-15T20:15:00-07:00",
-    "ObservedBy": "Nurse Alice",
+    "ObservedByStaffId": "EMP-004",
     "Category": "Symptom",
     "Severity": "Low",
-    "Note": "Resident reported mild dizziness before bedtime. Resolved after rest."
+    "Note": "Resident reported mild dizziness before bedtime. Resolved after rest.",
+    "Vitals": {
+      "TemperatureC": 36.7,
+      "Systolic": 110,
+      "Diastolic": 68,
+      "HeartRate": 82,
+      "OxygenSaturation": 95
+    }
   },
   {
     "Id": 3,
     "ResidentId": 1,
-    "ResidentName": "Liam Johnson",
     "ObservedAt": "2026-01-16T09:10:00-07:00",
-    "ObservedBy": "Nurse Brian",
+    "ObservedByStaffId": "EMP-002",
     "Category": "Mobility",
     "Severity": "Medium",
-    "Note": "Required assistance transferring from bed to wheelchair."
+    "Note": "Required assistance transferring from bed to wheelchair.",
+    "Vitals": {
+      "TemperatureC": 36.5,
+      "Systolic": 132,
+      "Diastolic": 84,
+      "HeartRate": 78,
+      "OxygenSaturation": 97
+    }
   },
   {
     "Id": 4,
     "ResidentId": 6,
-    "ResidentName": "Ava Miller",
     "ObservedAt": "2026-01-16T07:55:00-07:00",
-    "ObservedBy": "Nurse Clara",
+    "ObservedByStaffId": "EMP-017",
     "Category": "General",
     "Severity": "Normal",
-    "Note": "Slept well overnight. Appetite normal at breakfast."
+    "Note": "Slept well overnight. Appetite normal at breakfast.",
+    "Vitals": {
+      "TemperatureC": 36.4,
+      "Systolic": 128,
+      "Diastolic": 80,
+      "HeartRate": 68,
+      "OxygenSaturation": 98
+    }
   },
   {
     "Id": 5,
     "ResidentId": 3,
-    "ResidentName": "Noah Brown",
     "ObservedAt": "2026-01-16T12:30:00-07:00",
-    "ObservedBy": "Nurse Brian",
+    "ObservedByStaffId": "EMP-002",
     "Category": "Diet",
     "Severity": "Low",
-    "Note": "Blood sugar slightly elevated before lunch. Diabetic diet reinforced."
+    "Note": "Blood sugar slightly elevated before lunch. Diabetic diet reinforced.",
+    "Vitals": {
+      "TemperatureC": 36.6,
+      "Systolic": 138,
+      "Diastolic": 86,
+      "HeartRate": 76,
+      "OxygenSaturation": 96
+    }
   },
   {
     "Id": 6,
     "ResidentId": 4,
-    "ResidentName": "Emma Jones",
     "ObservedAt": "2026-01-16T22:10:00-07:00",
-    "ObservedBy": "Nurse Alice",
+    "ObservedByStaffId": "EMP-004",
     "Category": "Sleep",
     "Severity": "Medium",
-    "Note": "Difficulty falling asleep. Resident requested sleep aid."
+    "Note": "Difficulty falling asleep. Resident requested sleep aid.",
+    "Vitals": {
+      "TemperatureC": 36.8,
+      "Systolic": 134,
+      "Diastolic": 82,
+      "HeartRate": 84,
+      "OxygenSaturation": 97
+    }
   },
   {
     "Id": 7,
     "ResidentId": 10,
-    "ResidentName": "Isabella Hernandez",
     "ObservedAt": "2026-01-17T09:00:00-07:00",
-    "ObservedBy": "Nurse Clara",
+    "ObservedByStaffId": "EMP-017",
     "Category": "Vital Signs",
     "Severity": "Normal",
-    "Note": "Blood pressure and heart rate within normal range."
+    "Note": "Blood pressure and heart rate within normal range.",
+    "Vitals": {
+      "TemperatureC": 36.8,
+      "Systolic": 118,
+      "Diastolic": 76,
+      "HeartRate": 72,
+      "OxygenSaturation": 97
+    }
   },
   {
     "Id": 8,
     "ResidentId": 11,
-    "ResidentName": "James Lopez",
     "ObservedAt": "2026-01-17T10:45:00-07:00",
-    "ObservedBy": "Nurse Brian",
+    "ObservedByStaffId": "EMP-002",
     "Category": "Hearing",
     "Severity": "Low",
-    "Note": "Resident had difficulty hearing instructions. Repeated slowly."
+    "Note": "Resident had difficulty hearing instructions. Repeated slowly.",
+    "Vitals": {
+      "TemperatureC": 36.5,
+      "Systolic": 126,
+      "Diastolic": 78,
+      "HeartRate": 70,
+      "OxygenSaturation": 96
+    }
   },
   {
     "Id": 9,
     "ResidentId": 14,
-    "ResidentName": "Charlotte Anderson",
     "ObservedAt": "2026-01-17T13:20:00-07:00",
-    "ObservedBy": "Nurse Alice",
+    "ObservedByStaffId": "EMP-004",
     "Category": "Diet",
     "Severity": "Medium",
-    "Note": "Accidentally served food containing gluten. No reaction observed."
+    "Note": "Accidentally served food containing gluten. No reaction observed.",
+    "Vitals": {
+      "TemperatureC": 36.7,
+      "Systolic": 122,
+      "Diastolic": 74,
+      "HeartRate": 76,
+      "OxygenSaturation": 98
+    }
   },
   {
     "Id": 10,
     "ResidentId": 2,
-    "ResidentName": "Olivia Williams",
     "ObservedAt": "2026-01-17T19:30:00-07:00",
-    "ObservedBy": "Nurse Clara",
+    "ObservedByStaffId": "EMP-017",
     "Category": "Medication",
     "Severity": "Medium",
-    "Note": "Evening medication delayed due to resident being asleep."
+    "Note": "Evening medication delayed due to resident being asleep.",
+    "Vitals": {
+      "TemperatureC": 36.3,
+      "Systolic": 116,
+      "Diastolic": 72,
+      "HeartRate": 64,
+      "OxygenSaturation": 97
+    }
   },
   {
     "Id": 11,
     "ResidentId": 5,
-    "ResidentName": "Oliver Garcia",
     "ObservedAt": "2026-01-18T08:20:00-07:00",
-    "ObservedBy": "Nurse Brian",
+    "ObservedByStaffId": "EMP-002",
     "Category": "Respiratory",
     "Severity": "Low",
-    "Note": "Mild coughing noted in the morning. No fever."
+    "Note": "Mild coughing noted in the morning. No fever.",
+    "Vitals": {
+      "TemperatureC": 36.9,
+      "Systolic": 130,
+      "Diastolic": 82,
+      "HeartRate": 80,
+      "OxygenSaturation": 94
+    }
   },
   {
     "Id": 12,
     "ResidentId": 7,
-    "ResidentName": "Elijah Davis",
     "ObservedAt": "2026-01-18T14:50:00-07:00",
-    "ObservedBy": "Nurse Alice",
+    "ObservedByStaffId": "EMP-004",
     "Category": "General",
     "Severity": "Normal",
-    "Note": "Participated in group activity. Appeared in good spirits."
+    "Note": "Participated in group activity. Appeared in good spirits.",
+    "Vitals": {
+      "TemperatureC": 36.6,
+      "Systolic": 120,
+      "Diastolic": 76,
+      "HeartRate": 74,
+      "OxygenSaturation": 98
+    }
   },
   {
     "Id": 13,
     "ResidentId": 9,
-    "ResidentName": "William Martinez",
     "ObservedAt": "2026-01-18T18:40:00-07:00",
-    "ObservedBy": "Nurse Clara",
+    "ObservedByStaffId": "EMP-017",
     "Category": "Allergy",
     "Severity": "Low",
-    "Note": "Reported mild itching after outdoor walk. No swelling observed."
+    "Note": "Reported mild itching after outdoor walk. No swelling observed.",
+    "Vitals": {
+      "TemperatureC": 36.7,
+      "Systolic": 128,
+      "Diastolic": 80,
+      "HeartRate": 78,
+      "OxygenSaturation": 97
+    }
   },
   {
     "Id": 14,
     "ResidentId": 15,
-    "ResidentName": "Lucas Thomas",
     "ObservedAt": "2026-01-18T21:05:00-07:00",
-    "ObservedBy": "Nurse Brian",
+    "ObservedByStaffId": "EMP-002",
     "Category": "Medication",
     "Severity": "Medium",
-    "Note": "Refused evening dose stating nausea. Will monitor."
+    "Note": "Refused evening dose stating nausea. Will monitor.",
+    "Vitals": {
+      "TemperatureC": 37.1,
+      "Systolic": 136,
+      "Diastolic": 84,
+      "HeartRate": 86,
+      "OxygenSaturation": 95
+    }
   }
 ]

@@ -1,4 +1,5 @@
 ﻿using Microsoft.UI.Xaml;
+using Windows.Graphics;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -17,6 +18,37 @@ namespace MedReminder.WinUI
         public App()
         {
             this.InitializeComponent();
+        }
+
+        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        {
+            base.OnLaunched(args);
+
+            var currentWindow = Microsoft.Maui.Controls.Application.Current.Windows[0].Handler.PlatformView as Microsoft.UI.Xaml.Window;
+            if (currentWindow == null) return;
+
+            IntPtr windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(currentWindow);
+            Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(windowHandle);
+            Microsoft.UI.Windowing.AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+
+            // Get the display size (DisplayArea)
+            var displayArea = Microsoft.UI.Windowing.DisplayArea.GetFromWindowId(windowId, Microsoft.UI.Windowing.DisplayAreaFallback.Nearest);
+
+            if (displayArea != null)
+            {
+                var screenWidth = displayArea.WorkArea.Width;
+                var screenHeight = displayArea.WorkArea.Height;
+
+                // Calculate 75%
+                int newWidth = (int)(screenWidth * 0.80);
+                int newHeight = (int)(screenHeight * 0.80);
+
+                // Calculate center position
+                int newX = (screenWidth - newWidth) / 2;
+                int newY = (screenHeight - newHeight) / 2;
+
+                appWindow.MoveAndResize(new RectInt32(newX, newY, newWidth, newHeight));
+            }
         }
 
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();

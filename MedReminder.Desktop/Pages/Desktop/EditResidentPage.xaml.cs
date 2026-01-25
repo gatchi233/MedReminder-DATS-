@@ -4,6 +4,7 @@ using Microsoft.Maui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MedReminder.Pages.Desktop
 {
@@ -54,13 +55,18 @@ namespace MedReminder.Pages.Desktop
                     {
                         Id = existing.Id,
 
-                        // Name (First/Last)
+                        // Personal Info
                         FirstName = existing.FirstName,
-                        LastName = existing.LastName,
-
-                        // Core
+                        LastName = existing.LastName, 
                         DOB = existing.DOB,
                         SIN = existing.SIN,
+                        Gender = existing.Gender,
+
+                        // Address
+                        Address = existing.Address,
+                        City = existing.City,
+                        Province = existing.Province,
+                        PostalCode = existing.PostalCode,
 
                         // Room placement (Floor plan)
                         RoomNumber = existing.RoomNumber,
@@ -81,9 +87,29 @@ namespace MedReminder.Pages.Desktop
                         DoctorContact = existing.DoctorContact,
 
                         // Allergies & Remarks
-                        AllergyItems = existing.AllergyItems,
+                        AllergyPeanuts = existing.AllergyPeanuts,
+                        AllergyTreeNuts = existing.AllergyTreeNuts,
+                        AllergyMilk = existing.AllergyMilk,
+                        AllergyEggs = existing.AllergyEggs,
+                        AllergyShellfish = existing.AllergyShellfish,
+                        AllergyFish = existing.AllergyFish,
+                        AllergyWheat = existing.AllergyWheat,
+                        AllergySoy = existing.AllergySoy,
+                        AllergyLatex = existing.AllergyLatex,
+                        AllergyPenicillin = existing.AllergyPenicillin,
+                        AllergySulfa = existing.AllergySulfa,
+                        AllergyAspirin = existing.AllergyAspirin,
+                        AllergyOtherItems = existing.AllergyOtherItems,
                         Remarks = existing.Remarks
                     };
+
+                    WorkingCopy.AllergyNone = !WorkingCopy.AllergyPeanuts && !WorkingCopy.AllergyTreeNuts &&
+                                     !WorkingCopy.AllergyMilk && !WorkingCopy.AllergyEggs &&
+                                     !WorkingCopy.AllergyShellfish && !WorkingCopy.AllergyFish &&
+                                     !WorkingCopy.AllergyWheat && !WorkingCopy.AllergySoy &&
+                                     !WorkingCopy.AllergyLatex && !WorkingCopy.AllergyPenicillin &&
+                                     !WorkingCopy.AllergySulfa && !WorkingCopy.AllergyAspirin && 
+                                     string.IsNullOrWhiteSpace(WorkingCopy.AllergyOtherItems);
 
                     // In case the user opened edit from FloorPlan for an occupied room,
                     // do NOT overwrite existing room fields.
@@ -100,6 +126,72 @@ namespace MedReminder.Pages.Desktop
             }
 
             BindingContext = WorkingCopy;
+            RefreshAllergyUI();
+        }
+
+        private void OnNoneCheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            // When "None" is checked (e.Value == true)
+            if (WorkingCopy == null) return;
+
+            // When "None" is checked: clear all other allergy fields and disable inputs
+            if (e.Value)
+            {
+                ClearAllAllergies();
+            }
+
+            RefreshAllergyUI();
+        }
+
+        private void OnSpecificAllergyCheckedChanged(object sender, CheckedChangedEventArgs e)
+        {
+            if (WorkingCopy == null) return;
+
+            if (e.Value && WorkingCopy.AllergyNone)
+            {
+                WorkingCopy.AllergyNone = false;
+                RefreshAllergyUI();
+            }
+        }
+
+        // OPTIONAL BUT RECOMMENDED:
+        // Hook this to "Other" Entry TextChanged so typing auto turns off "None".
+        private void OnOtherAllergyTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (WorkingCopy == null) return;
+
+            if (!string.IsNullOrWhiteSpace(e.NewTextValue) && WorkingCopy.AllergyNone)
+            {
+                WorkingCopy.AllergyNone = false;
+                RefreshAllergyUI();
+            }
+        }
+
+        private void ClearAllAllergies()
+        {
+            if (WorkingCopy == null) return;
+
+            WorkingCopy.AllergyPeanuts = false;
+            WorkingCopy.AllergyTreeNuts = false;
+            WorkingCopy.AllergyMilk = false;
+            WorkingCopy.AllergyEggs = false;
+            WorkingCopy.AllergyShellfish = false;
+            WorkingCopy.AllergyFish = false;
+            WorkingCopy.AllergyWheat = false;
+            WorkingCopy.AllergySoy = false;
+            WorkingCopy.AllergyLatex = false;
+            WorkingCopy.AllergyPenicillin = false;
+            WorkingCopy.AllergySulfa = false;
+            WorkingCopy.AllergyAspirin = false;
+            WorkingCopy.AllergyOtherItems = string.Empty;
+        }
+
+        private void RefreshAllergyUI()
+        {
+            // Re-bind to ensure the checkboxes update their Enabled/Disabled states
+            var temp = BindingContext;
+            BindingContext = null;
+            BindingContext = temp;
         }
 
         private Resident CreateNewResidentWithDefaults()
@@ -168,18 +260,24 @@ namespace MedReminder.Pages.Desktop
             if (string.IsNullOrWhiteSpace(WorkingCopy.DoctorName))
                 errors.Add("Doctor Name");
 
-            if (string.IsNullOrWhiteSpace(WorkingCopy.AllergyItems))
-                errors.Add("Allergies");
+            // Allergy Validation Logic
+            bool hasAnySpecificAllergy = WorkingCopy.AllergyPeanuts || WorkingCopy.AllergyTreeNuts ||
+                                         WorkingCopy.AllergyMilk || WorkingCopy.AllergyEggs ||
+                                         WorkingCopy.AllergyShellfish || WorkingCopy.AllergyFish ||
+                                         WorkingCopy.AllergyWheat || WorkingCopy.AllergySoy ||
+                                         WorkingCopy.AllergyLatex || WorkingCopy.AllergyPenicillin ||
+                                         WorkingCopy.AllergySulfa || WorkingCopy.AllergyAspirin || !string.IsNullOrWhiteSpace(WorkingCopy.AllergyOtherItems);
+
+            if (!WorkingCopy.AllergyNone && !hasAnySpecificAllergy)
+            {
+                errors.Add("Allergies (Must select 'None' or check specific allergies)");
+            }
 
             if (errors.Count > 0)
             {
-                DisplayAlert(
-                    "Missing Required Fields",
-                    "Please fill in:\n• " + string.Join("\n• ", errors),
-                    "OK");
+                DisplayAlert("Missing Required Fields", "Please fill in:\n• " + string.Join("\n• ", errors), "OK");
                 return false;
             }
-
             return true;
         }
 

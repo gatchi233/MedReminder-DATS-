@@ -69,7 +69,7 @@ namespace MedReminder.ViewModels
             var obs = await _observationService.LoadAsync();
             var recentObs = obs
                 .Where(o => o.ResidentId == residentId)
-                .OrderByDescending(o => o.RecordedAt)
+                .OrderByDescending(o => o.ObservedAt)
                 .ToList();
 
             // Demo placeholder (later plug in AuthService username)

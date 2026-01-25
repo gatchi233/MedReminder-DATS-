@@ -5,97 +5,175 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:MedReminder.Pages"
-    Title="Inventory">
-
+    Title="Medication Inventory"
+    BackgroundColor="{StaticResource Medication_Main_Background}">
+    
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Logout" Clicked="OnLogoutClicked" Priority="0" Order="Primary" />
+        <ToolbarItem Text="Refresh" Clicked="OnRefreshClicked" Priority="0" Order="Primary" />
+        <ToolbarItem Text="Logout" Clicked="OnLogoutClicked" Priority="1" Order="Primary" />
     </ContentPage.ToolbarItems>
 
     <Grid Padding="16" RowDefinitions="Auto,*" RowSpacing="12">
 
-        <!-- Top bar -->
-        <HorizontalStackLayout Spacing="10">
-            <Button Text="Refresh" Command="{Binding RefreshCommand}" />
-            <Button Text="Orders" Clicked="OnOrdersClicked" />
-            <Button Text="Sort" Clicked="OnSortClicked" />
+        <!-- Top bar: Search + action Button (match ResidentsPage layout) -->
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
 
-            <ActivityIndicator IsRunning="{Binding IsBusy}"
-                               IsVisible="{Binding IsBusy}"
-                               VerticalOptions="Center" />
+            <SearchBar x:Name="MedSearchBar"
+                       Placeholder="Search medication..."
+                       TextChanged="OnFilterChanged" />
 
-            <Label Text="Low Stock = Stock ≤ Reorder"
-                   Opacity="0.7"
-                   VerticalOptions="Center" />
-        </HorizontalStackLayout>
+            <HorizontalStackLayout Grid.Column="1" Spacing="8">
+
+                <!-- Sort -->
+                <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="4"/>
+                    </Border.StrokeShape>
+
+                    <Grid ColumnDefinitions="32,Auto" Margin="0">
+                        <Image Grid.Column="0"
+                               Source="icons8_sort_100.png"
+                               HeightRequest="16"
+                               WidthRequest="16"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+
+                        <Border Grid.Column="1"
+                                BackgroundColor="{StaticResource Button_View}"
+                                Padding="10,0"
+                                StrokeThickness="0">
+                            <Label Text=" SORT "
+                                   TextColor="{StaticResource Button_Font_Primary}"
+                                   FontSize="12"
+                                   VerticalOptions="Center"
+                                   FontAttributes="Bold"/>
+                        </Border>
+                    </Grid>
+
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnSortClicked" />
+                    </Border.GestureRecognizers>
+                </Border>
+
+                <!-- Orders -->
+                <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="4"/>
+                    </Border.StrokeShape>
+
+                    <Grid ColumnDefinitions="32,Auto" Margin="0">
+                        <Image Grid.Column="0" Source="icons8_basketadd_100.png"
+                               HeightRequest="16" WidthRequest="16"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+
+                        <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Create}"
+                                Padding="10,0" StrokeThickness="0">
+                            <Label Text=" ORDERS "
+                                   TextColor="{StaticResource Button_Font_Primary}" FontSize="12"
+                                   VerticalOptions="Center" FontAttributes="Bold"/>
+                        </Border>
+                    </Grid>
+
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOrdersClicked" />
+                    </Border.GestureRecognizers>
+                </Border>
+
+            </HorizontalStackLayout>
+        </Grid>
 
         <!-- Inventory list -->
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Items}">
+        <CollectionView x:Name="InventoryCollection" Grid.Row="1" ItemsSource="{Binding Items}">
+
             <CollectionView.EmptyView>
-                <Label Text="No inventory items found."
-                       Opacity="0.6"
-                       VerticalOptions="Center" />
+                <Label Text="No inventory items found." 
+                       Opacity="0.6" VerticalOptions="Center" />
             </CollectionView.EmptyView>
+
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
+            </CollectionView.ItemsLayout>
 
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Border Padding="12"
-                            Margin="0,0,0,10"
-                            BackgroundColor="White"
-                            Stroke="LightGray"
+                            BackgroundColor="{StaticResource Medication_Background}"
+                            Stroke="{StaticResource Medication_Font_Primary}"
                             StrokeThickness="1">
 
-                        <Grid RowDefinitions="Auto,Auto"
-                              ColumnDefinitions="*,Auto,Auto,Auto"
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8"/>
+                        </Border.StrokeShape>
+
+                        <Grid ColumnDefinitions="*,Auto"
                               ColumnSpacing="10"
                               RowSpacing="8">
 
                             <!-- Row 0 -->
-                            <Label Text="{Binding MedName}"
-                                   FontSize="18"
-                                   FontAttributes="Bold" />
+                            <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                                <Label Text="{Binding MedName}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Medication_Font_Primary}" />
+                                <BoxView WidthRequest="1" HeightRequest="20" Color="{StaticResource Medication_Font_Secondary}" VerticalOptions="Center"/>
 
-                            <Label Grid.Column="1"
-                                   Text="{Binding StockQuantity, StringFormat='Stock {0}'}"
-                                   HorizontalOptions="End"
-                                   VerticalOptions="Center" />
+                                <Label Text="{Binding Usage}" FontSize="13" TextColor="{StaticResource Medication_Font_Secondary}" VerticalOptions="Center"/>
+                                <BoxView WidthRequest="1" HeightRequest="20" Color="{StaticResource Medication_Font_Secondary}" VerticalOptions="Center"/>
 
-                            <Label Grid.Column="2"
-                                   Text="{Binding ReorderLevel, StringFormat='Reorder {0}'}"
-                                   Opacity="0.75"
-                                   HorizontalOptions="End"
-                                   VerticalOptions="Center" />
+                                <Label FontSize="13" TextColor="{StaticResource Medication_Font_Secondary}" VerticalOptions="Center">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Stock: "/>
+                                            <Span Text="{Binding StockQuantity}"/>
+                                            <Span Text=" • "/>
+                                            <Span Text="Reorder: "/>
+                                            <Span Text="{Binding ReorderLevel}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </HorizontalStackLayout>
 
-                            <Grid Grid.Column="3" ColumnDefinitions="Auto,Auto" ColumnSpacing="8"
-                                  HorizontalOptions="End" VerticalOptions="Center">
+                            <!-- Right side: Low Stock + Adjust + Order -->
+                            <HorizontalStackLayout Grid.Column="1" Spacing="8" HorizontalOptions="End" VerticalOptions="Center">
 
                                 <!-- Low stock badge -->
-                                <Border Padding="8,4"
-                                        BackgroundColor="#F0AD4E"
-                                        IsVisible="{Binding IsLowStock}"
-                                        StrokeThickness="0">
-                                    <Label Text="LOW"
-                                           TextColor="White"
-                                           FontAttributes="Bold"
-                                           FontSize="12" />
+
+                                <Border Padding="8,4" BackgroundColor="{StaticResource Alert_Warning}" IsVisible="{Binding IsLowStock}" StrokeThickness="0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="6"/>
+                                    </Border.StrokeShape>
+                                    <Label Text="LOW" TextColor="{StaticResource Button_Font_Primary}"  FontAttributes="Bold" FontSize="12" />
                                 </Border>
 
-                                <!-- Adjust button -->
-                                <Button Grid.Column="1"
-                                        Text="Adjust"
-                                        Clicked="OnAdjustClicked" />
-                            </Grid>
+                                <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="4"/>
+                                    </Border.StrokeShape>
+                                    <Grid ColumnDefinitions="32,Auto" Margin="0">
+                                        <Image Grid.Column="0" Source="icons8_edit_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                        <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Edit}" Padding="10,0" StrokeThickness="0">
+                                            <Label Text="ADJUST" TextColor="{StaticResource Button_Font_Primary}" FontSize="12" VerticalOptions="Center" FontAttributes="Bold"/>
+                                        </Border>
+                                    </Grid>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnAdjustClicked" CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+                                </Border>
 
-                            <!-- Row 1 -->
-                            <Label Grid.Row="1"
-                                   Grid.ColumnSpan="3"
-                                   Text="{Binding Usage}"
-                                   Opacity="0.7" />
+                                <!-- Edit -->
+                                <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="4"/>
+                                    </Border.StrokeShape>
+                                    <Grid ColumnDefinitions="32,Auto" Margin="0">
+                                        <Image Grid.Column="0" Source="icons8_basketadd_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                        <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Create}" Padding="10,0" StrokeThickness="0">
+                                            <Label Text="ORDERS" TextColor="{StaticResource Button_Font_Primary}" FontSize="12" VerticalOptions="Center" FontAttributes="Bold"/>
+                                        </Border>
+                                    </Grid>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnDirectOrderClicked" CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </HorizontalStackLayout>
 
-                            <Button Grid.Row="1"
-                                    Grid.Column="3"
-                                    Text="Order"
-                                    Clicked="OnOrderClicked"
-                                    HorizontalOptions="End" />
                         </Grid>
 
                     </Border>

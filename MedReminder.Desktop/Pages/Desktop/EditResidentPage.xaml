@@ -6,23 +6,27 @@
     xmlns:conv="clr-namespace:MedReminder.Pages.UI.Converters"
     xmlns:beh="clr-namespace:MedReminder.Pages.UI.Behaviors"
     Title="Resident"
-    BackgroundColor="#FFECD1">
+    BackgroundColor="{StaticResource Resident_Main_Background}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Save" Clicked="OnSaveClicked" Priority="0" Order="Primary" />
         <ToolbarItem Text="Close" Clicked="OnCancelClicked" Priority="1" Order="Primary" />
     </ContentPage.ToolbarItems>
-    
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
     <ContentPage.Content>
         <Grid RowDefinitions="Auto,Auto,Auto,*"
               Padding="20"
               RowSpacing="12">
-            
-            <!-- Action buttons -->
-            <HorizontalStackLayout Grid.Row="0"
-                                   HorizontalOptions="End"
-                                   Spacing="10">
-                <!-- Keep your existing image buttons here (unchanged) -->
+
+            <!-- Action Button -->
+            <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" Spacing="10">
+                <!-- Keep your existing image Button here (unchanged) -->
             </HorizontalStackLayout>
 
             <!-- Main info -->
@@ -38,20 +42,20 @@
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="First Name *" FontAttributes="Bold" TextColor="#001524" />
-                            <Entry Text="{Binding FirstName}" Placeholder="First name" TextColor="#001524" />
+                            <Label Text="First Name *" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                            <Entry Text="{Binding FirstName}" Placeholder="First name" TextColor="{StaticResource Resident_Font_Primary}" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Grid.Column="1" Spacing="4">
-                            <Label Text="Last Name *" FontAttributes="Bold" TextColor="#001524" />
-                            <Entry Text="{Binding LastName}" Placeholder="Last name" TextColor="#001524" />
+                            <Label Text="Last Name *" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                            <Entry Text="{Binding LastName}" Placeholder="Last name" TextColor="{StaticResource Resident_Font_Primary}" />
                         </VerticalStackLayout>
                     </Grid>
 
                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="SIN *" FontAttributes="Bold" TextColor="#001524" />
-                            <Entry Text="{Binding SIN}" Placeholder="000-000-000" Keyboard="Numeric" TextColor="#001524">
+                            <Label Text="SIN *" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                            <Entry Text="{Binding SIN}" Placeholder="000-000-000" Keyboard="Numeric" TextColor="{StaticResource Resident_Font_Primary}">
                                 <Entry.Behaviors>
                                     <beh:SinBehavior />
                                 </Entry.Behaviors>
@@ -59,8 +63,8 @@
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Grid.Column="1" Spacing="4">
-                            <Label Text="DOB *" FontAttributes="Bold" TextColor="#001524" />
-                            <Entry Text="{Binding DOB}" Placeholder="YYYY-MM-DD" TextColor="#001524">
+                            <Label Text="DOB *" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                            <Entry Text="{Binding DOB}" Placeholder="YYYY-MM-DD" TextColor="{StaticResource Resident_Font_Primary}">
                                 <Entry.Behaviors>
                                     <beh:DobBehavior />
                                 </Entry.Behaviors>
@@ -68,8 +72,9 @@
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Grid.Column="2" Spacing="4">
-                            <Label Text="Gender" FontAttributes="Bold" TextColor="#001524" />
-                            <Picker Title="Select" ItemsSource="{Binding GenderOptions}" SelectedItem="{Binding Gender, Mode=TwoWay}" TextColor="#001524">
+                            <Label Text="Gender" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                            <!-- NOTE: removed ItemsSource to avoid conflict with Picker.Items -->
+                            <Picker SelectedItem="{Binding Gender, Mode=TwoWay}" TextColor="{StaticResource Resident_Font_Primary}">
                                 <Picker.Items>
                                     <x:String>Male</x:String>
                                     <x:String>Female</x:String>
@@ -80,165 +85,320 @@
                     </Grid>
 
                     <!-- Address -->
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Address" FontAttributes="Bold" TextColor="#001524" />
-                        <Entry Text="{Binding Address, Mode=TwoWay}" Placeholder="Street address" TextColor="#001524" />
-                    </VerticalStackLayout>
-
-                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-
-                        <!-- LEFT: City (33%) -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="City" FontAttributes="Bold" TextColor="#001524" />
-                            <Entry Text="{Binding City}" Placeholder="City" TextColor="#001524" />
+                            <Label Text="Address" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                            <Entry Text="{Binding Address, Mode=TwoWay}" Placeholder="Street address" TextColor="{StaticResource Resident_Font_Primary}" />
                         </VerticalStackLayout>
 
-                        <!-- MIDDLE: Province / Postal (33%) -->
-                        <Grid Grid.Column="1" ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <Grid Grid.Column="1" ColumnDefinitions="*,*,*" ColumnSpacing="12">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
-                                <Label Text="Province" FontAttributes="Bold" TextColor="#001524" />
-                                <Entry Text="{Binding Province}" Placeholder="BC" TextColor="#001524"/>
+                                <Label Text="City" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                                <Entry Text="{Binding City}" Placeholder="City" TextColor="{StaticResource Resident_Font_Primary}" />
                             </VerticalStackLayout>
 
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                <Label Text="Postal Code" FontAttributes="Bold" TextColor="#001524" />
-                                <Entry Text="{Binding PostalCode}" Placeholder="V6B 1A1" TextColor="#001524"/>
+                                <Label Text="Province" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                                <Entry Text="{Binding Province}" Placeholder="BC" TextColor="{StaticResource Resident_Font_Primary}"/>
                             </VerticalStackLayout>
-                        </Grid>
 
-                        <!-- RIGHT: Room (33%) -->
-                        <Grid Grid.Column="2" ColumnDefinitions="*,*" ColumnSpacing="12">
-                            <VerticalStackLayout Grid.Column="0" Spacing="4">
-                                <Label Text="Room Number" FontAttributes="Bold" />
-                                <Entry Text="{Binding RoomNumber}" Placeholder="e.g. 000" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                <Label Text="Bed" FontAttributes="Bold" />
-                                <Picker SelectedItem="{Binding BedLabel, Mode=TwoWay}" TextColor="#001524">
-                                    <Picker.Items>
-                                        <x:String>A</x:String>
-                                        <x:String>B</x:String>
-                                        <x:String>Null</x:String>
-                                    </Picker.Items>
-                                </Picker>
+                            <VerticalStackLayout Grid.Column="2" Spacing="4">
+                                <Label Text="Postal Code" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                                <Entry Text="{Binding PostalCode}" Placeholder="V6B 1A1" TextColor="{StaticResource Resident_Font_Primary}"/>
                             </VerticalStackLayout>
                         </Grid>
                     </Grid>
+
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Room Number" FontAttributes="Bold" />
+                            <Entry Text="{Binding RoomNumber}" Placeholder="e.g. 000" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Bed" FontAttributes="Bold" />
+                            <Picker SelectedItem="{Binding BedLabel, Mode=TwoWay}" TextColor="{StaticResource Resident_Font_Primary}">
+                                <Picker.Items>
+                                    <x:String>A</x:String>
+                                    <x:String>B</x:String>
+                                    <x:String>None</x:String>
+                                </Picker.Items>
+                            </Picker>
+                        </VerticalStackLayout>
+                    </Grid>
+
                 </VerticalStackLayout>
             </Border>
 
             <!-- Scrollable details -->
             <ScrollView Grid.Row="3">
-                <VerticalStackLayout Spacing="16">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
 
-                    <!-- Emergency Contacts -->
-                    <Border Padding="16" BackgroundColor="White">
+                        <!-- Emergency Contacts (spans col 0-1) -->
+                        <Border Grid.Column="0" Grid.ColumnSpan="2" Padding="16" BackgroundColor="{StaticResource Resident_Card_Background}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Border.Stroke>
+                                <SolidColorBrush Color="{StaticResource Resident_Card_Border}"/>
+                            </Border.Stroke>
+
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Emergency Contacts" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Alert_Warning}" />
+
+                                <!-- Emergency contacts -->
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+
+                                    <!-- Contact 1 -->
+                                    <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
+                                        <Label Text="Contact 1 *" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                                        <Entry Text="{Binding EmergencyContactName1}" Placeholder="Name" TextColor="{StaticResource Resident_Font_Primary}" />
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="4">
+                                        <Label Text="Phone *" TextColor="{StaticResource Resident_Font_Primary}" />
+                                        <Entry Text="{Binding EmergencyContactPhone1}" Placeholder="(999) 999-9999" TextColor="{StaticResource Resident_Font_Primary}">
+                                            <Entry.Behaviors>
+                                                <beh:PhoneNumberBehavior />
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Grid.Row="2" Grid.Column="0" Spacing="4">
+                                        <Label Text="Relationship *" TextColor="{StaticResource Resident_Font_Primary}" />
+                                        <Picker SelectedItem="{Binding EmergencyRelationship1}">
+                                            <Picker.Items>
+                                                <x:String>Select Relationship</x:String>
+                                                <x:String>Spouse</x:String>
+                                                <x:String>Son</x:String>
+                                                <x:String>Daughter</x:String>
+                                                <x:String>Sibling</x:String>
+                                                <x:String>Nephew</x:String>
+                                                <x:String>Niece</x:String>
+                                                <x:String>Friend</x:String>
+                                                <x:String>Others</x:String>
+                                            </Picker.Items>
+                                        </Picker>
+                                    </VerticalStackLayout>
+
+                                    <!-- Contact 2 -->
+                                    <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4">
+                                        <Label Text="Contact 2 (Optional)" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" />
+                                        <Entry Text="{Binding EmergencyContactName2}" Placeholder="Name" TextColor="{StaticResource Resident_Font_Primary}"  />
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4">
+                                        <Label Text="Phone" TextColor="{StaticResource Resident_Font_Primary}" />
+                                        <Entry Text="{Binding EmergencyContactPhone2}" Placeholder="Phone" TextColor="{StaticResource Resident_Font_Primary}">
+                                            <Entry.Behaviors>
+                                                <beh:PhoneNumberBehavior />
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="4">
+                                        <Label Text="Relationship" TextColor="{StaticResource Resident_Font_Primary}" />
+                                        <Picker SelectedItem="{Binding EmergencyRelationship2}">
+                                            <Picker.Items>
+                                                <x:String>Select Relationship</x:String>
+                                                <x:String>Spouse</x:String>
+                                                <x:String>Son</x:String>
+                                                <x:String>Daughter</x:String>
+                                                <x:String>Sibling</x:String>
+                                                <x:String>Nephew</x:String>
+                                                <x:String>Niece</x:String>
+                                                <x:String>Friend</x:String>
+                                                <x:String>Othes</x:String>
+                                            </Picker.Items>
+                                        </Picker>
+                                    </VerticalStackLayout>
+
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Primary Doctor -->
+                        <Border Grid.Column="2" Padding="16" BackgroundColor="White">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Border.Stroke>
+                                <SolidColorBrush Color="#FF7D00"/>
+                            </Border.Stroke>
+
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Primary Doctor" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Alert_Warning}" />
+
+                                <VerticalStackLayout Spacing="8">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="Doctor *" FontAttributes="Bold" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                        <Entry Text="{Binding DoctorName}" Placeholder="Doctor name" TextColor="{StaticResource Resident_Font_Primary}" />
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="Phone *" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                        <Entry Text="{Binding DoctorContact}" Placeholder="Phone" TextColor="{StaticResource Resident_Font_Primary}">
+                                            <Entry.Behaviors>
+                                                <beh:PhoneNumberBehavior />
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+
+                    <!-- Allergies (2 rows, 8 columns; row 2 last 3 cols for Other + input) -->
+                    <Border Padding="16" BackgroundColor="{StaticResource Resident_Font_Primary}">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="12"/>
                         </Border.StrokeShape>
                         <Border.Stroke>
-                            <SolidColorBrush Color="#FF7D00"/>
+                            <SolidColorBrush Color="{StaticResource Resident_Card_Border}"/>
                         </Border.Stroke>
 
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Emergency Contacts" FontAttributes="Bold" FontSize="16" TextColor="#FF7D00" />
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="Allergies *"
+               FontAttributes="Bold"
+               FontSize="16"
+               TextColor="#78290F" />
 
-                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
-                                <VerticalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
-                                    <Label Text="Contact 1 *" FontAttributes="Bold" TextColor="#001524" />
-                                    <Entry Text="{Binding EmergencyContactName1}" Placeholder="Name" TextColor="#001524" />
-                                </VerticalStackLayout>
+                            <!-- 2 rows, 8 columns -->
+                            <Grid ColumnSpacing="24"
+              RowSpacing="10"
+              ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+              RowDefinitions="Auto,Auto">
 
-                                <VerticalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4">
-                                    <Label Text="Contact 2 (Optional)" FontAttributes="Bold" TextColor="#001524" />
-                                    <Entry Text="{Binding EmergencyContactName2}" Placeholder="Name" TextColor="#001524" />
-                                </VerticalStackLayout>
+                                <!-- Row 0 -->
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="0">
+                                    <CheckBox x:Name="NoneCheck" IsChecked="{Binding AllergyNone}" CheckedChanged="OnNoneCheckedChanged" Margin="0,0,-80,0"/>
+                                    <Label Text="No Known Allergy" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" />
+                                </HorizontalStackLayout>
 
-                                <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="4">
-                                    <Label Text="Phone *" TextColor="#001524" />
-                                    <Entry Text="{Binding EmergencyContactPhone1}" Placeholder="(999) 999-9999" TextColor="#001524">
-                                        <Entry.Behaviors>
-                                            <beh:PhoneNumberBehavior />
-                                        </Entry.Behaviors>
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergyPeanuts}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                    <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Peanuts" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="2" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergyTreeNuts}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Tree nuts" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0"/>
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="3" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergyMilk}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Milk" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="4" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergyEggs}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Eggs" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="5" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergyShellfish}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Shellfish" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="6" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergyFish}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Fish" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="7" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergyWheat}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Wheat" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                </HorizontalStackLayout>
+
+                                <!-- Row 1 -->
+                                <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergySoy}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Soy" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0"/>
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergyLatex}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Latex" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergyPenicillin}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Penicillin" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="1" Grid.Column="3" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergySulfa}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Sulfa" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="1" Grid.Column="4" Spacing="0">
+                                    <CheckBox IsChecked="{Binding AllergyAspirin}" CheckedChanged="OnSpecificAllergyCheckedChanged" Margin="0,0,-80,0">
+                                        <CheckBox.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </CheckBox.IsEnabled>
+                                    </CheckBox>
+                                    <Label Text="Aspirin" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                                </HorizontalStackLayout>
+
+                                <!-- Row 1 last 3 columns: Other + Entry -->
+                                <Grid Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="3" ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Label Grid.Column="0" Text="Other Items:" VerticalTextAlignment="Center" TextColor="{StaticResource Resident_Font_Primary}" Margin="8,0,10,0" />
+
+                                    <!-- IMPORTANT: bind to AllergyOtherText (not AllergyOtherItems) -->
+                                    <Entry Grid.Column="1" Text="{Binding AllergyOtherItems}" TextChanged="OnOtherAllergyTextChanged" Placeholder="e.g., Ibuprofen..." TextColor="{StaticResource Resident_Font_Primary}">
+                                        <Entry.IsEnabled>
+                                            <Binding Source="{x:Reference NoneCheck}" Path="IsChecked" Converter="{StaticResource InvertedBoolConverter}" />
+                                        </Entry.IsEnabled>
                                     </Entry>
-                                </VerticalStackLayout>
+                                </Grid>
 
-                                <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4">
-                                    <Label Text="Phone" TextColor="#001524" />
-                                    <Entry Text="{Binding EmergencyContactPhone2}" Placeholder="Phone" TextColor="#001524">
-                                        <Entry.Behaviors>
-                                            <beh:PhoneNumberBehavior />
-                                        </Entry.Behaviors>
-                                    </Entry>
-                                </VerticalStackLayout>
-
-                                <VerticalStackLayout Grid.Row="2" Grid.Column="0" Spacing="4">
-                                    <Label Text="Relationship *" TextColor="#001524" />
-                                    <Picker SelectedItem="{Binding EmergencyRelationship1}">
-                                        <Picker.Items>
-                                            <x:String>Spouse</x:String>
-                                            <x:String>Son</x:String>
-                                            <x:String>Daughter</x:String>
-                                            <x:String>Sibling</x:String>
-                                            <x:String>Parent</x:String>
-                                            <x:String>Friend</x:String>
-                                            <x:String>Other</x:String>
-                                            <x:String>Select Relationship</x:String>
-                                        </Picker.Items>
-                                    </Picker>
-                                </VerticalStackLayout>
-
-                                <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="4">
-                                    <Label Text="Relationship" TextColor="#001524" />
-                                    <Picker SelectedItem="{Binding EmergencyRelationship2}">
-                                        <Picker.Items>
-                                            <x:String>Spouse</x:String>
-                                            <x:String>Son</x:String>
-                                            <x:String>Daughter</x:String>
-                                            <x:String>Sibling</x:String>
-                                            <x:String>Parent</x:String>
-                                            <x:String>Friend</x:String>
-                                            <x:String>Other</x:String>
-                                            <x:String>Select Relationship</x:String>
-                                        </Picker.Items>
-                                    </Picker>
-                                </VerticalStackLayout>
                             </Grid>
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <!-- Doctor -->
-                    <Border Padding="16" BackgroundColor="White">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="12"/>
-                        </Border.StrokeShape>
-                        <Border.Stroke>
-                            <SolidColorBrush Color="#15616D"/>
-                        </Border.Stroke>
-
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Doctor *" FontAttributes="Bold" FontSize="16" TextColor="#15616D" />
-                            <Entry Text="{Binding DoctorName}" Placeholder="Doctor Name" TextColor="#001524" />
-                            <Entry Text="{Binding DoctorContact}" Placeholder="Phone" TextColor="#001524">
-                                <Entry.Behaviors>
-                                    <beh:PhoneNumberBehavior />
-                                </Entry.Behaviors>
-                            </Entry>
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <!-- Allergies -->
-                    <Border Padding="16" BackgroundColor="White">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="12"/>
-                        </Border.StrokeShape>
-                        <Border.Stroke>
-                            <SolidColorBrush Color="#78290F"/>
-                        </Border.Stroke>
-
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Allergies *" FontAttributes="Bold" FontSize="16" TextColor="#78290F" />
-                            <Entry Text="{Binding AllergyItems}" Placeholder="Known allergies" TextColor="#001524" />
                         </VerticalStackLayout>
                     </Border>
 
@@ -252,14 +412,12 @@
                         </Border.Stroke>
 
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="Remarks" FontAttributes="Bold" FontSize="16" TextColor="#001524" />
-                            <Editor Text="{Binding Remarks}" AutoSize="TextChanges" Placeholder="Additional notes" TextColor="#001524" />
+                            <Label Text="Remarks" FontAttributes="Bold" FontSize="16" TextColor="{StaticResource Resident_Font_Primary}" Margin="0,0,50,0" />
+                            <Editor Text="{Binding Remarks}" AutoSize="TextChanges" Placeholder="Additional notes" TextColor="{StaticResource Resident_Font_Primary}" />
                         </VerticalStackLayout>
                     </Border>
-
                 </VerticalStackLayout>
             </ScrollView>
-
         </Grid>
     </ContentPage.Content>
 </ContentPage>

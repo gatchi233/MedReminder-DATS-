@@ -205,7 +205,7 @@ namespace MedReminder.ViewModels
         public Color ThirdTagColor => IsCancelled ? CancelledTagColor : ReceivedTagColor;
         public string ThirdLineText => IsCancelled ? CancelledLine : ReceivedLine;
 
-        // Buttons (no delete)
+        // Button (no delete)
         public bool ShowCancelRequest => _o.Status == MedicationOrderStatus.Requested;
         public bool ShowMarkOrdered => _o.Status == MedicationOrderStatus.Requested;
 

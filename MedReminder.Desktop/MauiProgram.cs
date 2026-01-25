@@ -12,14 +12,12 @@ using Microsoft.Maui.Hosting;
 using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI;
 using MedMinder.Services.Abstractions;
-using MedMinder.Services.Abstractions;
 
 
 
 
 
 #if WINDOWS
-using Microsoft.Maui.LifecycleEvents;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
 using WinRT.Interop;

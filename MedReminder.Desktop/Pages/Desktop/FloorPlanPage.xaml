@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:MedReminder.Pages"
     xmlns:vm="clr-namespace:MedReminder.ViewModels"
-    Title="Floor Plan">
+    Title="Floor Plan"
+    BackgroundColor="{StaticResource Floorplan_Main_Background}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Logout" Clicked="OnLogoutClicked" Priority="0" Order="Primary" />
@@ -30,6 +31,7 @@
             <Label Text="{Binding SelectedRoomTitle}"
                    FontAttributes="Bold"
                    FontSize="16"
+                   TextColor="{StaticResource Floorplan_Font_Primary}"
                    VerticalOptions="Center"
                    Margin="12,0,0,0" />
         </HorizontalStackLayout>
@@ -39,6 +41,7 @@
                Text="Residents in selected room"
                FontAttributes="Bold"
                FontSize="16"
+               TextColor="{StaticResource Floorplan_Font_Primary}"
                VerticalOptions="Center" />
 
         <!-- ===== Left: Rooms grid ===== -->
@@ -56,25 +59,26 @@
                     <Border Padding="10"
                             Margin="6"
                             StrokeThickness="1"
-                            Stroke="#E5E7EB"
-                            BackgroundColor="White"
+                            Stroke="{StaticResource Border_Light}"
+                            BackgroundColor="{StaticResource Floorplan_Card_Background}"
                             HeightRequest="82">
 
                         <Grid RowDefinitions="Auto,*">
                             <HorizontalStackLayout Spacing="8">
                                 <Label Text="{Binding RoomLabel}"
                                        FontSize="16"
-                                       FontAttributes="Bold" />
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Floorplan_Font_Primary}" />
                                 <Label Text="{Binding KindShort}"
                                        FontSize="12"
-                                       TextColor="#6B7280"
+                                       TextColor="{StaticResource Floorplan_Font_Primary}"
                                        VerticalOptions="Center" />
                             </HorizontalStackLayout>
 
                             <Label Grid.Row="1"
                                    Text="{Binding OccupancyText}"
                                    FontSize="12"
-                                   TextColor="#374151"
+                                   TextColor="{StaticResource Floorplan_Font_Primary}"
                                    LineBreakMode="TailTruncation" />
                         </Grid>
 
@@ -86,14 +90,15 @@
         <!-- ===== Right: Selected residents panel ===== -->
         <Border Grid.Row="1" Grid.Column="1"
                 StrokeThickness="1"
-                Stroke="#E5E7EB"
-                BackgroundColor="White"
+                Stroke="{StaticResource Border_Light}"
+                BackgroundColor="{StaticResource Floorplan_Card_Background}"
                 Padding="12">
 
             <Grid RowDefinitions="Auto,*" RowSpacing="8">
                 <Label Text="{Binding SelectedRoomTitle}"
                        FontAttributes="Bold"
-                       FontSize="14" />
+                       FontSize="14"
+                       TextColor="{StaticResource Floorplan_Font_Primary}" />
 
                 <CollectionView Grid.Row="1"
                                 ItemsSource="{Binding SelectedResidents}"
@@ -103,21 +108,22 @@
                             <Border Padding="10"
                                     Margin="0,0,0,10"
                                     StrokeThickness="1"
-                                    Stroke="#E5E7EB"
-                                    BackgroundColor="#F9FAFB">
+                                    Stroke="{StaticResource Floorplan_Card_Border}"
+                                    BackgroundColor="{StaticResource Floorplan_Card_Background}">
 
                                 <VerticalStackLayout Spacing="4">
                                     <Label Text="{Binding Name}"
                                            FontAttributes="Bold"
-                                           FontSize="14" />
+                                           FontSize="14"
+                                           TextColor="{StaticResource Floorplan_Font_Primary}" />
 
                                     <HorizontalStackLayout Spacing="12">
                                         <Label Text="{Binding Gender}"
                                                FontSize="12"
-                                               TextColor="#6B7280" />
+                                               TextColor="{StaticResource Floorplan_Font_Primary}" />
                                         <Label Text="{Binding AgeText}"
                                                FontSize="12"
-                                               TextColor="#6B7280" />
+                                               TextColor="{StaticResource Floorplan_Font_Primary}" />
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
 

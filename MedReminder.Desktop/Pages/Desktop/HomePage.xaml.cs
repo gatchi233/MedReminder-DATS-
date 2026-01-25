@@ -82,21 +82,6 @@ namespace MedReminder.Pages.Desktop
             await Shell.Current.GoToAsync(nameof(EditResidentPage));
         }
 
-        private async void OnHelpClicked(object sender, EventArgs e)
-        {
-            await DisplayAlert(
-                "Help",
-                "1. Enter a resident name and click Search to find their medications.\n" +
-                "   Click the Add Resident icon to create a new resident.\n\n" +
-                "2. Choose a day and time (hour + 00/15/30/45) to search medications by timeslot.\n\n" +
-                "3. Results:\n" +
-                "   • Only resident filled in → all meds for that resident.\n" +
-                "   • Only day/time filled → all meds at that timeslot (with resident names).\n" +
-                "   • Both filled → meds that resident takes at that timeslot.\n\n" +
-                "4. Check 'Completed' after the medication is taken.",
-                "OK");
-        }
-
         private async void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.CurrentSelection.Count == 0)
@@ -129,10 +114,6 @@ namespace MedReminder.Pages.Desktop
             await _medicationService.UpsertAsync(m);
         }
 
-        private async void OnLogoutClicked(object sender, EventArgs e)
-        {
-            await LogoutAsync();
-        }
 
         private void RunSearch()
         {
@@ -222,6 +203,25 @@ namespace MedReminder.Pages.Desktop
                 6 => DayOfWeek.Sunday,
                 _ => null
             };
+        }
+
+        protected async Task LogoutAsync()
+        {
+            var auth = Application.Current?
+                .Handler?
+                .MauiContext?
+                .Services
+                .GetService<MedReminder.Services.AuthService>();
+
+            auth?.Logout();
+
+            await Shell.Current.GoToAsync($"//{nameof(LoginPage)}");
+        }
+
+        // Add this event handler for the ToolbarItem
+        private async void OnLogoutClicked(object sender, EventArgs e)
+        {
+            await LogoutAsync();
         }
     }
 }

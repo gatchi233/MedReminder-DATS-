@@ -1,12 +1,21 @@
-﻿using MedReminder.Models;
+﻿using CommunityToolkit.Maui.Views;
+using MedReminder.Models;
+using MedReminder.Pages.UI;
+using MedReminder.Pages.UI.Popups;
 using MedReminder.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MedReminder.Pages.Desktop
 {
     public partial class MedicationInventoryPage : AuthPage
     {
         private MedicationInventoryViewModel VM => (MedicationInventoryViewModel)BindingContext;
+
+        // Local snapshot for search filtering without changing the ViewModel
+        private List<MedicationInventoryRow> _allItems = new();
 
         public MedicationInventoryPage()
         {
@@ -21,32 +30,78 @@ namespace MedReminder.Pages.Desktop
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+            await ReloadAndSyncAsync();
+        }
+
+        private async void OnRefreshClicked(object sender, EventArgs e)
+        {
+            await ReloadAndSyncAsync();
+        }
+
+        private async System.Threading.Tasks.Task ReloadAndSyncAsync()
+        {
             await VM.LoadAsync();
+            CaptureItemsSnapshot();
+            ApplyFilter();
+        }
+
+        private void CaptureItemsSnapshot()
+        {
+            // VM.Items should be the source list
+            _allItems = VM.Items?.ToList() ?? new List<MedicationInventoryRow>();
+        }
+
+        private void OnFilterChanged(object sender, TextChangedEventArgs e)
+        {
+            ApplyFilter();
+        }
+
+        private void ApplyFilter()
+        {
+            var query = MedSearchBar?.Text?.Trim();
+
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                // Restore binding source
+                InventoryCollection.ItemsSource = VM.Items;
+                return;
+            }
+
+            var filtered = _allItems
+                .Where(x => !string.IsNullOrWhiteSpace(x.MedName) &&
+                            x.MedName.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            InventoryCollection.ItemsSource = filtered;
         }
 
         private async void OnSortClicked(object sender, EventArgs e)
         {
-            var choice = await DisplayActionSheet(
-                "Sort Inventory",
-                "Cancel",
-                null,
-                "Low stock first (default)",
-                "Name (A–Z)",
-                "Stock (low → high)",
-                "Reorder level (high → low)");
+            var popup = new ActionPopup();
+            popup.ConfigureList(
+                title: "Sort",
+                items: new[]
+                {
+            ("LowStockFirst", "Low stock first (default)"),
+            ("Name", "Name (A–Z)"),
+            ("Stock", "Stock (low → high)"),
+            ("ReorderLevel", "Reorder level (high → low)")
+                });
 
-            if (choice == null || choice == "Cancel")
+            var result = await this.ShowPopupAsync(popup);
+
+            if (result is not ActionPopup.PopupResult r || string.IsNullOrWhiteSpace(r.SelectedKey))
                 return;
 
-            VM.SortMode = choice switch
+            VM.SortMode = r.SelectedKey switch
             {
-                "Name (A–Z)" => InventorySortMode.Name,
-                "Stock (low → high)" => InventorySortMode.Stock,
-                "Reorder level (high → low)" => InventorySortMode.ReorderLevel,
+                "Name" => InventorySortMode.Name,
+                "Stock" => InventorySortMode.Stock,
+                "ReorderLevel" => InventorySortMode.ReorderLevel,
                 _ => InventorySortMode.LowStockFirst
             };
 
-            await VM.LoadAsync();
+            await ReloadAndSyncAsync();
         }
 
         private async void OnAdjustClicked(object sender, EventArgs e)
@@ -75,7 +130,6 @@ namespace MedReminder.Pages.Desktop
                 return;
             }
 
-            // Step 1: Block negative stock (with a friendly fallback option)
             var newStock = row.StockQuantity + delta;
             if (newStock < 0)
             {
@@ -88,10 +142,8 @@ namespace MedReminder.Pages.Desktop
                 if (!setToZero)
                     return;
 
-                // Adjust down to exactly 0
                 delta = -row.StockQuantity;
 
-                // If already 0, nothing to do
                 if (delta == 0)
                     return;
             }
@@ -99,37 +151,38 @@ namespace MedReminder.Pages.Desktop
             VM.AdjustStockCommand.Execute(Tuple.Create(row.Med, delta));
         }
 
-        private async void OnOrderClicked(object sender, EventArgs e)
+        private async void OnDirectOrderClicked(object sender, EventArgs e)
         {
             if (sender is not Button { BindingContext: MedicationInventoryRow row })
                 return;
 
-            var qtyText = await DisplayPromptAsync(
-                "Create Order",
-                $"Enter quantity to order for {row.MedName}:",
-                accept: "Create",
-                cancel: "Cancel",
-                placeholder: "e.g. 30",
-                keyboard: Keyboard.Numeric);
+            var popup = new ActionPopup();
+            popup.ConfigureForm(
+                title: $"Create Order — {row.MedName}",
+                message: null,
+                primaryText: "Create",
+                field1: ("Quantity", "e.g. 30", Keyboard.Numeric),
+                field2: ("Notes (optional)", "e.g., urgent / pharmacy call", Keyboard.Default),
+                validator: (qtyText, notes) =>
+                {
+                    if (string.IsNullOrWhiteSpace(qtyText))
+                        return (false, "Quantity is required.");
 
-            if (string.IsNullOrWhiteSpace(qtyText))
+                    if (!int.TryParse(qtyText, out var qty) || qty <= 0)
+                        return (false, "Please enter a positive number.");
+
+                    return (true, null);
+                });
+
+            var result = await this.ShowPopupAsync(popup);
+
+            if (result is not ActionPopup.PopupResult r || string.IsNullOrWhiteSpace(r.Field1))
                 return;
 
-            if (!int.TryParse(qtyText, out var qty) || qty <= 0)
-            {
-                await DisplayAlert("Invalid", "Please enter a positive number.", "OK");
-                return;
-            }
-
-            var notes = await DisplayPromptAsync(
-                "Notes (optional)",
-                "Add notes for this order (optional):",
-                accept: "OK",
-                cancel: "Skip",
-                placeholder: "e.g., urgent / pharmacy call");
+            var qty = int.Parse(r.Field1);
 
             VM.CreateOrderCommand.Execute(
-                Tuple.Create(row.Med, qty, string.IsNullOrWhiteSpace(notes) ? null : notes));
+                Tuple.Create(row.Med, qty, r.Field2));
 
             await DisplayAlert("Created", "Order created (Status: Requested).", "OK");
         }

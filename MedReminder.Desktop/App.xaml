@@ -12,44 +12,26 @@
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- General Styles -->
+
+            <Style TargetType="ContentPage">
+                <Setter Property="Padding" Value="16" />
+            </Style>
+
+            <!-- Default Button style (safe, can be overridden per-page) -->
+            <Style TargetType="Button">
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="Padding" Value="12,10" />
+            </Style>
+
+            <!-- Converters -->
+            <conv:ReminderTimeToColorConverter x:Key="ReminderTimeToColorConverter" />
+            <conv:IntToDoubleConverter x:Key="IntToDoubleConverter" />
+            <conv:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+            <conv:BoolToEnableDisableTextConverter x:Key="BoolToEnableDisableTextConverter" />
+
         </ResourceDictionary>
-
-        <!-- Colors -->
-        <Color x:Key="AppBackground">#FFECD1</Color>
-        <Color x:Key="AppText">#001524</Color>
-        <Color x:Key="AccentTeal">#15616D</Color>
-        <Color x:Key="AccentOrange">#FF7D00</Color>
-        <Color x:Key="AccentBrown">#78290F</Color>
-        <Color x:Key="DeletePink">#ff8fab</Color>
-
-        <!-- General -->
-        <Style TargetType="ContentPage">
-            <Setter Property="Padding" Value="16" />
-            <Setter Property="BackgroundColor" Value="{StaticResource AppBackground}" />
-        </Style>
-
-        <Style TargetType="Button">
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="12,10"/>
-            <Setter Property="BackgroundColor" Value="{StaticResource AccentTeal}"/>
-            <Setter Property="TextColor" Value="White"/>
-        </Style>
-
-        <Style TargetType="ImageButton" x:Key="BorderlessIcon">
-            <Setter Property="BackgroundColor" Value="Transparent" />
-            <Setter Property="BorderWidth" Value="0" />
-            <Setter Property="BorderColor" Value="Transparent" />
-            <Setter Property="CornerRadius" Value="0" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="VisualStateManager.VisualStateGroups" Value="{x:Null}" />
-        </Style>
-
-        <!-- Converters -->
-        <conv:ReminderTimeToColorConverter x:Key="ReminderTimeToColorConverter" />
-        <conv:IntToDoubleConverter x:Key="IntToDoubleConverter" />
-        <conv:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
-        <conv:BoolToEnableDisableTextConverter x:Key="BoolToEnableDisableTextConverter" />
-
 
     </Application.Resources>
 </Application>

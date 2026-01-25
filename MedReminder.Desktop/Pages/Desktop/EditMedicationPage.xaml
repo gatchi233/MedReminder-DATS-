@@ -4,7 +4,8 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Name="EditMedPage"
-    Title="Medication">
+    Title="Medication"
+    BackgroundColor="{StaticResource Medication_Main_Background}">
 
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="16">
@@ -13,16 +14,16 @@
                    Text="Medication for"
                    FontSize="18"
                    FontAttributes="Bold"
-                   TextColor="#001524" />
+                   TextColor="{StaticResource Medication_Font_Primary}" />
 
             <Label Text="Medication Details"
                    FontSize="20"
                    FontAttributes="Bold"
-                   TextColor="#001524" />
+                   TextColor="{StaticResource Medication_Font_Primary}" />
 
             <!-- Medication name -->
             <VerticalStackLayout Spacing="4">
-                <Label Text="Medication name *" TextColor="#001524" />
+                <Label Text="Medication name *" TextColor="{StaticResource Medication_Font_Primary}" />
                 <Entry Placeholder="e.g., Amlodipine"
                        Text="{Binding MedName}" />
             </VerticalStackLayout>
@@ -31,7 +32,7 @@
             <VerticalStackLayout Spacing="4">
                 <Label Text="Treated condition"
                        FontAttributes="Bold"
-                       TextColor="#001524" />
+                       TextColor="{StaticResource Medication_Font_Primary}" />
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                     <Picker x:Name="ConditionPicker"
                             Grid.Column="0"
@@ -62,7 +63,7 @@
 
             <!-- Dose per time -->
             <VerticalStackLayout Spacing="4">
-                <Label Text="Dose per time" TextColor="#001524"
+                <Label Text="Dose per time" TextColor="{StaticResource Medication_Font_Primary}"
                        FontAttributes="Bold" />
                 <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8">
                     <Entry Grid.Column="0"
@@ -93,7 +94,7 @@
 
             <!-- Schedule -->
             <VerticalStackLayout Spacing="8" Margin="0,8,0,0">
-                <Label Text="Schedule" FontAttributes="Bold" TextColor="#001524" />
+                <Label Text="Schedule" FontAttributes="Bold" TextColor="{StaticResource Medication_Font_Primary}" />
                 <Label Text="Check days and set times per day." FontSize="12" TextColor="#78290F" />
 
                 <!-- Time frequency selection - aligned with columns -->
@@ -934,44 +935,60 @@
                 </Grid>
             </VerticalStackLayout>
 
-            <!-- Buttons row -->
-            <HorizontalStackLayout Spacing="20"
+            <!-- Button row -->
+            <HorizontalStackLayout Spacing="8"
                        Padding="0,20,0,0"
                        HorizontalOptions="Center">
 
-                <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                    <ImageButton Source="icons8_edit_100.png"
-                     WidthRequest="36"
-                     HeightRequest="36"
-                     CornerRadius="18"
-                     Padding="6"
-                     Clicked="OnSave" />
-                    <Label Text="Save" FontSize="10" TextColor="#001524" HorizontalOptions="Center" />
-                </VerticalStackLayout>
+                <!-- Save -->
+                <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="4"/>
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="32,Auto" Margin="0">
+                        <Image Grid.Column="0" Source="icons8_save_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Save}" Padding="10,0" StrokeThickness="0">
+                            <Label Text="SAVE" TextColor="{StaticResource Button_Save_Font}" FontSize="12" VerticalOptions="Center" FontAttributes="Bold"/>
+                        </Border>
+                    </Grid>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnSave"/>
+                    </Border.GestureRecognizers>
+                </Border>
 
-                <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                    <ImageButton Source="icons8_delete_100.png"
-                     WidthRequest="36"
-                     HeightRequest="36"
-                     BackgroundColor="#ff8fab"
-                     CornerRadius="18"
-                     Padding="6"
-                     Clicked="OnDelete" />
-                    <Label Text="Delete" FontSize="10" TextColor="#001524" HorizontalOptions="Center" />
-                </VerticalStackLayout>
+                <!-- Delete -->
+                <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="4"/>
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="32,Auto" Margin="0">
+                        <Image Grid.Column="0" Source="icons8_delete_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Delete}" Padding="10,0" StrokeThickness="0">
+                            <Label Text="DELETE" TextColor="{StaticResource Button_Delete_Font}" FontSize="12" VerticalOptions="Center" FontAttributes="Bold"/>
+                        </Border>
+                    </Grid>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnDelete"/>
+                    </Border.GestureRecognizers>
+                </Border>
 
-                <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
-                    <ImageButton Source="icons8_close_100.png"
-                     WidthRequest="36"
-                     HeightRequest="36"
-                     CornerRadius="18"
-                     Padding="6"
-                     Clicked="OnCancel" />
-                    <Label Text="Close" FontSize="10" TextColor="#001524" HorizontalOptions="Center" />
-                </VerticalStackLayout>
+                <!-- Close -->
+                <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="4"/>
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="32,Auto" Margin="0">
+                        <Image Grid.Column="0" Source="icons8_close_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Close}" Padding="10,0" StrokeThickness="0">
+                            <Label Text="CLOSE" TextColor="{StaticResource Button_Font_Primary}" FontSize="12" VerticalOptions="Center" FontAttributes="Bold"/>
+                        </Border>
+                    </Grid>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCancel"/>
+                    </Border.GestureRecognizers>
+                </Border>
 
             </HorizontalStackLayout>
-
 
         </VerticalStackLayout>
     </ScrollView>

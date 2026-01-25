@@ -45,6 +45,9 @@
     <MauiXaml Update="AppShell.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="Pages\Desktop\HelpPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Pages\Desktop\HomePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -79,6 +82,9 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Pages\Desktop\ViewResidentPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Pages\UI\ActionPopup.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Resources\Styles\Colors.xaml">
@@ -123,6 +129,9 @@
     </Compile>
     <Compile Update="Pages\Desktop\ResidentMedicationsPage.xaml.cs">
       <DependentUpon>ResidentMedicationsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Pages\UI\ActionPopup.xaml.cs">
+      <DependentUpon>ActionPopup.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 

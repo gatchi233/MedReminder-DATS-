@@ -45,7 +45,7 @@ namespace MedReminder.Services
             sb.AppendLine("<tr><th>SIN</th><td>" + Html(resident.SIN) + "</td></tr>");
             sb.AppendLine("<tr><th>Doctor</th><td>" + Html(resident.DoctorName) + "</td></tr>");
             sb.AppendLine("<tr><th>Doctor Contact</th><td>" + Html(resident.DoctorContact) + "</td></tr>");
-            sb.AppendLine("<tr><th>Allergies</th><td>" + Html(resident.AllergyItems) + "</td></tr>");
+            sb.AppendLine("<tr><th>Allergies</th><td>" + Html(resident.AllergyOtherItems) + "</td></tr>");
             sb.AppendLine("<tr><th>Remarks</th><td>" + Html(resident.Remarks) + "</td></tr>");
             sb.AppendLine("</table>");
 
@@ -102,18 +102,22 @@ namespace MedReminder.Services
                 sb.AppendLine("<tr><th>Date/Time</th><th>BP</th><th>Temp (°C)</th><th>HR</th><th>SpO2</th><th>Note</th></tr>");
 
                 foreach (var o in observations
-                             .OrderByDescending(x => x.RecordedAt)
-                             .Take(10))
+                    .OrderByDescending(x => x.ObservedAt)
+                    .Take(10))
                 {
-                    var bp = (o.Systolic.HasValue && o.Diastolic.HasValue) ? $"{o.Systolic}/{o.Diastolic}" : "";
+                    var v = o.Vitals;
+
+                    var bp = (v?.Systolic.HasValue == true && v?.Diastolic.HasValue == true)
+                        ? $"{v.Systolic}/{v.Diastolic}"
+                        : "";
 
                     sb.AppendLine("<tr>");
-                    sb.AppendLine($"<td>{o.RecordedAt:yyyy-MM-dd HH:mm}</td>");
+                    sb.AppendLine($"<td>{o.ObservedAt:yyyy-MM-dd HH:mm}</td>");
                     sb.AppendLine($"<td>{Html(bp)}</td>");
-                    sb.AppendLine($"<td>{(o.TemperatureC.HasValue ? o.TemperatureC.Value.ToString("0.0") : "")}</td>");
-                    sb.AppendLine($"<td>{(o.HeartRate?.ToString() ?? "")}</td>");
-                    sb.AppendLine($"<td>{(o.SpO2?.ToString() ?? "")}</td>");
-                    sb.AppendLine($"<td>{Html(o.NurseNote)}</td>");
+                    sb.AppendLine($"<td>{(v?.TemperatureC.HasValue == true ? v.TemperatureC.Value.ToString("0.0") : "")}</td>");
+                    sb.AppendLine($"<td>{(v?.HeartRate?.ToString() ?? "")}</td>");
+                    sb.AppendLine($"<td>{(v?.OxygenSaturation?.ToString() ?? "")}</td>");
+                    sb.AppendLine($"<td>{Html(o.Note)}</td>");
                     sb.AppendLine("</tr>");
                 }
 

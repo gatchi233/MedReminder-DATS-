@@ -3,31 +3,44 @@
     x:Class="MedReminder.Pages.LoginPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Staff Login">
+    Title="Staff Login"
+    BackgroundColor="{StaticResource Homepage_Main_Background}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="16">
+        <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
 
             <Label
                 Text="MedReminder Pro"
                 FontSize="24"
-                FontAttributes="Bold" />
+                FontAttributes="Bold"
+                TextColor="{StaticResource Homepage_Font_Primary}" />
 
             <Label
                 Text="Staff Login"
-                FontSize="18" />
+                FontSize="18"
+                TextColor="{StaticResource Homepage_Font_Secondary}" />
 
             <Entry
                 Placeholder="Username"
+                PlaceholderColor="{StaticResource Placeholder_Font_Secondary}"
+                TextColor="{StaticResource Homepage_Font_Primary}"
+                BackgroundColor="{StaticResource Popup_Card_Background}"
                 Text="{Binding Username}" />
 
             <Entry
                 Placeholder="Password"
+                PlaceholderColor="{StaticResource Placeholder_Font_Secondary}"
+                TextColor="{StaticResource Homepage_Font_Primary}"
+                BackgroundColor="{StaticResource Popup_Card_Background}"
                 IsPassword="True"
-                Text="{Binding Password}" />
+                Text="{Binding Password}"
+                Completed="OnPasswordCompleted"/>
 
             <Button
                 Text="Login"
+                BackgroundColor="{StaticResource Button_Login}"
+                TextColor="{StaticResource Button_Font_Primary}"
+                FontAttributes="Bold"
                 Command="{Binding LoginCommand}" />
 
         </VerticalStackLayout>

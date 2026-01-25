@@ -43,5 +43,14 @@ namespace MedReminder.Pages
             }
         }
 
+        private void OnPasswordCompleted(object sender, EventArgs e)
+        {
+            // Invoke the ViewModel's LoginCommand
+            if (BindingContext is LoginViewModel vm && vm.LoginCommand.CanExecute(null))
+            {
+                vm.LoginCommand.Execute(null);
+            }
+        }
+
     }
 }

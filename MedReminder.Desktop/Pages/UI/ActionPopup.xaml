@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    x:Class="MedReminder.Pages.UI.Popups.ActionPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+
+    <Border
+        WidthRequest="420"
+        HeightRequest="420"
+        Stroke="{StaticResource Popup_Card_Border}"
+        BackgroundColor="{StaticResource Popup_Main_Background}"
+        StrokeThickness="1"
+        Padding="14">
+
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="12"/>
+        </Border.StrokeShape>
+
+        <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
+
+            <!-- Header -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                <Label x:Name="TitleLabel" Text="Popup" FontSize="20" FontAttributes="Bold"
+                       TextColor="{StaticResource Popup_Font_Primary}" />
+
+                <Border Grid.Column="1" Stroke="{StaticResource Popup_Card_Border}" StrokeThickness="1" 
+                        BackgroundColor="Transparent" HeightRequest="28" WidthRequest="28">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="6"/>
+                    </Border.StrokeShape>
+                    <Label Text="✕" HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{StaticResource Popup_Font_Secondary}" FontSize="14" />
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnCloseTapped" />
+                    </Border.GestureRecognizers>
+                </Border>
+            </Grid>
+
+            <BoxView Grid.Row="1" HeightRequest="1" Color="{StaticResource Popup_Card_Border}" Opacity="0.8"/>
+
+            <!-- BODY -->
+            <Grid Grid.Row="2">
+
+                <!-- List Mode -->
+                <ScrollView x:Name="ListContainer" IsVisible="False">
+                    <VerticalStackLayout x:Name="ListStack" Spacing="10" />
+                </ScrollView>
+
+                <!-- Form Mode -->
+                <ScrollView x:Name="FormContainer" IsVisible="False">
+                    <VerticalStackLayout Spacing="12">
+
+                        <Label x:Name="MessageLabel"
+                               Text=""
+                               IsVisible="False"
+                               TextColor="{StaticResource Popup_Font_Secondary}" />
+
+                        <VerticalStackLayout x:Name="Field1Container" Spacing="6" IsVisible="False">
+                            <Label x:Name="Field1Label" Text="Field 1" FontAttributes="Bold"
+                                   TextColor="{StaticResource Popup_Font_Primary}" />
+                            <Entry x:Name="Field1Entry" Placeholder=""
+                                   BackgroundColor="{StaticResource Popup_Card_Background}"
+                                   TextColor="{StaticResource Popup_Font_Primary}" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout x:Name="Field2Container" Spacing="6" IsVisible="False">
+                            <Label x:Name="Field2Label" Text="Field 2" FontAttributes="Bold"
+                                   TextColor="{StaticResource Popup_Font_Primary}" />
+                            <Entry x:Name="Field2Entry"
+                                   Placeholder=""
+                                   BackgroundColor="{StaticResource Popup_Card_Background}"
+                                   TextColor="{StaticResource Popup_Font_Primary}" />
+                        </VerticalStackLayout>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Text="Cancel" Clicked="OnCancelClicked"
+                                    Style="{StaticResource Button_Cancel}" />
+
+                            <Button Grid.Column="1" x:Name="PrimaryButton" Text="OK"
+                                    Clicked="OnPrimaryClicked" Style="{StaticResource Button_Save}" />
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </ScrollView>
+
+            </Grid>
+
+        </Grid>
+    </Border>
+</toolkit:Popup>

@@ -142,7 +142,7 @@ namespace MedReminder.Services.Local
             var list = await LoadAsync();
             return list
                 .Where(o => o.ResidentId == residentId)
-                .OrderByDescending(o => o.RecordedAt)
+                .OrderByDescending(o => o.ObservedAt)
                 .ToList();
         }
 
@@ -150,18 +150,20 @@ namespace MedReminder.Services.Local
         {
             var cutoff = DateTime.Now.AddDays(-days);
             var list = await LoadAsync();
+
             return list
-                .Where(o => o.ResidentId == residentId && o.RecordedAt >= cutoff)
-                .OrderByDescending(o => o.RecordedAt)
+                .Where(o => o.ResidentId == residentId && o.ObservedAt >= cutoff)
+                .OrderByDescending(o => o.ObservedAt)
                 .ToList();
         }
 
         public async Task<Observation?> LoadLatestAsync(int residentId)
         {
             var list = await LoadAsync();
+
             return list
                 .Where(o => o.ResidentId == residentId)
-                .OrderByDescending(o => o.RecordedAt)
+                .OrderByDescending(o => o.ObservedAt)
                 .FirstOrDefault();
         }
 

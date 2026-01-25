@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:MedReminder.Pages"
     xmlns:model="clr-namespace:MedReminder.Models"
-    Title="Medications">
+    Title="Medications"
+    BackgroundColor="{StaticResource Medication_Main_Background}">
 
     <Grid Padding="16" RowDefinitions="Auto,*" RowSpacing="12">
 
@@ -14,14 +15,19 @@
                    Text="Medications"
                    FontSize="20"
                    FontAttributes="Bold"
+                   TextColor="{StaticResource Medication_Font_Primary}"
                    VerticalOptions="Center"/>
 
             <Button Grid.Column="1"
                     Text="Add"
+                    BackgroundColor="{StaticResource Button_Add}"
+                    TextColor="{StaticResource Button_Font_Primary}"
                     Clicked="OnAddMedicationClicked"/>
 
             <Button Grid.Column="2"
                     Text="Close"
+                    BackgroundColor="{StaticResource Button_Close}"
+                    TextColor="{StaticResource Button_Font_Primary}"
                     Clicked="OnCloseClicked"/>
         </Grid>
 
@@ -31,22 +37,34 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="model:Medication">
                     <Border Padding="12"
-                            Stroke="#E5E7EB"
+                            Margin="0,0,0,8"
+                            Stroke="{StaticResource Medication_Card_Border}"
                             StrokeThickness="1"
-                            BackgroundColor="White">
+                            BackgroundColor="{StaticResource Medication_Card_Background}">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="10"/>
                         </Border.StrokeShape>
 
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                             <VerticalStackLayout>
-                                <Label Text="{Binding MedName}" FontAttributes="Bold"/>
+                                <Label Text="{Binding MedName}" 
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Medication_Font_Primary}"/>
                                 <Label Text="{Binding Dosage, StringFormat='Dosage: {0}'}"
-                                       FontSize="12" Opacity="0.75"/>
+                                       FontSize="12" 
+                                       TextColor="{StaticResource Medication_Font_Secondary}"/>
                             </VerticalStackLayout>
 
-                            <Button Grid.Column="1" Text="Edit" Clicked="OnEditClicked"/>
-                            <Button Grid.Column="2" Text="Delete" Clicked="OnDeleteClicked"/>
+                            <Button Grid.Column="1" 
+                                    Text="Edit" 
+                                    BackgroundColor="{StaticResource Button_Edit}"
+                                    TextColor="{StaticResource Button_Font_Secondary}"
+                                    Clicked="OnEditClicked"/>
+                            <Button Grid.Column="2" 
+                                    Text="Delete" 
+                                    BackgroundColor="{StaticResource Button_Delete}"
+                                    TextColor="{StaticResource Button_Font_Primary}"
+                                    Clicked="OnDeleteClicked"/>
                         </Grid>
                     </Border>
                 </DataTemplate>

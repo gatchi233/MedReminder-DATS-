@@ -1,9 +1,10 @@
-using System;
-using System.Collections.Generic;
 using MedReminder.Models;
 using MedReminder.ViewModels;
-using Microsoft.Maui.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Controls;
+using System;
+using System.Collections.Generic;
+using static MedReminder.ViewModels.ResidentsPageViewModel;
 
 namespace MedReminder.Pages.Desktop
 {
@@ -74,19 +75,19 @@ namespace MedReminder.Pages.Desktop
             await Shell.Current.GoToAsync($"{nameof(EditResidentPage)}?id={r.Id}");
         }
 
-        private async void OnViewMedClicked(object sender, EventArgs e)
-        {
-            if ((sender as BindableObject)?.BindingContext is not Resident r)
-                return;
+        //private async void OnViewMedClicked(object sender, EventArgs e)
+        //{
+        //    if ((sender as BindableObject)?.BindingContext is not Resident r)
+        //        return;
 
-            var parameters = new Dictionary<string, object?>
-            {
-                ["residentId"] = r.Id,
-                ["residentName"] = r.FullName
-            };
+        //    var parameters = new Dictionary<string, object?>
+        //    {
+        //        ["residentId"] = r.Id,
+        //        ["residentName"] = r.FullName
+        //    };
 
-            await Shell.Current.GoToAsync(nameof(ResidentMedicationsPage), true, parameters);
-        }
+        //    await Shell.Current.GoToAsync(nameof(ResidentMedicationsPage), true, parameters);
+        //}
 
         private async void OnDeleteResidentClicked(object sender, EventArgs e)
         {
@@ -108,5 +109,6 @@ namespace MedReminder.Pages.Desktop
         {
             await LogoutAsync();
         }
+
     }
 }

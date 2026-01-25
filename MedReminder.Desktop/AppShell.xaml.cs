@@ -22,7 +22,8 @@ namespace MedReminder
             Routing.RegisterRoute(nameof(ResidentReportPage), typeof(ResidentReportPage));
             Routing.RegisterRoute(nameof(ResidentsPage), typeof(ResidentsPage));
             Routing.RegisterRoute(nameof(ViewResidentPage), typeof(ViewResidentPage));
-            Routing.RegisterRoute(nameof(StaffManagementPage), typeof(StaffManagementPage)); 
+            Routing.RegisterRoute(nameof(StaffManagementPage), typeof(StaffManagementPage));
+            Routing.RegisterRoute(nameof(HelpPage), typeof(HelpPage));
 
             // Login is not under Desktop namespace
             Routing.RegisterRoute(nameof(LoginPage), typeof(LoginPage));

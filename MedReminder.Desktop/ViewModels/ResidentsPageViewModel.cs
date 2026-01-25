@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -59,13 +59,25 @@ namespace MedReminder.ViewModels
 
             if (!string.IsNullOrWhiteSpace(NameFilter))
             {
+                var q = NameFilter.Trim();
+
                 query = query.Where(r =>
-                    !string.IsNullOrEmpty(r.FullName) &&
-                    r.FullName.Contains(NameFilter, System.StringComparison.OrdinalIgnoreCase));
+                {
+                    var first = (r.FirstName ?? "").Trim();
+                    var last = (r.LastName ?? "").Trim();
+
+                    var full1 = $"{first} {last}".Trim();
+                    var full2 = $"{last} {first}".Trim();
+
+                    return full1.Contains(q, System.StringComparison.OrdinalIgnoreCase)
+                        || full2.Contains(q, System.StringComparison.OrdinalIgnoreCase)
+                        || first.Contains(q, System.StringComparison.OrdinalIgnoreCase)
+                        || last.Contains(q, System.StringComparison.OrdinalIgnoreCase);
+                });
             }
 
             query = query
-                .OrderBy(r => r.DOB)
+                .OrderBy(r => DateTime.TryParse(r.DOB, out var d) ? d : DateTime.MinValue)
                 .ThenBy(r => r.FullName);
 
             Residents.Clear();

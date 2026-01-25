@@ -14,24 +14,7 @@ namespace MedReminder
         public App()
         {
             InitializeComponent();
+            MainPage = new AppShell();
         }
-
-        protected override Window CreateWindow(IActivationState? activationState)
-        {
-            var shell = new AppShell();
-            var window = new Window(shell)
-            {
-                Title = "MedReminder Pro (DATS)"
-            };
-
-            MainThread.BeginInvokeOnMainThread(async () =>
-            {
-                await shell.GoToAsync($"//{nameof(LoginPage)}");
-
-            });
-
-            return window;
-        }
-
     }
 }

@@ -67,4 +67,23 @@ namespace MedReminder.Pages.UI.Converters
             => throw new NotSupportedException();
     }
 
+    public class InvertedBoolConverter : IValueConverter
+    {
+        // Converts True to False and False to True
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is bool booleanValue)
+                return !booleanValue;
+
+            return true;
+        }
+
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is bool booleanValue)
+                return !booleanValue;
+
+            return true;
+        }
+    }
 }

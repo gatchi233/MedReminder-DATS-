@@ -3,7 +3,8 @@
     x:Class="MedReminder.Pages.Desktop.StaffManagementPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Staff Management">
+    Title="Staff Management"
+    BackgroundColor="{StaticResource Staff_Main_Background}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="New" Command="{Binding NewCommand}" />
@@ -13,12 +14,15 @@
 
     <Grid Padding="16" ColumnDefinitions="2*,3*" RowDefinitions="Auto,*">
         <Label Text="Staff list (select to edit)."
-               TextColor="Gray" />
+               TextColor="{StaticResource Staff_Font_Secondary}" />
 
         <Grid Grid.Row="1" ColumnDefinitions="2*,3*" ColumnSpacing="16">
 
             <!-- Left: List -->
-            <Border Padding="12" BackgroundColor="White">
+            <Border Padding="12" 
+                    BackgroundColor="{StaticResource Staff_Card_Background}"
+                    Stroke="{StaticResource Staff_Card_Border}"
+                    StrokeThickness="1">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="12"/>
                 </Border.StrokeShape>
@@ -28,14 +32,24 @@
                                 SelectedItem="{Binding Selected, Mode=TwoWay}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <Border Padding="10" Margin="0,0,0,10" BackgroundColor="#FAFAFA">
+                            <Border Padding="10" 
+                                    Margin="0,0,0,10" 
+                                    BackgroundColor="{StaticResource Card_Background_Light}"
+                                    Stroke="{StaticResource Staff_Card_Border}"
+                                    StrokeThickness="1">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="10"/>
                                 </Border.StrokeShape>
                                 <VerticalStackLayout Spacing="2">
-                                    <Label Text="{Binding EmployeeId}" FontSize="14" />
-                                    <Label Text="{Binding FullName}" FontSize="16" />
-                                    <Label Text="{Binding Role}" FontSize="12" TextColor="Gray" />
+                                    <Label Text="{Binding EmployeeId}" 
+                                           FontSize="14" 
+                                           TextColor="{StaticResource Staff_Font_Secondary}" />
+                                    <Label Text="{Binding FullName}" 
+                                           FontSize="16" 
+                                           TextColor="{StaticResource Staff_Font_Primary}" />
+                                    <Label Text="{Binding Role}" 
+                                           FontSize="12" 
+                                           TextColor="{StaticResource Staff_Font_Secondary}" />
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
@@ -44,7 +58,11 @@
             </Border>
 
             <!-- Right: Editor -->
-            <Border Grid.Column="1" Padding="12" BackgroundColor="White">
+            <Border Grid.Column="1" 
+                    Padding="12" 
+                    BackgroundColor="{StaticResource Staff_Card_Background}"
+                    Stroke="{StaticResource Staff_Card_Border}"
+                    StrokeThickness="1">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="12"/>
                 </Border.StrokeShape>
@@ -52,70 +70,91 @@
                 <ScrollView>
                     <VerticalStackLayout Spacing="10">
 
-                        <Label Text="{Binding Error}" TextColor="Red" />
+                        <Label Text="{Binding Error}" TextColor="{StaticResource Text_Error}" />
 
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                             <VerticalStackLayout>
-                                <Label Text="EmployeeId" />
-                                <Entry Text="{Binding EmployeeId, Mode=TwoWay}" Placeholder="EMP-001" />
+                                <Label Text="EmployeeId" TextColor="{StaticResource Staff_Font_Primary}" />
+                                <Entry Text="{Binding EmployeeId, Mode=TwoWay}" 
+                                       Placeholder="EMP-001" 
+                                       PlaceholderColor="{StaticResource Placeholder_Font_Primary}"
+                                       TextColor="{StaticResource Staff_Font_Primary}" />
                             </VerticalStackLayout>
 
                             <VerticalStackLayout Grid.Column="1">
-                                <Label Text="Role" />
+                                <Label Text="Role" TextColor="{StaticResource Staff_Font_Primary}" />
                                 <Picker ItemsSource="{Binding Roles}"
-                                        SelectedItem="{Binding Role, Mode=TwoWay}" />
+                                        SelectedItem="{Binding Role, Mode=TwoWay}"
+                                        TextColor="{StaticResource Staff_Font_Primary}" />
                             </VerticalStackLayout>
                         </Grid>
 
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                             <VerticalStackLayout>
-                                <Label Text="First Name" />
-                                <Entry Text="{Binding FirstName, Mode=TwoWay}" />
+                                <Label Text="First Name" TextColor="{StaticResource Staff_Font_Primary}" />
+                                <Entry Text="{Binding FirstName, Mode=TwoWay}" 
+                                       TextColor="{StaticResource Staff_Font_Primary}" />
                             </VerticalStackLayout>
 
                             <VerticalStackLayout Grid.Column="1">
-                                <Label Text="Last Name" />
-                                <Entry Text="{Binding LastName, Mode=TwoWay}" />
+                                <Label Text="Last Name" TextColor="{StaticResource Staff_Font_Primary}" />
+                                <Entry Text="{Binding LastName, Mode=TwoWay}" 
+                                       TextColor="{StaticResource Staff_Font_Primary}" />
                             </VerticalStackLayout>
                         </Grid>
 
-                        <Label Text="Job Title" />
-                        <Entry Text="{Binding JobTitle, Mode=TwoWay}" />
+                        <Label Text="Job Title" TextColor="{StaticResource Staff_Font_Primary}" />
+                        <Entry Text="{Binding JobTitle, Mode=TwoWay}" 
+                               TextColor="{StaticResource Staff_Font_Primary}" />
 
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                             <VerticalStackLayout>
-                                <Label Text="Department" />
-                                <Entry Text="{Binding Department, Mode=TwoWay}" />
+                                <Label Text="Department" TextColor="{StaticResource Staff_Font_Primary}" />
+                                <Entry Text="{Binding Department, Mode=TwoWay}" 
+                                       TextColor="{StaticResource Staff_Font_Primary}" />
                             </VerticalStackLayout>
 
                             <VerticalStackLayout Grid.Column="1">
-                                <Label Text="Employment Status" />
-                                <Entry Text="{Binding EmploymentStatus, Mode=TwoWay}" Placeholder="Full-time" />
+                                <Label Text="Employment Status" TextColor="{StaticResource Staff_Font_Primary}" />
+                                <Entry Text="{Binding EmploymentStatus, Mode=TwoWay}" 
+                                       Placeholder="Full-time" 
+                                       PlaceholderColor="{StaticResource Placeholder_Font_Primary}"
+                                       TextColor="{StaticResource Staff_Font_Primary}" />
                             </VerticalStackLayout>
                         </Grid>
 
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                             <VerticalStackLayout>
-                                <Label Text="Hourly Wage" />
-                                <Entry Text="{Binding HourlyWage, Mode=TwoWay}" Keyboard="Numeric" />
+                                <Label Text="Hourly Wage" TextColor="{StaticResource Staff_Font_Primary}" />
+                                <Entry Text="{Binding HourlyWage, Mode=TwoWay}" 
+                                       Keyboard="Numeric" 
+                                       TextColor="{StaticResource Staff_Font_Primary}" />
                             </VerticalStackLayout>
 
                             <VerticalStackLayout Grid.Column="1">
-                                <Label Text="Shift Preference" />
-                                <Entry Text="{Binding ShiftPreference, Mode=TwoWay}" Placeholder="Day / Evening / Night / Any" />
+                                <Label Text="Shift Preference" TextColor="{StaticResource Staff_Font_Primary}" />
+                                <Entry Text="{Binding ShiftPreference, Mode=TwoWay}" 
+                                       Placeholder="Day / Evening / Night / Any" 
+                                       PlaceholderColor="{StaticResource Placeholder_Font_Primary}"
+                                       TextColor="{StaticResource Staff_Font_Primary}" />
                             </VerticalStackLayout>
                         </Grid>
 
-                        <Label Text="Compliance" FontAttributes="Bold" />
+                        <Label Text="Compliance" 
+                               FontAttributes="Bold" 
+                               TextColor="{StaticResource Staff_Font_Primary}" />
 
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                             <VerticalStackLayout>
-                                <Label Text="First Aid Expiry" />
-                                <Entry Text="{Binding FirstAidExpiry, Mode=TwoWay}" Placeholder="YYYY-MM-DD" />
+                                <Label Text="First Aid Expiry" TextColor="{StaticResource Staff_Font_Primary}" />
+                                <Entry Text="{Binding FirstAidExpiry, Mode=TwoWay}" 
+                                       Placeholder="YYYY-MM-DD" 
+                                       PlaceholderColor="{StaticResource Placeholder_Font_Primary}"
+                                       TextColor="{StaticResource Staff_Font_Primary}" />
                             </VerticalStackLayout>
 
                             <VerticalStackLayout Grid.Column="1">
-                                <Label Text="FoodSafe Certified" />
+                                <Label Text="FoodSafe Certified" TextColor="{StaticResource Staff_Font_Primary}" />
                                 <Switch IsToggled="{Binding FoodSafeCertified, Mode=TwoWay}" />
                             </VerticalStackLayout>
                         </Grid>
@@ -125,7 +164,9 @@
                                     Command="{Binding ToggleEnabledCommand}" />
 
                             <HorizontalStackLayout Grid.Column="1" Spacing="10">
-                                <Label Text="Enabled" VerticalOptions="Center" />
+                                <Label Text="Enabled" 
+                                       VerticalOptions="Center" 
+                                       TextColor="{StaticResource Staff_Font_Primary}" />
                                 <Switch IsToggled="{Binding IsEnabled, Mode=TwoWay}" />
                             </HorizontalStackLayout>
                         </Grid>

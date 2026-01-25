@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<pages:AuthPage
+    x:Class="MedReminder.Pages.Desktop.HelpPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:MedReminder.Pages"
+    Title="Help"
+    BackgroundColor="{StaticResource Medication_Main_Background}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+
+            <Label Text="How to use MedReminder Pro (DATS CareHub)"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="#222" />
+
+            <Label Text="Quick guide for each page. Use this tab anytime you’re unsure what to do next."
+                   FontSize="13"
+                   TextColor="#555" />
+
+            <!-- HOME -->
+            <Border Padding="14" BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12"/>
+                </Border.StrokeShape>
+                <Border.Stroke>
+                    <SolidColorBrush Color="#78290F"/>
+                </Border.Stroke>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Home"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#78290F" />
+
+                    <Label Text="Purpose"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="Search meds by resident, or by day/time, and mark meds as completed."
+                           FontSize="13"
+                           TextColor="#444" />
+
+                    <Label Text="How to use"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="• Search by resident name → shows that resident’s meds.
+• Search by day &amp; time → shows meds scheduled at that time (with resident names).
+• Use both filters → shows that resident’s meds at that time.
+• Tap Completed after giving the medication."
+                           FontSize="13"
+                           TextColor="#444" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- FLOOR PLAN -->
+            <Border Padding="14" BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12"/>
+                </Border.StrokeShape>
+                <Border.Stroke>
+                    <SolidColorBrush Color="#78290F"/>
+                </Border.Stroke>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Floor Plan"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#78290F" />
+
+                    <Label Text="Purpose"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="Visual layout of rooms. Tap a room to quickly see who lives there and open resident details."
+                           FontSize="13"
+                           TextColor="#444" />
+
+                    <Label Text="How to use"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="• Click a room tile → shows resident summary on the side.
+• Click the resident card/name → opens the resident detail page.
+• Use the floor sections (1/F, 2/F) if your design supports both floors."
+                           FontSize="13"
+                           TextColor="#444" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- RESIDENTS -->
+            <Border Padding="14" BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12"/>
+                </Border.StrokeShape>
+                <Border.Stroke>
+                    <SolidColorBrush Color="#78290F"/>
+                </Border.Stroke>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Residents"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#78290F" />
+
+                    <Label Text="Purpose"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="Manage resident profiles: add, edit, view details, and open reports/medications."
+                           FontSize="13"
+                           TextColor="#444" />
+
+                    <Label Text="How to use"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="• Search by name to find residents quickly.
+• Add Resident to create a new profile.
+• Open a resident to view details, medications, observations, and report."
+                           FontSize="13"
+                           TextColor="#444" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- INVENTORY -->
+            <Border Padding="14" BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12"/>
+                </Border.StrokeShape>
+                <Border.Stroke>
+                    <SolidColorBrush Color="#78290F"/>
+                </Border.Stroke>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Inventory"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#78290F" />
+
+                    <Label Text="Purpose"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="Track medication stock, reorder levels, and create orders when quantity is low."
+                           FontSize="13"
+                           TextColor="#444" />
+
+                    <Label Text="How to use"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="• Review Qty / Reorder level.
+• Use Direct Order to create a purchase order.
+• Open Orders page to review pending/received orders (if available in your app flow)."
+                           FontSize="13"
+                           TextColor="#444" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- STAFF -->
+            <Border Padding="14" BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12"/>
+                </Border.StrokeShape>
+                <Border.Stroke>
+                    <SolidColorBrush Color="#78290F"/>
+                </Border.Stroke>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Staff"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#78290F" />
+
+                    <Label Text="Purpose"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="Manage staff accounts (add/edit/enable/disable) for demo/admin use."
+                           FontSize="13"
+                           TextColor="#444" />
+
+                    <Label Text="How to use"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="• Add a staff account for new users.
+• Edit staff info if needed.
+• Disable an account to prevent login (for demo)."
+                           FontSize="13"
+                           TextColor="#444" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- OPTIONAL: ORDERS (even if not a tab) -->
+            <Border Padding="14" BackgroundColor="White">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12"/>
+                </Border.StrokeShape>
+                <Border.Stroke>
+                    <SolidColorBrush Color="#78290F"/>
+                </Border.Stroke>
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Orders"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#78290F" />
+
+                    <Label Text="Purpose"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="Review created orders, update status, and mark deliveries received."
+                           FontSize="13"
+                           TextColor="#444" />
+
+                    <Label Text="How to use"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           TextColor="#333" />
+                    <Label Text="• Refresh to reload latest orders.
+• Create a new order (or from Inventory direct order).
+• Approve/Receive/Void depending on your workflow."
+                           FontSize="13"
+                           TextColor="#444" />
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</pages:AuthPage>

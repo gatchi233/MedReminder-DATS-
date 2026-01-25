@@ -6,22 +6,31 @@ using System.Threading.Tasks;
 
 namespace MedReminder.Models
 {
-    public class Observation
+    public sealed class Observation
     {
         public int Id { get; set; }
         public int ResidentId { get; set; }
 
-        public DateTime RecordedAt { get; set; } = DateTime.Now;
+        // (Optional improvement later) This is denormalized; can be removed once DB exists.
+        public string ResidentName { get; set; } = "";
 
-        public int? Systolic { get; set; }
-        public int? Diastolic { get; set; }
-        public double? TemperatureC { get; set; }
+        public DateTime ObservedAt { get; set; }
+        public string ObservedByStaffId { get; set; } = "";
+        public string Category { get; set; } = "";   // e.g. "Vital Signs"
+        public string Severity { get; set; } = "";   // e.g. "Normal", "Low", "Medium"
+        public string Note { get; set; } = "";
 
-        public int? HeartRate { get; set; }  // optional
-        public int? SpO2 { get; set; }       // optional
+        // NEW (only used when Category == "Vital Signs")
+        public VitalReading? Vitals { get; set; }
+    }
 
-        public string? NurseNote { get; set; }
-        public string? RecordedBy { get; set; }
+    public sealed class VitalReading
+    {
+        public decimal? TemperatureC { get; set; }      // e.g. 36.7
+        public int? Systolic { get; set; }              // e.g. 120
+        public int? Diastolic { get; set; }             // e.g. 80
+        public int? HeartRate { get; set; }             // optional
+        public int? OxygenSaturation { get; set; }      // SpO2 %, e.g. 96
     }
 }
 
