@@ -11,18 +11,25 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<CareHubDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("CareHubDb")));
 
-// Simple CORS for local MAUI dev later
+// CORS (Dev only policy name kept stable for later)
+const string DevCorsPolicy = "DevCors";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("DevCors", p =>
+    options.AddPolicy(DevCorsPolicy, p =>
         p.AllowAnyOrigin()
          .AllowAnyHeader()
          .AllowAnyMethod());
 });
 
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
-app.UseCors("DevCors");
+app.UseHttpsRedirection();
+
+app.UseCors(DevCorsPolicy);
+
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
@@ -30,7 +37,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Minimal “is alive” endpoints for demo
 app.MapGet("/health", () => Results.Ok(new { ok = true }));
 
 app.MapControllers();
