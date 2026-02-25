@@ -15,12 +15,27 @@ public sealed class ObservationsController : ControllerBase
 
     // GET api/observations
     [HttpGet]
-    public async Task<ActionResult<List<Observation>>> GetAll(CancellationToken ct)
+    public async Task<ActionResult<List<Observation>>> GetAll()
+        => await _db.Observations.AsNoTracking().ToListAsync();
+
+    // GET api/observations/{id}
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<Observation>> GetById(Guid id)
     {
-        var list = await _db.Observations
-            .AsNoTracking()
-            .OrderByDescending(o => o.RecordedAt)
-            .ToListAsync(ct);
+        var obs = await _db.Observations.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        return obs is null ? NotFound() : Ok(obs);
+    }
+
+    // GET api/observations/by-resident/{residentId}
+    [HttpGet("by-resident/{residentId:guid}")]
+    public async Task<ActionResult<List<Observation>>> GetByResidentId(Guid residentId)
+    {
+        var list = await _db.Observations.AsNoTracking()
+            .Where(x => x.ResidentId == residentId)
+            .OrderByDescending(x => x.RecordedAt) // or ObservedAtUtc
+            .ToListAsync();
 
         return Ok(list);
     }

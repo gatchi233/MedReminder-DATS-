@@ -2,7 +2,7 @@ using MedReminder.ViewModels;
 
 namespace MedReminder.Pages.Desktop;
 
-public partial class ResidentObservationsPage : ContentPage
+public partial class ResidentObservationsPage : ContentPage, IQueryAttributable
 {
     private readonly ResidentObservationsViewModel _vm;
 
@@ -12,14 +12,30 @@ public partial class ResidentObservationsPage : ContentPage
         BindingContext = _vm = vm;
     }
 
-    protected override async void OnAppearing()
+    public async void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        base.OnAppearing();
+        if (query is null)
+            return;
 
-        // If navigation provided ResidentId and VM hasn't loaded yet, load now.
-        if (!_vm.HasLoadedOnce)
+        if (query.TryGetValue("residentId", out var value) && value != null)
         {
-            await _vm.InitializeAsync();
+            Guid residentId = Guid.Empty;
+
+            if (value is Guid g)
+                residentId = g;
+            else if (value is string s && Guid.TryParse(s, out var parsed))
+                residentId = parsed;
+
+            if (residentId != Guid.Empty)
+            {
+                _vm.SetResident(residentId, string.Empty);
+                await _vm.LoadAsync();
+            }
         }
+    }
+
+    private async void OnCloseClicked(object sender, EventArgs e)
+    {
+        await Shell.Current.GoToAsync("..");
     }
 }

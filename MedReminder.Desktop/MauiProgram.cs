@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Maui;
+using MedReminder.Desktop.Services;
+using MedReminder.Desktop.Services.Sync;
 using MedReminder.Pages;
 using MedReminder.Pages.Desktop;
 using MedReminder.Services;
@@ -88,9 +90,18 @@ namespace MedReminder
                 client.BaseAddress = apiBase;
             });
 
-            builder.Services.AddHttpClient<IObservationService, ObservationApiService>(client =>
+            builder.Services.AddHttpClient<ObservationApiService>(client =>
             {
                 client.BaseAddress = apiBase;
+            });
+            builder.Services.AddSingleton<ObservationJsonService>();
+            builder.Services.AddSingleton<ISyncQueue, JsonSyncQueue>();
+            builder.Services.AddSingleton<IObservationService>(sp =>
+            {
+                var api = sp.GetRequiredService<ObservationApiService>();
+                var local = sp.GetRequiredService<ObservationJsonService>();
+                var queue = sp.GetRequiredService<ISyncQueue>();
+                return new ObservationService(api, local, queue);
             });
 
             builder.Services.AddSingleton<IMedicationOrderService, MedicationOrderJsonService>();

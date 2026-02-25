@@ -52,13 +52,13 @@
                     <RoundRectangle CornerRadius="4"/>
                 </Border.StrokeShape>
                 <Grid ColumnDefinitions="32,Auto" Margin="0">
-                    <Image Grid.Column="0" Source="icons8_report_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Image Grid.Column="0" Source="icons8_scan_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
                     <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Export}" Padding="10,0" StrokeThickness="0">
-                        <Label Text="REPORT" TextColor="{StaticResource Button_Font_Primary}" FontSize="12" VerticalOptions="Center" FontAttributes="Bold"/>
+                        <Label Text="OBS" TextColor="{StaticResource Button_Font_Primary}" FontSize="12" VerticalOptions="Center" FontAttributes="Bold"/>
                     </Border>
                 </Grid>
                 <Border.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnReportClicked"/>
+                    <TapGestureRecognizer Tapped="OnObserviationsClicked"/>
                 </Border.GestureRecognizers>
             </Border>
 

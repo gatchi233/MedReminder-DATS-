@@ -3,12 +3,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using MedReminder.Models;
-using MedReminder.Services.Local;
 using MedReminder.Services.Abstractions;
 
 namespace MedReminder.ViewModels
 {
-
     public class ResidentsPageViewModel
     {
         private readonly IResidentService _residentService;
@@ -29,8 +27,12 @@ namespace MedReminder.ViewModels
             try
             {
                 var list = await _residentService.LoadAsync();
-                Residents.Clear();
-                foreach (var r in list) Residents.Add(r);
+
+                // ✅ IMPORTANT: keep master list for filtering/sorting
+                _allResidents = list?.ToList() ?? new List<Resident>();
+
+                // ✅ Apply current filter to populate the UI list
+                ApplyFilters();
             }
             catch (HttpRequestException)
             {
@@ -38,6 +40,12 @@ namespace MedReminder.ViewModels
                     "Server not running",
                     "Cannot reach the API. Start MedReminder.Api and try again.",
                     "OK");
+
+                // optional: keep current UI list as-is
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlert("Error", ex.Message, "OK");
             }
         }
 
@@ -90,9 +98,7 @@ namespace MedReminder.ViewModels
 
             Residents.Clear();
             foreach (var r in query)
-            {
                 Residents.Add(r);
-            }
         }
     }
 }

@@ -90,7 +90,7 @@ namespace MedReminder.ViewModels
             var html = ResidentReportBuilder.BuildHtml(report);
 
             TitleText = $"Resident Report — {report.ResidentName}";
-            SubtitleText = $"Generated: {report.GeneratedAt:yyyy-MM-dd HH:mm}  •  By: {report.GeneratedByStaff}";
+            SubtitleText = $"Generated: {ToLocalTime(report.GeneratedAt):yyyy-MM-dd HH:mm}  •  By: {report.GeneratedByStaff}";
             HtmlPreview = html;
 
             OnPropertyChanged(nameof(TitleText));
@@ -134,6 +134,14 @@ namespace MedReminder.ViewModels
             {
                 _isLoading = false;
             }
+        }
+
+        private static DateTime ToLocalTime(DateTime value)
+        {
+            var utc = value.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(value, DateTimeKind.Utc)
+                : value;
+            return utc.ToLocalTime();
         }
     }
 }

@@ -16,14 +16,20 @@ namespace MedReminder.Pages.Desktop
         private readonly IResidentService _residentService;
         private readonly IMedicationService _medicationService;
 
-        public Guid ResidentId { get; set; }
+        private Guid _residentId = Guid.Empty;
+        public string? ResidentId
+        {
+            get => _residentId == Guid.Empty ? null : _residentId.ToString();
+            set
+            {
+                _residentId = Guid.TryParse(value, out var id) ? id : Guid.Empty;
+            }
+        }
 
         // Where to return when Close is pressed (e.g. //FloorPlanPage or //ResidentsPage)
         public string? ReturnTo { get; set; }
 
         private Resident? _resident;
-        private Guid _ResidentID;
-
         // Bind this from XAML via x:Reference (so we can keep BindingContext = Resident)
         public ObservableCollection<Medication> MedicationSchedules { get; } = new();
 
@@ -50,7 +56,7 @@ namespace MedReminder.Pages.Desktop
             }
 
             var residents = await _residentService.LoadAsync();
-            _resident = residents.FirstOrDefault(r => r.Id == Guid.Empty);
+            _resident = residents.FirstOrDefault(r => r.Id == _residentId);
 
             if (_resident == null)
             {
@@ -68,7 +74,7 @@ namespace MedReminder.Pages.Desktop
             MedicationSchedules.Clear();
             var allMeds = await _medicationService.LoadAsync();
             var residentMeds = allMeds
-                .Where(m => m.ResidentId.HasValue && m.ResidentId.Value == _ResidentID)
+                .Where(m => m.ResidentId.HasValue && m.ResidentId.Value == _residentId)
                 .OrderBy(m => m.MedName ?? string.Empty);
 
             foreach (var m in residentMeds)
@@ -119,7 +125,7 @@ namespace MedReminder.Pages.Desktop
                 ? $"//{nameof(ResidentsPage)}"
                 : ReturnTo);
 
-            await Shell.Current.GoToAsync($"{nameof(EditResidentPage)}?id={ResidentId}&returnTo={returnTo}");
+            await Shell.Current.GoToAsync($"{nameof(EditResidentPage)}?id={_residentId}&returnTo={returnTo}");
         }
 
         private async void OnViewMedicationsClicked(object sender, EventArgs e)
@@ -141,18 +147,17 @@ namespace MedReminder.Pages.Desktop
             await GoBackAsync();
         }
 
-        private async void OnReportClicked(object sender, EventArgs e)
+        private async void OnObserviationsClicked(object sender, EventArgs e)
         {
             if (_resident == null)
                 return;
 
             await Shell.Current.GoToAsync(
-                nameof(ResidentReportPage),
+                nameof(ResidentObservationsPage),
                 true,
                 new Dictionary<string, object>
                 {
                     ["residentId"] = _resident.Id,
-                    // If you later add ReturnTo to report, pass it too
                 });
         }
     }

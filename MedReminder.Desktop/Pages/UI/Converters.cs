@@ -86,4 +86,33 @@ namespace MedReminder.Pages.UI.Converters
             return true;
         }
     }
+
+    public class UtcToLocalDateTimeConverter : IValueConverter
+    {
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is null)
+                return null;
+
+            var format = parameter as string ?? "yyyy-MM-dd HH:mm";
+
+            if (value is DateTime dt)
+            {
+                var utc = dt.Kind == DateTimeKind.Unspecified
+                    ? DateTime.SpecifyKind(dt, DateTimeKind.Utc)
+                    : dt;
+                return utc.ToLocalTime().ToString(format, culture);
+            }
+
+            if (value is DateTimeOffset dto)
+            {
+                return dto.ToLocalTime().ToString(format, culture);
+            }
+
+            return value;
+        }
+
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+            => throw new NotSupportedException();
+    }
 }

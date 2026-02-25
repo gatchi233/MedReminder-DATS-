@@ -11,6 +11,8 @@ namespace MedReminder.Services.Abstractions
     {
         Task<List<Observation>> LoadAsync();
         Task<List<Observation>> GetByResidentIdAsync(Guid residentId);
+        Task AddAsync(Observation observation);
+        Task<int> SyncAsync();
         Task UpsertAsync(Observation item);
         Task DeleteAsync(Observation item);
     }

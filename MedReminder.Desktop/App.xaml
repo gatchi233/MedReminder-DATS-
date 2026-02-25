@@ -30,6 +30,7 @@
             <conv:IntToDoubleConverter x:Key="IntToDoubleConverter" />
             <conv:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
             <conv:BoolToEnableDisableTextConverter x:Key="BoolToEnableDisableTextConverter" />
+            <conv:UtcToLocalDateTimeConverter x:Key="UtcToLocalDateTimeConverter" />
 
         </ResourceDictionary>
 

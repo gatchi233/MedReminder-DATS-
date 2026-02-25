@@ -173,16 +173,16 @@ namespace MedReminder.ViewModels
         };
 
         // Timeline line strings (we keep them short because the tag already says the word)
-        public string RequestedLine => $"{_o.RequestedAt:yyyy-MM-dd HH:mm}  by {Who(_o.RequestedBy)}";
+        public string RequestedLine => $"{_o.RequestedAt.ToLocalTime():yyyy-MM-dd HH:mm}  by {Who(_o.RequestedBy)}";
 
         public string OrderedLine =>
-            _o.OrderedAt == null ? "—" : $"{_o.OrderedAt:yyyy-MM-dd HH:mm}  by {Who(_o.OrderedBy)}";
+            _o.OrderedAt == null ? "—" : $"{_o.OrderedAt.Value.ToLocalTime():yyyy-MM-dd HH:mm}  by {Who(_o.OrderedBy)}";
 
         public string ReceivedLine =>
-            _o.ReceivedAt == null ? "—" : $"{_o.ReceivedAt:yyyy-MM-dd HH:mm}  by {Who(_o.ReceivedBy)}";
+            _o.ReceivedAt == null ? "—" : $"{_o.ReceivedAt.Value.ToLocalTime():yyyy-MM-dd HH:mm}  by {Who(_o.ReceivedBy)}";
 
         public string CancelledLine =>
-            _o.CancelledAt == null ? "—" : $"{_o.CancelledAt:yyyy-MM-dd HH:mm}  by {Who(_o.CancelledBy)}";
+            _o.CancelledAt == null ? "—" : $"{_o.CancelledAt.Value.ToLocalTime():yyyy-MM-dd HH:mm}  by {Who(_o.CancelledBy)}";
 
         public Color RequestedTagColor => Color.FromArgb("#F0AD4E");
         public Color OrderedTagColor => Color.FromArgb("#5BC0DE");
