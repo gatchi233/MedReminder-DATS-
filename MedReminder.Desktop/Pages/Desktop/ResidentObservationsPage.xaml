@@ -62,7 +62,7 @@
                                        FontAttributes="Bold"
                                        FontSize="16" />
                                 <Label Grid.Column="1"
-                                       Text="{Binding DisplayTime}"
+                                       Text="{Binding RecordedAt}"
                                        TextColor="Gray"
                                        FontSize="12" />
 
@@ -73,7 +73,7 @@
 
                                 <Label Grid.Row="2"
                                        Grid.ColumnSpan="2"
-                                       Text="{Binding Notes}"
+                                       Text="{Binding RecordedBy, StringFormat='By: {0}'}"
                                        TextColor="Gray"
                                        FontSize="12"
                                        LineBreakMode="TailTruncation"

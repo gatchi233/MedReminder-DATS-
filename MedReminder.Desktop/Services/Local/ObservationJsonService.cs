@@ -91,7 +91,7 @@ namespace MedReminder.Services.Local
         {
             var list = await LoadAsync();
             return list.Where(o => o.ResidentId == residentId)
-                       .OrderByDescending(o => o.ObservedAt)
+                       .OrderByDescending(o => o.RecordedAt)
                        .ToList();
         }
 
@@ -150,7 +150,7 @@ namespace MedReminder.Services.Local
             var list = await LoadAsync();
             return list
                 .Where(o => o.ResidentId == residentId)
-                .OrderByDescending(o => o.ObservedAt)
+                .OrderByDescending(o => o.RecordedAt)
                 .ToList();
         }
 
@@ -160,8 +160,8 @@ namespace MedReminder.Services.Local
             var list = await LoadAsync();
 
             return list
-                .Where(o => o.ResidentId == residentId && o.ObservedAt >= cutoff)
-                .OrderByDescending(o => o.ObservedAt)
+                .Where(o => o.ResidentId == residentId && o.RecordedAt >= cutoff)
+                .OrderByDescending(o => o.RecordedAt)
                 .ToList();
         }
 
@@ -171,7 +171,7 @@ namespace MedReminder.Services.Local
 
             return list
                 .Where(o => o.ResidentId == residentId)
-                .OrderByDescending(o => o.ObservedAt)
+                .OrderByDescending(o => o.RecordedAt)
                 .FirstOrDefault();
         }
 

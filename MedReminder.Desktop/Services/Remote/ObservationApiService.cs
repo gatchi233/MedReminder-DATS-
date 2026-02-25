@@ -43,7 +43,7 @@ public sealed class ObservationApiService : IObservationService
             if (created is not null)
             {
                 item.Id = created.Id;
-                item.ObservedAt = created.ObservedAt;
+                item.RecordedAt = created.RecordedAt;
             }
 
             return;

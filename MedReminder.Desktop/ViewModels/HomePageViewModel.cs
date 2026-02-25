@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using MedReminder.Models;
 using MedReminder.Services.Abstractions;
 
 namespace MedReminder.ViewModels
 {
-    public class HomePageViewModel : INotifyPropertyChanged
+    public class HomePageViewModel : BaseViewModel
     {
         private readonly IMedicationService _medicationService;
         private readonly IResidentService _residentService;
@@ -20,8 +18,8 @@ namespace MedReminder.ViewModels
         public ObservableCollection<Medication> Medications { get; } = new();
         public ObservableCollection<Resident> Residents { get; } = new();
 
-        private Resident _selectedResident;
-        public Resident SelectedResident
+        private Resident? _selectedResident;
+        public Resident? SelectedResident
         {
             get => _selectedResident;
             set
@@ -110,19 +108,5 @@ namespace MedReminder.ViewModels
                 Medications.Add(m);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(storage, value))
-                return false;
-
-            storage = value;
-            OnPropertyChanged(propertyName);
-            return true;
-        }
     }
 }
