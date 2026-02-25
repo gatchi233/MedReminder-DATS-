@@ -99,25 +99,17 @@ namespace MedReminder.Services
             else
             {
                 sb.AppendLine("<table>");
-                sb.AppendLine("<tr><th>Date/Time</th><th>BP</th><th>Temp (°C)</th><th>HR</th><th>SpO2</th><th>Note</th></tr>");
+                sb.AppendLine("<tr><th>Date/Time</th><th>Type</th><th>Value</th><th>Recorded By</th></tr>");
 
                 foreach (var o in observations
-                    .OrderByDescending(x => x.ObservedAt)
+                    .OrderByDescending(x => x.RecordedAt)
                     .Take(10))
                 {
-                    var v = o.Vitals;
-
-                    var bp = (v?.Systolic.HasValue == true && v?.Diastolic.HasValue == true)
-                        ? $"{v.Systolic}/{v.Diastolic}"
-                        : "";
-
                     sb.AppendLine("<tr>");
-                    sb.AppendLine($"<td>{o.ObservedAt:yyyy-MM-dd HH:mm}</td>");
-                    sb.AppendLine($"<td>{Html(bp)}</td>");
-                    sb.AppendLine($"<td>{(v?.TemperatureC.HasValue == true ? v.TemperatureC.Value.ToString("0.0") : "")}</td>");
-                    sb.AppendLine($"<td>{(v?.HeartRate?.ToString() ?? "")}</td>");
-                    sb.AppendLine($"<td>{(v?.OxygenSaturation?.ToString() ?? "")}</td>");
-                    sb.AppendLine($"<td>{Html(o.Note)}</td>");
+                    sb.AppendLine($"<td>{o.RecordedAt:yyyy-MM-dd HH:mm}</td>");
+                    sb.AppendLine($"<td>{Html(o.Type)}</td>");
+                    sb.AppendLine($"<td>{Html(o.Value)}</td>");
+                    sb.AppendLine($"<td>{Html(o.RecordedBy)}</td>");
                     sb.AppendLine("</tr>");
                 }
 

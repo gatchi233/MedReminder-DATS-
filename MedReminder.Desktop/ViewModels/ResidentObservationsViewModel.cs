@@ -8,6 +8,7 @@ namespace MedReminder.ViewModels;
 public class ResidentObservationsViewModel : BaseViewModel
 {
     private readonly IObservationService _observations;
+    private bool _hasLoadedOnce;
 
     public ResidentObservationsViewModel(IObservationService observations)
     {
@@ -23,6 +24,12 @@ public class ResidentObservationsViewModel : BaseViewModel
     public string ResidentName { get; private set; } = "";
 
     public ObservableCollection<Observation> Items { get; } = new();
+
+    public bool HasLoadedOnce
+    {
+        get => _hasLoadedOnce;
+        private set { _hasLoadedOnce = value; OnPropertyChanged(); }
+    }
 
     private bool _isBusy;
     public bool IsBusy
@@ -43,6 +50,13 @@ public class ResidentObservationsViewModel : BaseViewModel
         OnPropertyChanged(nameof(ResidentName));
     }
 
+    public async Task InitializeAsync()
+    {
+        if (HasLoadedOnce) return;
+        await LoadAsync();
+        HasLoadedOnce = true;
+    }
+
     public async Task LoadAsync()
     {
         if (IsBusy || ResidentId == Guid.Empty)
@@ -55,8 +69,8 @@ public class ResidentObservationsViewModel : BaseViewModel
 
             var list = await _observations.GetByResidentIdAsync(ResidentId);
 
-            // Sort newest first (ObservedAt is your MAUI model field)
-            foreach (var item in list.OrderByDescending(x => x.ObservedAt))
+            // Sort newest first (RecordedAt is your MAUI model field)
+            foreach (var item in list.OrderByDescending(x => x.RecordedAt))
                 Items.Add(item);
         }
         finally
@@ -84,9 +98,10 @@ public class ResidentObservationsViewModel : BaseViewModel
         {
             Id = Guid.Empty,
             ResidentId = ResidentId,
-            ObservedAt = DateTime.Now,
-            ObservedBy = by,
-            Notes = $"{type}: {value}"
+            RecordedAt = DateTime.Now,
+            RecordedBy = by,
+            Type = type,
+            Value = value
         };
 
         await _observations.UpsertAsync(obs);
@@ -98,10 +113,10 @@ public class ResidentObservationsViewModel : BaseViewModel
         if (item is null) return;
 
         // Simple edit: edit Notes
-        var notes = await Shell.Current.DisplayPromptAsync("Edit Observation", "Notes:", "Save", "Cancel", item.Notes);
+        var notes = await Shell.Current.DisplayPromptAsync("Edit Observation", "Notes:", "Save", "Cancel", item.Value);
         if (notes is null) return;
 
-        item.Notes = notes;
+        item.Value = notes;
         await _observations.UpsertAsync(item);
         await LoadAsync();
     }
