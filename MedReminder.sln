@@ -7,13 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedReminder.Mobile", "MedRe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedReminder.Desktop", "MedReminder.Desktop\MedReminder.Desktop.csproj", "{125B3F35-1C9C-367B-A37D-93845822638B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{B4FC8ABA-4ED2-485D-A187-DFC5E44EF2E2}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Updates", "Updates", "{C5E1426A-3CC6-449E-9F44-D69F572AE8EC}"
-	ProjectSection(SolutionItems) = preProject
-		Updates20260120.md = Updates20260120.md
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MedReminder.Api", "MedReminder.Api", "{0FCBF5DD-9433-4FEE-8AA8-7DD22DE5CD91}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8CB1EE0F-2D83-4FE8-80E9-8FA41F1AEC3B}"
@@ -48,7 +41,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{C5E1426A-3CC6-449E-9F44-D69F572AE8EC} = {B4FC8ABA-4ED2-485D-A187-DFC5E44EF2E2}
 		{183D710D-E6AF-4EB6-AC7C-3CCB55E639B3} = {0FCBF5DD-9433-4FEE-8AA8-7DD22DE5CD91}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
