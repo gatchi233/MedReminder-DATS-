@@ -6,8 +6,8 @@
 
 ### Members:
 
-- Alice – Backend & Architecture Lead
-- Samuel – Mobile Engineer (Offline + Integration)
+- Alice â€“ Backend & Architecture
+- Samuel â€“ Mobile (Offline + Integration)
 
 **Responsibilities**
 
@@ -26,8 +26,8 @@
 
 ### Members:
 
-- Devi – Web UI Engineer
-- Tanvi – Web UI Engineer
+- Devi â€“ Web UI
+- Tanvi â€“ Web UI
 
 **Responsibilities**
 
