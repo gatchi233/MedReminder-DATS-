@@ -18,6 +18,7 @@ function App() {
   const [sortDirection, setSortDirection] = useState("asc");
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showAllReorders, setShowAllReorders] = useState(false);
   const searchInputRef = useRef(null);
 
   function resetSectionView() {
@@ -262,6 +263,12 @@ function App() {
   }, [currentPage, totalPages]);
 
   useEffect(() => {
+    if (activeSection !== "Dashboard") {
+      setShowAllReorders(false);
+    }
+  }, [activeSection]);
+
+  useEffect(() => {
     function handleFocusShortcut(event) {
       if (activeSection === "Dashboard" || activeSection === "Staff") {
         return;
@@ -372,6 +379,18 @@ function App() {
           <small>
             Page {currentPage} / {totalPages}
           </small>
+          {totalPages > 1 && (
+            <select
+              value={currentPage}
+              onChange={(event) => setCurrentPage(Number(event.target.value))}
+            >
+              {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+                <option key={page} value={page}>
+                  Go to {page}
+                </option>
+              ))}
+            </select>
+          )}
           <button
             type="button"
             className="ghost-button"
@@ -400,10 +419,13 @@ function App() {
           {displayedResidents.length === 0 && (
             <p className="empty-state">No residents match this view.</p>
           )}
-          {pagedResidents.map((resident) => {
+          {pagedResidents.map((resident, index) => {
             return (
               <div className="list-row" key={resident.id}>
-                <span>{resident._name}</span>
+                <span className="list-primary">
+                  <b className="row-index">{(currentPage - 1) * pageSize + index + 1}</b>
+                  {resident._name}
+                </span>
                 <small>Room {resident._room || "N/A"}</small>
               </div>
             );
@@ -424,9 +446,12 @@ function App() {
           {displayedMedications.length === 0 && (
             <p className="empty-state">No medications match this view.</p>
           )}
-          {pagedMedications.map((med) => (
+          {pagedMedications.map((med, index) => (
             <div className={`list-row ${med._isLow ? "row-alert" : ""}`} key={med.id}>
-              <span>{med._name}</span>
+              <span className="list-primary">
+                <b className="row-index">{(currentPage - 1) * pageSize + index + 1}</b>
+                {med._name}
+              </span>
               <small>
                 {med._stock} in stock
                 {med.reorderLevel != null ? ` | Reorder at ${med._reorder}` : ""}
@@ -450,9 +475,12 @@ function App() {
           {displayedObservations.length === 0 && (
             <p className="empty-state">No observations match this view.</p>
           )}
-          {pagedObservations.map((obs) => (
+          {pagedObservations.map((obs, index) => (
             <div className="list-row" key={obs.id}>
-              <span>{obs._summary}</span>
+              <span className="list-primary">
+                <b className="row-index">{(currentPage - 1) * pageSize + index + 1}</b>
+                {obs._summary}
+              </span>
               <small>{obs._timestamp}</small>
             </div>
           ))}
@@ -554,16 +582,48 @@ function App() {
                   <p className="metric-caption">{lowStockRate}% of medication records</p>
                 </article>
                 <article className="card">
+                  <h3>Quick Actions</h3>
+                  <div className="action-row">
+                    <button type="button" className="ghost-button" onClick={() => setActiveSection("Residents")}>
+                      View Residents
+                    </button>
+                    <button type="button" className="ghost-button" onClick={() => setActiveSection("Medications")}>
+                      View Medications
+                    </button>
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() => setActiveSection("Observations")}
+                    >
+                      View Observations
+                    </button>
+                  </div>
+                </article>
+                <article className="card">
                   <h3>Inventory Reorder List</h3>
                   {lowStock.length === 0 && <p>No low-stock items.</p>}
-                  {lowStock.slice(0, 6).map((m) => (
+                  {lowStock
+                    .slice(0, showAllReorders ? lowStock.length : 6)
+                    .map((m, index) => (
                     <div className="list-row" key={m.id}>
-                      <span>{m.medName}</span>
+                      <span className="list-primary">
+                        <b className="row-index">{index + 1}</b>
+                        {m.medName}
+                      </span>
                       <small>
                         {m.stockQuantity} / {m.reorderLevel}
                       </small>
                     </div>
-                  ))}
+                    ))}
+                  {lowStock.length > 6 && (
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() => setShowAllReorders((isOpen) => !isOpen)}
+                    >
+                      {showAllReorders ? "Show less" : `Show all (${lowStock.length})`}
+                    </button>
+                  )}
                 </article>
               </>
             )}

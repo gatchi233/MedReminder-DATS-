@@ -210,6 +210,14 @@ body {
   gap: 0.5rem;
 }
 
+.pager select {
+  border: 1px solid #cedfe6;
+  border-radius: 8px;
+  padding: 0.35rem 0.45rem;
+  background: #ffffff;
+  color: #15343f;
+}
+
 .empty-state {
   margin: 0.8rem 0 0.3rem;
   color: #58757f;
@@ -247,6 +255,24 @@ body {
   border-bottom: 0;
 }
 
+.list-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.row-index {
+  min-width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  background: #e8f3f6;
+  color: #17414d;
+}
+
 .row-alert {
   background: #fff8ec;
 }
@@ -254,6 +280,12 @@ body {
 .row-alert small {
   color: #9b5e00;
   font-weight: 700;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 @media (max-width: 920px) {
