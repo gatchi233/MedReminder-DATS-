@@ -42,6 +42,70 @@ function App() {
     });
   }, [medications]);
 
+  function renderSectionCard() {
+    if (activeSection === "Residents") {
+      return (
+        <section className="card">
+          <h3>Residents</h3>
+          {residents.length === 0 && <p>No residents found.</p>}
+          {residents.map((resident) => {
+            const name =
+              resident.fullName ||
+              `${resident.firstName || ""} ${resident.lastName || ""}`.trim() ||
+              resident.name ||
+              "Unnamed resident";
+            return (
+              <div className="list-row" key={resident.id}>
+                <span>{name}</span>
+                <small>Room {resident.roomNumber || resident.room || "N/A"}</small>
+              </div>
+            );
+          })}
+        </section>
+      );
+    }
+
+    if (activeSection === "Medications") {
+      return (
+        <section className="card">
+          <h3>Medications</h3>
+          {medications.length === 0 && <p>No medications found.</p>}
+          {medications.map((med) => (
+            <div className="list-row" key={med.id}>
+              <span>{med.medName || med.name || "Unnamed medication"}</span>
+              <small>
+                {med.stockQuantity ?? 0} in stock
+                {med.reorderLevel != null ? ` | Reorder at ${med.reorderLevel}` : ""}
+              </small>
+            </div>
+          ))}
+        </section>
+      );
+    }
+
+    if (activeSection === "Observations") {
+      return (
+        <section className="card">
+          <h3>Observations</h3>
+          {observations.length === 0 && <p>No observations found.</p>}
+          {observations.map((obs) => (
+            <div className="list-row" key={obs.id}>
+              <span>{obs.summary || obs.note || "Observation entry"}</span>
+              <small>{obs.observedAt || obs.createdAt || "No timestamp"}</small>
+            </div>
+          ))}
+        </section>
+      );
+    }
+
+    return (
+      <section className="card">
+        <h3>Staff</h3>
+        <p>This section is planned next. Dashboard data is already live.</p>
+      </section>
+    );
+  }
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -66,10 +130,15 @@ function App() {
           <button onClick={() => window.location.reload()}>Refresh</button>
         </header>
 
-        {activeSection !== "Dashboard" && (
+        {activeSection !== "Dashboard" && !loading && !error && renderSectionCard()}
+        {activeSection !== "Dashboard" && loading && (
           <section className="card">
-            <h3>{activeSection}</h3>
-            <p>This section will be implemented next.</p>
+            <p>Loading {activeSection.toLowerCase()}...</p>
+          </section>
+        )}
+        {activeSection !== "Dashboard" && error && (
+          <section className="card error">
+            <p>{error}</p>
           </section>
         )}
 
