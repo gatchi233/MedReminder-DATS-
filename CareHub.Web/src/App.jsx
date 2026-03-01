@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { API_BASE, api } from "./api";
 
 const SECTIONS = ["Dashboard", "Residents", "Medications", "Observations", "Staff"];
@@ -18,6 +18,7 @@ function App() {
   const [sortDirection, setSortDirection] = useState("asc");
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(1);
+  const searchInputRef = useRef(null);
 
   function resetSectionView() {
     setQuery("");
@@ -41,6 +42,24 @@ function App() {
       return rawValue;
     }
     return new Date(parsed).toLocaleString();
+  }
+
+  function csvCell(value) {
+    const text = String(value ?? "");
+    return `"${text.replaceAll('"', '""')}"`;
+  }
+
+  function downloadCsv(filename, headers, rows) {
+    const headerLine = headers.map(csvCell).join(",");
+    const rowLines = rows.map((row) => row.map(csvCell).join(","));
+    const csv = [headerLine, ...rowLines].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   useEffect(() => {
@@ -217,6 +236,8 @@ function App() {
           : 0;
 
   const totalPages = Math.max(1, Math.ceil(activeTotalItems / pageSize));
+  const lowStockRate =
+    medications.length === 0 ? 0 : Math.round((lowStock.length / medications.length) * 100);
   const sectionSummary =
     activeSection === "Residents"
       ? `${displayedResidents.length} residents in current view`
@@ -227,6 +248,12 @@ function App() {
           : activeSection === "Dashboard"
             ? `${lowStock.length} low stock alerts right now`
             : "Staff directory coming next";
+  const canExport =
+    activeSection !== "Dashboard" &&
+    activeSection !== "Staff" &&
+    !loading &&
+    !error &&
+    activeTotalItems > 0;
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -234,13 +261,60 @@ function App() {
     }
   }, [currentPage, totalPages]);
 
+  useEffect(() => {
+    function handleFocusShortcut(event) {
+      if (activeSection === "Dashboard" || activeSection === "Staff") {
+        return;
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    }
+
+    window.addEventListener("keydown", handleFocusShortcut);
+    return () => window.removeEventListener("keydown", handleFocusShortcut);
+  }, [activeSection]);
+
+  function handleExport() {
+    if (activeSection === "Residents") {
+      downloadCsv(
+        "residents.csv",
+        ["Name", "Room"],
+        displayedResidents.map((resident) => [resident._name, resident._room || "N/A"])
+      );
+      return;
+    }
+    if (activeSection === "Medications") {
+      downloadCsv(
+        "medications.csv",
+        ["Medication", "Stock", "Reorder Level", "Low Stock"],
+        displayedMedications.map((med) => [
+          med._name,
+          med._stock,
+          med._reorder,
+          med._isLow ? "Yes" : "No"
+        ])
+      );
+      return;
+    }
+    if (activeSection === "Observations") {
+      downloadCsv(
+        "observations.csv",
+        ["Summary", "Timestamp"],
+        displayedObservations.map((obs) => [obs._summary, obs._timestamp])
+      );
+    }
+  }
+
   function renderSectionTools(sortOptions) {
     return (
       <div className="section-tools">
         <input
+          ref={searchInputRef}
           type="search"
           value={query}
-          placeholder="Filter list..."
+          placeholder="Filter list... (Ctrl/Cmd+K)"
           onChange={(event) => setQuery(event.target.value)}
         />
         <select value={sortKey} onChange={(event) => setSortKey(event.target.value)}>
@@ -435,6 +509,11 @@ function App() {
             <h2>{activeSection}</h2>
           </div>
           <p className="topbar-meta">{sectionSummary}</p>
+          {canExport && (
+            <button type="button" className="secondary-button" onClick={handleExport}>
+              Export CSV
+            </button>
+          )}
           <button onClick={() => window.location.reload()}>Refresh</button>
         </header>
 
@@ -472,6 +551,7 @@ function App() {
                 <article className="card metric warning">
                   <h3>Low Stock Alerts</h3>
                   <strong>{lowStock.length}</strong>
+                  <p className="metric-caption">{lowStockRate}% of medication records</p>
                 </article>
                 <article className="card">
                   <h3>Inventory Reorder List</h3>

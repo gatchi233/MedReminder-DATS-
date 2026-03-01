@@ -130,6 +130,15 @@ body {
   cursor: pointer;
 }
 
+.secondary-button {
+  border: 1px solid #bed4dc;
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  background: #ffffff;
+  color: #123a47;
+  cursor: pointer;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -149,6 +158,11 @@ body {
   flex-wrap: wrap;
   gap: 0.6rem;
   margin-bottom: 0.8rem;
+  position: sticky;
+  top: 0.5rem;
+  z-index: 6;
+  background: #ffffff;
+  padding-bottom: 0.35rem;
 }
 
 .section-tools input,
@@ -203,6 +217,12 @@ body {
 
 .metric strong {
   font-size: 1.9rem;
+}
+
+.metric-caption {
+  margin: 0.4rem 0 0;
+  color: #7a4f00;
+  font-size: 0.9rem;
 }
 
 .warning strong {
