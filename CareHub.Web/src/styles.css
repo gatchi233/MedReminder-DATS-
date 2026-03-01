@@ -95,6 +95,32 @@ body {
   box-shadow: 0 10px 24px rgba(17, 49, 59, 0.08);
 }
 
+.section-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.section-tools input,
+.section-tools select,
+.ghost-button {
+  border: 1px solid #cedfe6;
+  border-radius: 10px;
+  padding: 0.5rem 0.65rem;
+  background: #ffffff;
+  color: #15343f;
+}
+
+.section-tools input {
+  min-width: 190px;
+  flex: 1;
+}
+
+.ghost-button {
+  cursor: pointer;
+}
+
 .metric strong {
   font-size: 1.9rem;
 }
