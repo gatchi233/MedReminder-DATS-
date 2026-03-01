@@ -7,6 +7,7 @@ const DEFAULT_PAGE_SIZE = 8;
 
 function App() {
   const [activeSection, setActiveSection] = useState("Dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [residents, setResidents] = useState([]);
@@ -17,6 +18,30 @@ function App() {
   const [sortDirection, setSortDirection] = useState("asc");
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(1);
+
+  function resetSectionView() {
+    setQuery("");
+    setCurrentPage(1);
+    setPageSize(DEFAULT_PAGE_SIZE);
+    if (activeSection === "Observations") {
+      setSortKey("date");
+      setSortDirection("desc");
+      return;
+    }
+    setSortKey("name");
+    setSortDirection("asc");
+  }
+
+  function formatObservationTime(rawValue) {
+    if (!rawValue) {
+      return "No timestamp";
+    }
+    const parsed = Date.parse(rawValue);
+    if (Number.isNaN(parsed)) {
+      return rawValue;
+    }
+    return new Date(parsed).toLocaleString();
+  }
 
   useEffect(() => {
     async function loadDashboard() {
@@ -50,23 +75,8 @@ function App() {
   }, [medications]);
 
   useEffect(() => {
-    setQuery("");
-    setCurrentPage(1);
-    setPageSize(DEFAULT_PAGE_SIZE);
-    if (activeSection === "Observations") {
-      setSortKey("date");
-      setSortDirection("desc");
-      return;
-    }
-    if (activeSection === "Medications") {
-      setSortKey("name");
-      setSortDirection("asc");
-      return;
-    }
-    if (activeSection === "Residents") {
-      setSortKey("name");
-      setSortDirection("asc");
-    }
+    resetSectionView();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSection]);
 
   const displayedResidents = useMemo(() => {
@@ -114,7 +124,13 @@ function App() {
         const name = med.medName || med.name || "Unnamed medication";
         const stock = Number(med.stockQuantity ?? 0);
         const reorder = Number(med.reorderLevel ?? 0);
-        return { ...med, _name: name, _stock: stock, _reorder: reorder };
+        return {
+          ...med,
+          _name: name,
+          _stock: stock,
+          _reorder: reorder,
+          _isLow: stock <= reorder
+        };
       })
       .filter((med) => {
         const term = query.trim().toLowerCase();
@@ -150,7 +166,7 @@ function App() {
         return {
           ...obs,
           _summary: summary,
-          _timestamp: timestamp || "No timestamp",
+          _timestamp: formatObservationTime(timestamp),
           _timeValue: Number.isNaN(dateValue) ? 0 : dateValue
         };
       })
@@ -201,6 +217,16 @@ function App() {
           : 0;
 
   const totalPages = Math.max(1, Math.ceil(activeTotalItems / pageSize));
+  const sectionSummary =
+    activeSection === "Residents"
+      ? `${displayedResidents.length} residents in current view`
+      : activeSection === "Medications"
+        ? `${displayedMedications.length} medications in current view`
+        : activeSection === "Observations"
+          ? `${displayedObservations.length} observations in current view`
+          : activeSection === "Dashboard"
+            ? `${lowStock.length} low stock alerts right now`
+            : "Staff directory coming next";
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -244,6 +270,9 @@ function App() {
           <option value={12}>12 / page</option>
           <option value={20}>20 / page</option>
         </select>
+        <button type="button" className="ghost-button" onClick={resetSectionView}>
+          Reset
+        </button>
       </div>
     );
   }
@@ -322,11 +351,12 @@ function App() {
             <p className="empty-state">No medications match this view.</p>
           )}
           {pagedMedications.map((med) => (
-            <div className="list-row" key={med.id}>
+            <div className={`list-row ${med._isLow ? "row-alert" : ""}`} key={med.id}>
               <span>{med._name}</span>
               <small>
                 {med._stock} in stock
                 {med.reorderLevel != null ? ` | Reorder at ${med._reorder}` : ""}
+                {med._isLow ? " | LOW" : ""}
               </small>
             </div>
           ))}
@@ -366,7 +396,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <h1>CareHub</h1>
         <p>Retirement medication operations</p>
         <nav>
@@ -374,17 +404,37 @@ function App() {
             <button
               key={section}
               className={activeSection === section ? "active" : ""}
-              onClick={() => setActiveSection(section)}
+              onClick={() => {
+                setActiveSection(section);
+                setSidebarOpen(false);
+              }}
             >
-              {section}
+              <span>{section}</span>
+              {section === "Residents" && <small>{residents.length}</small>}
+              {section === "Medications" && <small>{medications.length}</small>}
+              {section === "Observations" && <small>{observations.length}</small>}
+              {section === "Dashboard" && lowStock.length > 0 && (
+                <small className="alert-pill">{lowStock.length}</small>
+              )}
             </button>
           ))}
         </nav>
       </aside>
+      {sidebarOpen && <button className="backdrop" onClick={() => setSidebarOpen(false)} />}
 
       <main className="content">
         <header className="topbar">
-          <h2>{activeSection}</h2>
+          <div className="topbar-title">
+            <button
+              type="button"
+              className="menu-toggle"
+              onClick={() => setSidebarOpen((isOpen) => !isOpen)}
+            >
+              Menu
+            </button>
+            <h2>{activeSection}</h2>
+          </div>
+          <p className="topbar-meta">{sectionSummary}</p>
           <button onClick={() => window.location.reload()}>Refresh</button>
         </header>
 
