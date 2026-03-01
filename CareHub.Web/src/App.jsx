@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { API_BASE, api } from "./api";
 
 const SECTIONS = ["Dashboard", "Residents", "Medications", "Observations", "Staff"];
+const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
 
 function App() {
   const [activeSection, setActiveSection] = useState("Dashboard");
@@ -10,6 +11,9 @@ function App() {
   const [residents, setResidents] = useState([]);
   const [medications, setMedications] = useState([]);
   const [observations, setObservations] = useState([]);
+  const [query, setQuery] = useState("");
+  const [sortKey, setSortKey] = useState("name");
+  const [sortDirection, setSortDirection] = useState("asc");
 
   useEffect(() => {
     async function loadDashboard() {
@@ -37,27 +41,180 @@ function App() {
   const lowStock = useMemo(() => {
     return medications.filter((m) => {
       const unassigned =
-        !m.residentId || m.residentId === "00000000-0000-0000-0000-000000000000";
+        !m.residentId || m.residentId === EMPTY_GUID;
       return unassigned && Number(m.stockQuantity) <= Number(m.reorderLevel);
     });
   }, [medications]);
+
+  useEffect(() => {
+    setQuery("");
+    if (activeSection === "Observations") {
+      setSortKey("date");
+      setSortDirection("desc");
+      return;
+    }
+    if (activeSection === "Medications") {
+      setSortKey("name");
+      setSortDirection("asc");
+      return;
+    }
+    if (activeSection === "Residents") {
+      setSortKey("name");
+      setSortDirection("asc");
+    }
+  }, [activeSection]);
+
+  const displayedResidents = useMemo(() => {
+    const filtered = residents
+      .map((resident) => {
+        const name =
+          resident.fullName ||
+          `${resident.firstName || ""} ${resident.lastName || ""}`.trim() ||
+          resident.name ||
+          "Unnamed resident";
+        const room = resident.roomNumber || resident.room || "";
+        return { ...resident, _name: name, _room: room };
+      })
+      .filter((resident) => {
+        const term = query.trim().toLowerCase();
+        if (!term) {
+          return true;
+        }
+        return (
+          resident._name.toLowerCase().includes(term) ||
+          String(resident._room).toLowerCase().includes(term)
+        );
+      });
+
+    filtered.sort((a, b) => {
+      if (sortKey === "room") {
+        const roomCompare = Number(a._room || 0) - Number(b._room || 0);
+        if (roomCompare !== 0) {
+          return roomCompare;
+        }
+      }
+      return a._name.localeCompare(b._name);
+    });
+
+    if (sortDirection === "desc") {
+      filtered.reverse();
+    }
+
+    return filtered;
+  }, [residents, query, sortKey, sortDirection]);
+
+  const displayedMedications = useMemo(() => {
+    const filtered = medications
+      .map((med) => {
+        const name = med.medName || med.name || "Unnamed medication";
+        const stock = Number(med.stockQuantity ?? 0);
+        const reorder = Number(med.reorderLevel ?? 0);
+        return { ...med, _name: name, _stock: stock, _reorder: reorder };
+      })
+      .filter((med) => {
+        const term = query.trim().toLowerCase();
+        if (!term) {
+          return true;
+        }
+        return med._name.toLowerCase().includes(term);
+      });
+
+    filtered.sort((a, b) => {
+      if (sortKey === "stock") {
+        const stockCompare = a._stock - b._stock;
+        if (stockCompare !== 0) {
+          return stockCompare;
+        }
+      }
+      return a._name.localeCompare(b._name);
+    });
+
+    if (sortDirection === "desc") {
+      filtered.reverse();
+    }
+
+    return filtered;
+  }, [medications, query, sortKey, sortDirection]);
+
+  const displayedObservations = useMemo(() => {
+    const filtered = observations
+      .map((obs) => {
+        const summary = obs.summary || obs.note || "Observation entry";
+        const timestamp = obs.observedAt || obs.createdAt || "";
+        const dateValue = Date.parse(timestamp);
+        return {
+          ...obs,
+          _summary: summary,
+          _timestamp: timestamp || "No timestamp",
+          _timeValue: Number.isNaN(dateValue) ? 0 : dateValue
+        };
+      })
+      .filter((obs) => {
+        const term = query.trim().toLowerCase();
+        if (!term) {
+          return true;
+        }
+        return obs._summary.toLowerCase().includes(term);
+      });
+
+    filtered.sort((a, b) => {
+      if (sortKey === "summary") {
+        return a._summary.localeCompare(b._summary);
+      }
+      return a._timeValue - b._timeValue;
+    });
+
+    if (sortDirection === "desc") {
+      filtered.reverse();
+    }
+
+    return filtered;
+  }, [observations, query, sortKey, sortDirection]);
+
+  function renderSectionTools(sortOptions) {
+    return (
+      <div className="section-tools">
+        <input
+          type="search"
+          value={query}
+          placeholder="Filter list..."
+          onChange={(event) => setQuery(event.target.value)}
+        />
+        <select value={sortKey} onChange={(event) => setSortKey(event.target.value)}>
+          {sortOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="ghost-button"
+          onClick={() =>
+            setSortDirection((current) => (current === "asc" ? "desc" : "asc"))
+          }
+        >
+          {sortDirection === "asc" ? "Asc" : "Desc"}
+        </button>
+      </div>
+    );
+  }
 
   function renderSectionCard() {
     if (activeSection === "Residents") {
       return (
         <section className="card">
           <h3>Residents</h3>
-          {residents.length === 0 && <p>No residents found.</p>}
-          {residents.map((resident) => {
-            const name =
-              resident.fullName ||
-              `${resident.firstName || ""} ${resident.lastName || ""}`.trim() ||
-              resident.name ||
-              "Unnamed resident";
+          {renderSectionTools([
+            { value: "name", label: "Sort: Name" },
+            { value: "room", label: "Sort: Room" }
+          ])}
+          {displayedResidents.length === 0 && <p>No residents found.</p>}
+          {displayedResidents.map((resident) => {
             return (
               <div className="list-row" key={resident.id}>
-                <span>{name}</span>
-                <small>Room {resident.roomNumber || resident.room || "N/A"}</small>
+                <span>{resident._name}</span>
+                <small>Room {resident._room || "N/A"}</small>
               </div>
             );
           })}
@@ -69,13 +226,17 @@ function App() {
       return (
         <section className="card">
           <h3>Medications</h3>
-          {medications.length === 0 && <p>No medications found.</p>}
-          {medications.map((med) => (
+          {renderSectionTools([
+            { value: "name", label: "Sort: Name" },
+            { value: "stock", label: "Sort: Stock" }
+          ])}
+          {displayedMedications.length === 0 && <p>No medications found.</p>}
+          {displayedMedications.map((med) => (
             <div className="list-row" key={med.id}>
-              <span>{med.medName || med.name || "Unnamed medication"}</span>
+              <span>{med._name}</span>
               <small>
-                {med.stockQuantity ?? 0} in stock
-                {med.reorderLevel != null ? ` | Reorder at ${med.reorderLevel}` : ""}
+                {med._stock} in stock
+                {med.reorderLevel != null ? ` | Reorder at ${med._reorder}` : ""}
               </small>
             </div>
           ))}
@@ -87,11 +248,15 @@ function App() {
       return (
         <section className="card">
           <h3>Observations</h3>
-          {observations.length === 0 && <p>No observations found.</p>}
-          {observations.map((obs) => (
+          {renderSectionTools([
+            { value: "date", label: "Sort: Date" },
+            { value: "summary", label: "Sort: Summary" }
+          ])}
+          {displayedObservations.length === 0 && <p>No observations found.</p>}
+          {displayedObservations.map((obs) => (
             <div className="list-row" key={obs.id}>
-              <span>{obs.summary || obs.note || "Observation entry"}</span>
-              <small>{obs.observedAt || obs.createdAt || "No timestamp"}</small>
+              <span>{obs._summary}</span>
+              <small>{obs._timestamp}</small>
             </div>
           ))}
         </section>
