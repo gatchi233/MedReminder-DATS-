@@ -18,7 +18,7 @@ public sealed class ResidentsController : ControllerBase
 
     // GET api/residents
     [HttpGet]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Staff},{Roles.Observer},{Roles.Resident}")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Observer},{Roles.Resident}")]
     public async Task<ActionResult<List<Resident>>> GetAll(CancellationToken ct)
     {
         var query = _db.Residents
@@ -42,7 +42,7 @@ public sealed class ResidentsController : ControllerBase
 
     // POST api/residents
     [HttpPost]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Staff}")]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<ActionResult<Resident>> Create([FromBody] Resident resident, CancellationToken ct)
     {
         if (resident.Id == Guid.Empty)
@@ -56,7 +56,7 @@ public sealed class ResidentsController : ControllerBase
 
     // PUT api/residents/{id}
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Staff}")]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Update(Guid id, [FromBody] Resident resident, CancellationToken ct)
     {
         if (id != resident.Id)

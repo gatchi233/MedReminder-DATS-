@@ -10,6 +10,8 @@ const RESIDENT_TABS = [
 function ResidentsPage({
   loading,
   error,
+  authRole,
+  currentResident,
   displayedResidents,
   pagedResidents,
   currentPage,
@@ -43,6 +45,49 @@ function ResidentsPage({
     return (
       <section className="card error">
         <p>{error}</p>
+      </section>
+    );
+  }
+
+  if (authRole === "Resident") {
+    const resident = currentResident;
+    if (!resident) {
+      return (
+        <section className="card">
+          <h3>My Resident Profile</h3>
+          <p className="empty-state">No resident profile is linked to this account yet.</p>
+        </section>
+      );
+    }
+
+    const fullName =
+      resident.fullName ||
+      `${resident.firstName || resident.residentFName || ""} ${resident.lastName || resident.residentLName || ""}`.trim() ||
+      "Unnamed resident";
+
+    return (
+      <section className="card">
+        <h3>My Resident Profile</h3>
+        <div className="list-row">
+          <span>Name</span>
+          <small>{fullName}</small>
+        </div>
+        <div className="list-row">
+          <span>Room</span>
+          <small>{resident.roomNumber || resident.room || "N/A"}</small>
+        </div>
+        <div className="list-row">
+          <span>Date of Birth</span>
+          <small>{resident.dateOfBirth || "N/A"}</small>
+        </div>
+        <div className="list-row">
+          <span>Primary Contact</span>
+          <small>{resident.emergencyContactName1 || "N/A"}</small>
+        </div>
+        <div className="list-row">
+          <span>Contact Phone</span>
+          <small>{resident.emergencyContactPhone1 || "N/A"}</small>
+        </div>
       </section>
     );
   }

@@ -10,6 +10,8 @@ const OBSERVATION_TABS = [
 function ObservationsPage({
   loading,
   error,
+  authRole,
+  currentResident,
   displayedObservations,
   pagedObservations,
   currentPage,
@@ -40,23 +42,40 @@ function ObservationsPage({
       <PageTabs tabs={OBSERVATION_TABS} activeTab={activeTab} onChange={setActiveTab} />
 
       {activeTab === "timeline" && (
-        <section className="card">
-          <h3>Observations Timeline</h3>
-          {renderSectionTools([
-            { value: "date", label: "Sort: Date" },
-            { value: "summary", label: "Sort: Summary" }
-          ])}
-          {renderSectionMeta(displayedObservations.length, "observations")}
-          {displayedObservations.length === 0 && <p className="empty-state">No observations match this view.</p>}
-          {pagedObservations.map((obs, index) => (
-            <div className="list-row" key={obs.id}>
-              <span className="list-primary">
-                <b className="row-index">{(currentPage - 1) * pageSize + index + 1}</b>
-                {obs._summary}
-              </span>
-              <small>{obs._timestamp}</small>
-            </div>
-          ))}
+        <section className="page-shell">
+          {authRole === "Resident" && currentResident && (
+            <article className="card">
+              <h3>My Care Team</h3>
+              <div className="list-row">
+                <span>Primary Doctor / Nurse Practitioner</span>
+                <small>{currentResident.doctorName || "Not assigned"}</small>
+              </div>
+              <div className="list-row">
+                <span>Care Team Contact</span>
+                <small>{currentResident.doctorContact || "Not available"}</small>
+              </div>
+            </article>
+          )}
+          <article className="card">
+            <h3>Observations Timeline</h3>
+            {renderSectionTools([
+              { value: "date", label: "Sort: Date" },
+              { value: "summary", label: "Sort: Summary" }
+            ])}
+            {renderSectionMeta(displayedObservations.length, "observations")}
+            {displayedObservations.length === 0 && (
+              <p className="empty-state">No observations match this view.</p>
+            )}
+            {pagedObservations.map((obs, index) => (
+              <div className="list-row" key={obs.id}>
+                <span className="list-primary">
+                  <b className="row-index">{(currentPage - 1) * pageSize + index + 1}</b>
+                  {obs._summary}
+                </span>
+                <small>{obs._timestamp}</small>
+              </div>
+            ))}
+          </article>
         </section>
       )}
 

@@ -18,9 +18,9 @@ const SECTIONS = [
 
 const ROLE_SECTIONS = {
   Admin: ["Dashboard", "Residents", "Inventory", "Observations", "Staff"],
-  Staff: ["Dashboard", "Residents", "Inventory", "Observations", "Staff"],
+  Staff: ["Dashboard", "Observations"],
   Observer: ["Dashboard", "Residents", "Inventory", "Observations"],
-  Resident: ["Dashboard", "Observations"]
+  Resident: ["Dashboard", "Residents", "Observations", "Staff"]
 };
 
 const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
@@ -161,10 +161,15 @@ function App() {
       try {
         setLoading(true);
         setError("");
+        const role = authSession.role || "";
+        const canReadResidents = ["Admin", "Observer", "Resident"].includes(role);
+        const canReadInventory = ["Admin", "Observer", "Resident"].includes(role);
+        const canReadObservations = ["Admin", "Staff", "Observer", "Resident"].includes(role);
+
         const [resData, medData, obsData] = await Promise.all([
-          api.get("/residents"),
-          api.get("/medications"),
-          api.get("/observations")
+          canReadResidents ? api.get("/residents") : Promise.resolve([]),
+          canReadInventory ? api.get("/medications") : Promise.resolve([]),
+          canReadObservations ? api.get("/observations") : Promise.resolve([])
         ]);
         setResidents(Array.isArray(resData) ? resData : []);
         setMedications(Array.isArray(medData) ? medData : []);
@@ -183,6 +188,13 @@ function App() {
     loadDashboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authSession]);
+
+  const currentResident = useMemo(() => {
+    if (authSession?.role !== "Resident") {
+      return null;
+    }
+    return residents[0] || null;
+  }, [authSession, residents]);
 
   const lowStock = useMemo(() => {
     return medications.filter((m) => {
@@ -354,9 +366,11 @@ function App() {
         ? `${displayedInventory.length} inventory items in current view`
         : activeSection === "Observations"
           ? `${displayedObservations.length} observations in current view`
-          : activeSection === "Dashboard"
-            ? `${lowStock.length} low stock alerts right now`
-            : "Staff directory and planning workspace";
+      : activeSection === "Dashboard"
+        ? `${lowStock.length} low stock alerts right now`
+        : authSession?.role === "Resident"
+          ? "Your assigned care team details"
+          : "Staff directory and planning workspace";
   const canExport =
     authSession &&
     activeSection !== "Dashboard" &&
@@ -506,6 +520,8 @@ function App() {
         <ResidentsPage
           loading={loading}
           error={error}
+          authRole={authSession?.role}
+          currentResident={currentResident}
           displayedResidents={displayedResidents}
           pagedResidents={pagedResidents}
           currentPage={currentPage}
@@ -537,6 +553,8 @@ function App() {
         <ObservationsPage
           loading={loading}
           error={error}
+          authRole={authSession?.role}
+          currentResident={currentResident}
           displayedObservations={displayedObservations}
           pagedObservations={pagedObservations}
           currentPage={currentPage}
@@ -547,7 +565,14 @@ function App() {
       );
     }
 
-    return <StaffPage loading={loading} error={error} />;
+    return (
+      <StaffPage
+        loading={loading}
+        error={error}
+        authRole={authSession?.role}
+        currentResident={currentResident}
+      />
+    );
   }
 
   if (authLoading) {

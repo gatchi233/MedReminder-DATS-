@@ -18,7 +18,7 @@ public sealed class MedicationsController : ControllerBase
 
     // GET api/medications
     [HttpGet]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Staff},{Roles.Observer},{Roles.Resident}")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Observer},{Roles.Resident}")]
     public async Task<ActionResult<List<Medication>>> GetAll(CancellationToken ct)
     {
         var query = _db.Medications
@@ -41,7 +41,7 @@ public sealed class MedicationsController : ControllerBase
 
     // GET api/medications/lowstock
     [HttpGet("lowstock")]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Staff},{Roles.Observer}")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Observer}")]
     public async Task<ActionResult<List<Medication>>> GetLowStock(CancellationToken ct)
     {
         var list = await _db.Medications
@@ -56,7 +56,7 @@ public sealed class MedicationsController : ControllerBase
 
     // POST api/medications
     [HttpPost]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Staff}")]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<ActionResult<Medication>> Create([FromBody] Medication med, CancellationToken ct)
     {
         if (med.Id == Guid.Empty)
@@ -72,7 +72,7 @@ public sealed class MedicationsController : ControllerBase
 
     // PUT api/medications/{id}
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Staff}")]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Update(Guid id, [FromBody] Medication med, CancellationToken ct)
     {
         if (id != med.Id)
@@ -98,7 +98,7 @@ public sealed class MedicationsController : ControllerBase
 
     // DELETE api/medications/{id}
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Staff}")]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         var entity = await _db.Medications.FirstOrDefaultAsync(m => m.Id == id, ct);
@@ -112,7 +112,7 @@ public sealed class MedicationsController : ControllerBase
 
     // POST api/medications/{id}/adjustStock?delta=...
     [HttpPost("{id:guid}/adjustStock")]
-    [Authorize(Roles = $"{Roles.Admin},{Roles.Staff}")]
+    [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> AdjustStock(Guid id, [FromQuery] int delta, CancellationToken ct)
     {
         var med = await _db.Medications.FirstOrDefaultAsync(m => m.Id == id, ct);

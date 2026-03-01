@@ -7,7 +7,7 @@ const STAFF_TABS = [
   { key: "assignments", label: "Assignments" }
 ];
 
-function StaffPage({ loading, error }) {
+function StaffPage({ loading, error, authRole, currentResident }) {
   const [activeTab, setActiveTab] = useState("directory");
 
   if (loading) {
@@ -22,6 +22,22 @@ function StaffPage({ loading, error }) {
     return (
       <section className="card error">
         <p>{error}</p>
+      </section>
+    );
+  }
+
+  if (authRole === "Resident") {
+    return (
+      <section className="card">
+        <h3>My Assigned Care Team</h3>
+        <div className="list-row">
+          <span>Primary Doctor / Nurse Practitioner</span>
+          <small>{currentResident?.doctorName || "Not assigned"}</small>
+        </div>
+        <div className="list-row">
+          <span>Contact</span>
+          <small>{currentResident?.doctorContact || "Not available"}</small>
+        </div>
       </section>
     );
   }
