@@ -17,7 +17,7 @@
         correctly (avoids the "CollectionView inside inner ScrollView" layout
         bug that breaks hit-testing for elements above it on Windows).
     -->
-    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
+    <Grid RowDefinitions="Auto,Auto,*" Padding="16" RowSpacing="12">
 
         <!-- ── Top action bar ─────────────────────────────────────────────── -->
         <HorizontalStackLayout Grid.Row="0" Spacing="8">
@@ -93,8 +93,30 @@
 
         </HorizontalStackLayout>
 
-        <!-- ── Single outer ScrollView (Row 1) ────────────────────────────── -->
-        <ScrollView Grid.Row="1">
+        <!-- ── Fixed resident name header (always visible) ──────────────── -->
+        <Border Grid.Row="1" Padding="12,8"
+                BackgroundColor="{StaticResource Resident_Card_Background}"
+                Stroke="{StaticResource Resident_Card_Border}"
+                StrokeThickness="1">
+            <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="{Binding ResidentName}"
+                       FontSize="17" FontAttributes="Bold"
+                       TextColor="{StaticResource Resident_Font_Primary}"
+                       VerticalOptions="Center"/>
+                <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
+                    <Label Text="{Binding RoomNumber, StringFormat='Room {0}'}"
+                           FontSize="12" TextColor="{StaticResource Resident_Font_Secondary}"
+                           VerticalOptions="Center"/>
+                    <Label Text="{Binding BedLabel, StringFormat='Bed {0}'}"
+                           FontSize="12" TextColor="{StaticResource Resident_Font_Secondary}"
+                           VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Grid>
+        </Border>
+
+        <!-- ── Single outer ScrollView (Row 2) ────────────────────────────── -->
+        <ScrollView Grid.Row="2">
             <VerticalStackLayout Spacing="12">
 
                 <!-- ── Info card ──────────────────────────────────────────── -->

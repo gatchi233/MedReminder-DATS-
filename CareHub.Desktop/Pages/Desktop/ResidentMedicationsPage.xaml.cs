@@ -49,8 +49,12 @@ namespace CareHub.Pages.Desktop
                                   .OrderBy(m => m.MedName ?? string.Empty);
 
                 Medications.Clear();
+                int index = 1;
                 foreach (var med in filtered)
+                {
+                    med.DisplayIndex = index++;
                     Medications.Add(med);
+                }
             }
             catch
             {

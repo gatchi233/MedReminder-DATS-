@@ -90,7 +90,7 @@
                     </CollectionView.EmptyView>
 
                     <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8"/>
+                        <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
                     </CollectionView.ItemsLayout>
 
                     <CollectionView.ItemTemplate>
@@ -103,10 +103,16 @@
                                     <RoundRectangle CornerRadius="8"/>
                                 </Border.StrokeShape>
 
-                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6">
+                                <Grid RowDefinitions="Auto,*,Auto" RowSpacing="6">
+
+                                    <!-- Big # number -->
+                                    <Label Text="{Binding DisplayIndex, StringFormat='#{0}'}"
+                                           FontSize="24" FontAttributes="Bold"
+                                           TextColor="{StaticResource Medication_Font_Secondary}"
+                                           Opacity="0.5"/>
 
                                     <!-- Medication info -->
-                                    <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                                    <VerticalStackLayout Grid.Row="1" Spacing="2" VerticalOptions="Center">
                                         <Label FontSize="13"
                                                TextColor="{StaticResource Medication_Font_Primary}">
                                             <Label.FormattedText>
@@ -128,37 +134,42 @@
                                                TextColor="{StaticResource Medication_Font_Secondary}"/>
                                     </VerticalStackLayout>
 
-                                    <!-- EDIT -->
-                                    <Border Grid.Column="1" StrokeThickness="0" HeightRequest="24"
-                                            BackgroundColor="{StaticResource Button_Icon_Background}"
-                                            VerticalOptions="Center">
-                                        <Border.StrokeShape><RoundRectangle CornerRadius="3"/></Border.StrokeShape>
-                                        <Grid ColumnDefinitions="22,Auto" Margin="0" InputTransparent="True">
-                                            <Image Grid.Column="0" Source="icons8_edit_100.png" HeightRequest="12" WidthRequest="12" HorizontalOptions="Center" VerticalOptions="Center"/>
-                                            <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Edit}" Padding="7,0" StrokeThickness="0" InputTransparent="True">
-                                                <Label Text="EDIT" TextColor="{StaticResource Button_Font_Secondary}" FontSize="10" VerticalOptions="Center" FontAttributes="Bold"/>
-                                            </Border>
-                                        </Grid>
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Tapped="OnEditClicked"/>
-                                        </Border.GestureRecognizers>
-                                    </Border>
+                                    <!-- Action buttons -->
+                                    <HorizontalStackLayout Grid.Row="2" Spacing="6">
 
-                                    <!-- DELETE -->
-                                    <Border Grid.Column="2" StrokeThickness="0" HeightRequest="24"
-                                            BackgroundColor="{StaticResource Button_Icon_Background}"
-                                            VerticalOptions="Center">
-                                        <Border.StrokeShape><RoundRectangle CornerRadius="3"/></Border.StrokeShape>
-                                        <Grid ColumnDefinitions="22,Auto" Margin="0" InputTransparent="True">
-                                            <Image Grid.Column="0" Source="icons8_delete_100.png" HeightRequest="12" WidthRequest="12" HorizontalOptions="Center" VerticalOptions="Center"/>
-                                            <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Delete}" Padding="7,0" StrokeThickness="0" InputTransparent="True">
-                                                <Label Text="DELETE" TextColor="{StaticResource Button_Font_Primary}" FontSize="10" VerticalOptions="Center" FontAttributes="Bold"/>
-                                            </Border>
-                                        </Grid>
-                                        <Border.GestureRecognizers>
-                                            <TapGestureRecognizer Tapped="OnDeleteClicked"/>
-                                        </Border.GestureRecognizers>
-                                    </Border>
+                                        <!-- EDIT -->
+                                        <Border StrokeThickness="0" HeightRequest="24"
+                                                BackgroundColor="{StaticResource Button_Icon_Background}"
+                                                VerticalOptions="Center">
+                                            <Border.StrokeShape><RoundRectangle CornerRadius="3"/></Border.StrokeShape>
+                                            <Grid ColumnDefinitions="22,Auto" Margin="0" InputTransparent="True">
+                                                <Image Grid.Column="0" Source="icons8_edit_100.png" HeightRequest="12" WidthRequest="12" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                                <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Edit}" Padding="7,0" StrokeThickness="0" InputTransparent="True">
+                                                    <Label Text="EDIT" TextColor="{StaticResource Button_Font_Secondary}" FontSize="10" VerticalOptions="Center" FontAttributes="Bold"/>
+                                                </Border>
+                                            </Grid>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnEditClicked"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+
+                                        <!-- DELETE -->
+                                        <Border StrokeThickness="0" HeightRequest="24"
+                                                BackgroundColor="{StaticResource Button_Icon_Background}"
+                                                VerticalOptions="Center">
+                                            <Border.StrokeShape><RoundRectangle CornerRadius="3"/></Border.StrokeShape>
+                                            <Grid ColumnDefinitions="22,Auto" Margin="0" InputTransparent="True">
+                                                <Image Grid.Column="0" Source="icons8_delete_100.png" HeightRequest="12" WidthRequest="12" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                                <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Delete}" Padding="7,0" StrokeThickness="0" InputTransparent="True">
+                                                    <Label Text="DELETE" TextColor="{StaticResource Button_Font_Primary}" FontSize="10" VerticalOptions="Center" FontAttributes="Bold"/>
+                                                </Border>
+                                            </Grid>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnDeleteClicked"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+
+                                    </HorizontalStackLayout>
 
                                 </Grid>
                             </Border>

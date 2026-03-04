@@ -134,7 +134,7 @@ namespace CareHub.ViewModels
             ? string.Join(", ", Residents.Select(r =>
                 string.IsNullOrWhiteSpace(r.BedLabel) || r.BedLabel == "None"
                     ? r.ResidentName
-                    : $"{r.BedLabel} - {r.ResidentName}"))
+                    : $"{r.ResidentName} [{r.BedLabel}]"))
             : "Empty";
 
         private bool _isSelected;
@@ -171,7 +171,7 @@ namespace CareHub.ViewModels
             Id = r.Id;
             Name = string.IsNullOrWhiteSpace(r.BedLabel) || r.BedLabel == "None"
                 ? r.ResidentName
-                : $"{r.BedLabel} - {r.ResidentName}";
+                : $"{r.ResidentName} [{r.BedLabel}]";
             Gender = string.IsNullOrWhiteSpace(r.Gender) ? "Unknown" : r.Gender;
             AgeText = $"Age: {CalculateAge(r.DateOfBirth)}";
         }

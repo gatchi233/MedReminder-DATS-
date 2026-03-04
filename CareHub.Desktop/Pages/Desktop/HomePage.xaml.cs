@@ -99,22 +99,16 @@ namespace CareHub.Pages.Desktop
             }
         }
 
-        private void OnResidentSearchClicked(object sender, EventArgs e) => RunSearch();
         private void OnSearchClicked(object sender, EventArgs e) => RunSearch();
 
         private void OnClearDayTimeClicked(object sender, EventArgs e)
         {
+            if (ResidentSearchEntry != null) ResidentSearchEntry.Text = string.Empty;
             if (DayPicker != null) DayPicker.SelectedIndex = -1;
             if (HourPicker != null) HourPicker.SelectedIndex = -1;
             if (MinutePicker != null) MinutePicker.SelectedIndex = -1;
 
             RunSearch();
-        }
-
-        private async void OnAddResidentClicked(object sender, EventArgs e)
-        {
-            // Standardized route
-            await Shell.Current.GoToAsync(nameof(EditResidentPage));
         }
 
         private async void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -138,19 +132,17 @@ namespace CareHub.Pages.Desktop
             await Shell.Current.GoToAsync($"{nameof(ViewResidentPage)}?id={m.ResidentId.Value}");
         }
 
-        // HomePage.xaml uses CheckBox.CheckedChanged
+        // Handles CheckedChanged for any of the 3 timeslot checkboxes
         private async void OnDoneCheckedChanged(object sender, CheckedChangedEventArgs e)
         {
             if ((sender as BindableObject)?.BindingContext is not Medication m)
                 return;
 
-            m.IsDone = e.Value;
-
             try
             {
                 await _medicationService.UpsertAsync(m);
 
-                // Deduct or restore inventory stock
+                // Deduct or restore inventory stock per slot toggle
                 var inventoryMatch = _inventoryMeds.FirstOrDefault(inv =>
                     string.Equals(inv.MedName, m.MedName, StringComparison.OrdinalIgnoreCase));
 
@@ -240,7 +232,14 @@ namespace CareHub.Pages.Desktop
                     if (!dayEnabled)
                         continue;
 
-                    if (med.ReminderTime != selectedTime)
+                    var times = MarScheduleHelper.GetTimesForDay(med, dayFilter.Value);
+                    int slotsToUse = Math.Max(1, Math.Min(3, med.TimesPerDay));
+                    bool timeMatch = false;
+                    for (int i = 0; i < slotsToUse && i < times.Count; i++)
+                    {
+                        if (times[i] == selectedTime) { timeMatch = true; break; }
+                    }
+                    if (!timeMatch)
                         continue;
                 }
 

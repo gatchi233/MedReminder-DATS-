@@ -49,6 +49,12 @@ namespace CareHub.Pages.Desktop
             _vm.UpdateFilters(NameSearchBar?.Text ?? string.Empty);
         }
 
+        private void OnSortClicked(object sender, EventArgs e)
+        {
+            _vm.ToggleSort();
+            SortLabel.Text = _vm.SortAscending ? "A-Z" : "Z-A";
+        }
+
         private async void OnAddResidentClicked(object sender, EventArgs e)
         {
             var auth = MauiProgram.Services.GetService<AuthService>();

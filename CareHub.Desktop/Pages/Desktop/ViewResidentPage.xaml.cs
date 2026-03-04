@@ -139,7 +139,7 @@ private Resident? _resident;
             }
 
             foreach (var item in items)
-                AllergyBadgesLayout.Children.Add(CreateAllergyBadge(item, Color.FromArgb("#DC2626"), Colors.White));
+                AllergyBadgesLayout.Children.Add(CreateAllergyBadge(item, Color.FromArgb("#FFB6C1"), Color.FromArgb("#4A0010")));
         }
 
         private static Border CreateAllergyBadge(string text, Color backgroundColor, Color textColor)
@@ -147,13 +147,13 @@ private Resident? _resident;
             return new Border
             {
                 BackgroundColor = backgroundColor,
-                Padding = new Thickness(10, 4),
+                Padding = new Thickness(12, 6),
                 Margin = new Thickness(0, 0, 6, 6),
                 StrokeThickness = 0,
-                StrokeShape = new RoundRectangle { CornerRadius = 12 },
+                StrokeShape = new RoundRectangle { CornerRadius = 3 },
                 Content = new Label
                 {
-                    Text = text,
+                    Text = text.ToUpperInvariant(),
                     FontSize = 11,
                     FontAttributes = FontAttributes.Bold,
                     TextColor = textColor,

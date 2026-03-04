@@ -152,9 +152,44 @@ namespace CareHub.Models
                     ? string.Join(", ", ordered.Select(t => t.ToString(@"hh\:mm")))
                     : "No time set";
 
-                return $"{dayText} • {timeText}";
+                return $"{dayText} Â· {timeText}";
             }
         }
+
+        // Per-slot completion (IsDone = slot 1 for backward compat)
+        public bool IsDoneSlot2 { get; set; }
+        public bool IsDoneSlot3 { get; set; }
+
+        [JsonIgnore]
+        public bool HasSlot2 => TimesPerDay >= 2;
+        [JsonIgnore]
+        public bool HasSlot3 => TimesPerDay >= 3;
+
+        [JsonIgnore]
+        public TimeSpan TodayTime1 => GetTodayTime(1);
+        [JsonIgnore]
+        public TimeSpan TodayTime2 => GetTodayTime(2);
+        [JsonIgnore]
+        public TimeSpan TodayTime3 => GetTodayTime(3);
+
+        private TimeSpan GetTodayTime(int slot)
+        {
+            var day = DateTime.Today.DayOfWeek;
+            return (day, slot) switch
+            {
+                (DayOfWeek.Monday, 1) => MonTime1, (DayOfWeek.Monday, 2) => MonTime2, (DayOfWeek.Monday, 3) => MonTime3,
+                (DayOfWeek.Tuesday, 1) => TueTime1, (DayOfWeek.Tuesday, 2) => TueTime2, (DayOfWeek.Tuesday, 3) => TueTime3,
+                (DayOfWeek.Wednesday, 1) => WedTime1, (DayOfWeek.Wednesday, 2) => WedTime2, (DayOfWeek.Wednesday, 3) => WedTime3,
+                (DayOfWeek.Thursday, 1) => ThuTime1, (DayOfWeek.Thursday, 2) => ThuTime2, (DayOfWeek.Thursday, 3) => ThuTime3,
+                (DayOfWeek.Friday, 1) => FriTime1, (DayOfWeek.Friday, 2) => FriTime2, (DayOfWeek.Friday, 3) => FriTime3,
+                (DayOfWeek.Saturday, 1) => SatTime1, (DayOfWeek.Saturday, 2) => SatTime2, (DayOfWeek.Saturday, 3) => SatTime3,
+                (DayOfWeek.Sunday, 1) => SunTime1, (DayOfWeek.Sunday, 2) => SunTime2, (DayOfWeek.Sunday, 3) => SunTime3,
+                _ => new TimeSpan(8, 0, 0)
+            };
+        }
+
+        [JsonIgnore]
+        public int DisplayIndex { get; set; }
 
         public bool IsExpired => DateTimeOffset.UtcNow.Date > ExpiryDate.Date;
 
