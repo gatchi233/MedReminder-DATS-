@@ -98,10 +98,10 @@ public static class DataSeedService
                 .Select(x => new AppUser
                 {
                     Username = x.Username,
-                    Password = x.Password,
+                    PasswordHash = x.Password,
                     Role = x.Role,
                     DisplayName = x.DisplayName,
-                    ResidentId = x.ResidentId
+                    ResidentId = Guid.TryParse(x.ResidentId, out var rid) ? rid : null
                 })
                 .ToList();
 

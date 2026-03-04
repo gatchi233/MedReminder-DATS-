@@ -13,8 +13,6 @@ public sealed class CareHubDbContext : DbContext
     public DbSet<Medication> Medications => Set<Medication>();
     public DbSet<Observation> Observations => Set<Observation>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
-
-    public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<MarEntry> MarEntries => Set<MarEntry>();
     public DbSet<MedicationInventoryLedger> MedicationInventoryLedgers => Set<MedicationInventoryLedger>();
 
@@ -25,7 +23,10 @@ public sealed class CareHubDbContext : DbContext
         modelBuilder.Entity<Resident>().HasKey(x => x.Id);
         modelBuilder.Entity<Medication>().HasKey(x => x.Id);
         modelBuilder.Entity<Observation>().HasKey(x => x.Id);
-        modelBuilder.Entity<AppUser>().HasKey(x => x.Username);
+        modelBuilder.Entity<AppUser>().HasKey(x => x.Id);
+        modelBuilder.Entity<AppUser>()
+            .HasIndex(x => x.Username)
+            .IsUnique();
 
         modelBuilder.Entity<Medication>()
             .HasOne<Resident>()
@@ -38,12 +39,6 @@ public sealed class CareHubDbContext : DbContext
             .WithMany()
             .HasForeignKey(x => x.ResidentId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        // AppUser
-        modelBuilder.Entity<AppUser>().HasKey(x => x.Id);
-        modelBuilder.Entity<AppUser>()
-            .HasIndex(x => x.Username)
-            .IsUnique();
 
         // MarEntry
         modelBuilder.Entity<MarEntry>().HasKey(x => x.Id);

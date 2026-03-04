@@ -61,7 +61,7 @@ public sealed class StaffController : ControllerBase
             user.DisplayName = request.DisplayName.Trim();
 
         if (!string.IsNullOrWhiteSpace(request.Password))
-            user.Password = request.Password;
+            user.PasswordHash = request.Password;
 
         await _db.SaveChangesAsync(ct);
 

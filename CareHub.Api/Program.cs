@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,27 +72,6 @@ builder.Services.AddCors(options =>
          .AllowAnyMethod());
 });
 
-// JWT Authentication
-var jwtKey = builder.Configuration["Jwt:Key"]!;
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-    };
-});
-
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -106,13 +83,15 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
     await db.Database.ExecuteSqlRawAsync("""
         CREATE TABLE IF NOT EXISTS "AppUsers" (
+            "Id" uuid NOT NULL,
             "Username" text NOT NULL,
-            "Password" text NOT NULL,
-            "Role" text NOT NULL,
+            "PasswordHash" text NOT NULL,
             "DisplayName" text NOT NULL,
-            "ResidentId" text NULL,
-            CONSTRAINT "PK_AppUsers" PRIMARY KEY ("Username")
+            "Role" text NOT NULL,
+            "ResidentId" uuid NULL,
+            CONSTRAINT "PK_AppUsers" PRIMARY KEY ("Id")
         );
+        CREATE UNIQUE INDEX IF NOT EXISTS "IX_AppUsers_Username" ON "AppUsers" ("Username");
     """);
 }
 await DataSeedService.SeedFromSharedJsonAsync(app.Services, app.Configuration, app.Environment);
