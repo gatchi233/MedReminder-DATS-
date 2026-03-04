@@ -12,6 +12,7 @@ public sealed class CareHubDbContext : DbContext
     public DbSet<Resident> Residents => Set<Resident>();
     public DbSet<Medication> Medications => Set<Medication>();
     public DbSet<Observation> Observations => Set<Observation>();
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
 
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<MarEntry> MarEntries => Set<MarEntry>();
@@ -24,6 +25,7 @@ public sealed class CareHubDbContext : DbContext
         modelBuilder.Entity<Resident>().HasKey(x => x.Id);
         modelBuilder.Entity<Medication>().HasKey(x => x.Id);
         modelBuilder.Entity<Observation>().HasKey(x => x.Id);
+        modelBuilder.Entity<AppUser>().HasKey(x => x.Username);
 
         modelBuilder.Entity<Medication>()
             .HasOne<Resident>()
@@ -80,5 +82,10 @@ public sealed class CareHubDbContext : DbContext
             .WithMany()
             .HasForeignKey(l => l.MarEntryId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Backward-compatible mapping: database column is RecordedAtUtc.
+        modelBuilder.Entity<Observation>()
+            .Property(x => x.RecordedAt)
+            .HasColumnName("RecordedAtUtc");
     }
 }
