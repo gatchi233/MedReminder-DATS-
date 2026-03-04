@@ -11,27 +11,18 @@ namespace CareHub.Api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "AppUsers",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Username = table.Column<string>(type: "text", nullable: false),
-                    PasswordHash = table.Column<string>(type: "text", nullable: false),
-                    DisplayName = table.Column<string>(type: "text", nullable: false),
-                    Role = table.Column<string>(type: "text", nullable: false),
-                    ResidentId = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AppUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AppUsers_Username",
-                table: "AppUsers",
-                column: "Username",
-                unique: true);
+            migrationBuilder.Sql("""
+                CREATE TABLE IF NOT EXISTS "AppUsers" (
+                    "Id" uuid NOT NULL,
+                    "Username" text NOT NULL,
+                    "PasswordHash" text NOT NULL,
+                    "DisplayName" text NOT NULL,
+                    "Role" text NOT NULL,
+                    "ResidentId" uuid NULL,
+                    CONSTRAINT "PK_AppUsers" PRIMARY KEY ("Id")
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS "IX_AppUsers_Username" ON "AppUsers" ("Username");
+            """);
         }
 
         /// <inheritdoc />

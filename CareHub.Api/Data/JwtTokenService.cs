@@ -24,18 +24,17 @@ public sealed class JwtTokenService
         var dbUser = await _db.AppUsers
             .AsNoTracking()
             .FirstOrDefaultAsync(u =>
-                u.Username.ToLower() == username.ToLower() &&
-                u.Password == password, ct);
+                u.Username.ToLower() == username.ToLower(), ct);
 
-        if (dbUser is not null)
+        if (dbUser is not null && VerifyPassword(password, dbUser.PasswordHash))
         {
             return new AuthUser
             {
                 Username = dbUser.Username,
-                Password = dbUser.Password,
+                Password = password,
                 Role = dbUser.Role,
                 DisplayName = dbUser.DisplayName,
-                ResidentId = dbUser.ResidentId
+                ResidentId = dbUser.ResidentId?.ToString()
             };
         }
 
@@ -72,5 +71,24 @@ public sealed class JwtTokenService
             signingCredentials: credentials);
 
         return (new JwtSecurityTokenHandler().WriteToken(token), expires);
+    }
+
+    /// <summary>
+    /// Supports both plaintext passwords (from DataSeedService) and BCrypt hashes (from DevController).
+    /// </summary>
+    private static bool VerifyPassword(string password, string storedHash)
+    {
+        if (string.IsNullOrEmpty(storedHash))
+            return false;
+
+        // BCrypt hashes start with "$2a$", "$2b$", or "$2y$"
+        if (storedHash.StartsWith("$2"))
+        {
+            try { return BCrypt.Net.BCrypt.Verify(password, storedHash); }
+            catch { return false; }
+        }
+
+        // Plaintext comparison
+        return storedHash == password;
     }
 }
