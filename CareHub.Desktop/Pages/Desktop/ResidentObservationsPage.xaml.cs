@@ -1,6 +1,9 @@
 using CommunityToolkit.Maui.Views;
 using CareHub.Models;
+using CareHub.Pages.UI;
 using CareHub.Pages.UI.Popups;
+using CareHub.Services;
+using CareHub.Services.Abstractions;
 using CareHub.ViewModels;
 using System.Windows.Input;
 using static CareHub.ViewModels.ResidentObservationsViewModel;
@@ -20,6 +23,15 @@ public partial class ResidentObservationsPage : ContentPage, IQueryAttributable
 
         _vm.AddRequested = () => _ = ShowAddObservationPopupAsync();
         _vm.EditRequested = (obs) => _ = ShowEditObservationPopupAsync(obs);
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        var auth = MauiProgram.Services.GetService<AuthService>();
+        var canUseAi = auth?.HasRole(StaffRole.Admin, StaffRole.Nurse) ?? false;
+        if (AiTrend3Action != null) AiTrend3Action.IsVisible = canUseAi;
+        if (AiTrend7Action != null) AiTrend7Action.IsVisible = canUseAi;
     }
 
     private async Task ShowAddObservationPopupAsync()
@@ -110,6 +122,54 @@ public partial class ResidentObservationsPage : ContentPage, IQueryAttributable
                 _vm.SetResident(residentId, string.Empty);
                 await _vm.LoadAsync();
             }
+        }
+    }
+
+    private async void OnAiTrend3Clicked(object sender, TappedEventArgs e) =>
+        await RunAiTrendAsync(3);
+
+    private async void OnAiTrend7Clicked(object sender, TappedEventArgs e) =>
+        await RunAiTrendAsync(7);
+
+    private async Task RunAiTrendAsync(int days)
+    {
+        if (_vm.ResidentId == Guid.Empty)
+        {
+            await DisplayAlert("No Resident", "No resident loaded.", "OK");
+            return;
+        }
+
+        var ai = MauiProgram.Services.GetService<IAiService>();
+        if (ai == null)
+        {
+            await DisplayAlert("Unavailable", "AI service is not configured.", "OK");
+            return;
+        }
+
+        if (AiTrend3Action != null) AiTrend3Action.IsEnabled = false;
+        if (AiTrend7Action != null) AiTrend7Action.IsEnabled = false;
+
+        try
+        {
+            var result = await ai.TrendExplainAsync(_vm.ResidentId, days);
+            if (result.Success)
+            {
+                var popup = new AiResponsePopup($"{days}-Day Trend Analysis", result.Content, result.Disclaimer);
+                await this.ShowPopupAsync(popup);
+            }
+            else
+            {
+                await DisplayAlert("AI Error", result.Content, "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("AI Error", $"Could not get AI response: {ex.Message}", "OK");
+        }
+        finally
+        {
+            if (AiTrend3Action != null) AiTrend3Action.IsEnabled = true;
+            if (AiTrend7Action != null) AiTrend7Action.IsEnabled = true;
         }
     }
 

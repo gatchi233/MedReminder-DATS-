@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="CareHub.Pages.Desktop.AiCareQueryPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="AI Care Query"
+    BackgroundColor="{StaticResource Resident_Main_Background}">
+
+    <Grid Padding="16" RowDefinitions="Auto,Auto,Auto,Auto,*" RowSpacing="12">
+
+        <!-- Header -->
+        <VerticalStackLayout Spacing="2">
+            <Label Text="CARE QUERY"
+                   FontSize="11" FontAttributes="Bold" CharacterSpacing="1.5"
+                   TextColor="{StaticResource Resident_Font_Secondary}"/>
+            <Label Text="Ask questions about residents, medications, or observations"
+                   FontSize="15" FontAttributes="Bold"
+                   TextColor="{StaticResource Resident_Font_Primary}"/>
+        </VerticalStackLayout>
+
+        <!-- Action bar -->
+        <HorizontalStackLayout Grid.Row="1" Spacing="8">
+            <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
+                <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                <Grid ColumnDefinitions="32,Auto" Margin="0" InputTransparent="True">
+                    <Image Grid.Column="0" Source="icons8_close_100.png" HeightRequest="16" WidthRequest="16"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Close}"
+                            Padding="10,0" StrokeThickness="0" InputTransparent="True">
+                        <Label Text="CLOSE" TextColor="{StaticResource Button_Font_Primary}"
+                               FontSize="11" VerticalOptions="Center" FontAttributes="Bold"/>
+                    </Border>
+                </Grid>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCloseClicked"/>
+                </Border.GestureRecognizers>
+            </Border>
+        </HorizontalStackLayout>
+
+        <!-- Query input area -->
+        <Border Grid.Row="2" Padding="12,10"
+                BackgroundColor="{StaticResource Resident_Card_Background}"
+                Stroke="{StaticResource Resident_Card_Border}"
+                StrokeThickness="1">
+            <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+
+                <!-- Optional resident picker -->
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <Label Text="SCOPE:" FontSize="10" FontAttributes="Bold"
+                           TextColor="{StaticResource Resident_Font_Secondary}"
+                           VerticalOptions="Center"/>
+                    <Picker x:Name="ResidentPicker"
+                            FontSize="12" WidthRequest="280"
+                            VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+
+                <!-- Query entry -->
+                <Editor x:Name="QueryEditor" Grid.Row="1"
+                        Placeholder="e.g., Which residents refused medications this week?"
+                        HeightRequest="60" FontSize="13"
+                        TextColor="{StaticResource Resident_Font_Primary}"
+                        PlaceholderColor="{StaticResource Resident_Font_Secondary}"/>
+
+                <!-- Submit button -->
+                <Border x:Name="AskButton" Grid.Row="2" StrokeThickness="0" HeightRequest="32"
+                        BackgroundColor="#7C3AED" HorizontalOptions="Start"
+                        Padding="16,0">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="6"/></Border.StrokeShape>
+                    <Label Text="ASK AI" TextColor="White" FontSize="12"
+                           FontAttributes="Bold" VerticalOptions="Center"
+                           HorizontalOptions="Center"/>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAskClicked"/>
+                    </Border.GestureRecognizers>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Disclaimer banner -->
+        <Border Grid.Row="3" Padding="10,6" StrokeThickness="0"
+                BackgroundColor="#FEF3C7" HorizontalOptions="Fill">
+            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+            <Label Text="AI-generated draft — review required. AI is assistive only and does not make clinical decisions."
+                   FontSize="10" FontAttributes="Italic"
+                   TextColor="#92400E"/>
+        </Border>
+
+        <!-- Response area -->
+        <Border Grid.Row="4" Padding="14,12"
+                BackgroundColor="{StaticResource Resident_Card_Background}"
+                Stroke="{StaticResource Resident_Card_Border}"
+                StrokeThickness="1">
+            <Border.StrokeShape><RoundRectangle CornerRadius="12"/></Border.StrokeShape>
+            <Grid RowDefinitions="Auto,Auto,*">
+                <Label Text="AI RESPONSE"
+                       FontSize="11" FontAttributes="Bold" CharacterSpacing="1.5"
+                       TextColor="{StaticResource Resident_Font_Secondary}"/>
+                <BoxView Grid.Row="1" HeightRequest="1"
+                         Color="{StaticResource Resident_Card_Border}"
+                         Margin="0,6,0,10"/>
+                <ScrollView Grid.Row="2">
+                    <VerticalStackLayout Spacing="8">
+                        <Label x:Name="ResponseLabel"
+                               Text="Submit a question above to get started."
+                               FontSize="13" LineBreakMode="WordWrap"
+                               TextColor="{StaticResource Resident_Font_Primary}"/>
+                        <Label x:Name="DisclaimerLabel"
+                               FontSize="11" FontAttributes="Bold,Italic"
+                               LineBreakMode="WordWrap"
+                               TextColor="{StaticResource Resident_Font_Secondary}"
+                               IsVisible="False"/>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </Grid>
+        </Border>
+
+    </Grid>
+</ContentPage>

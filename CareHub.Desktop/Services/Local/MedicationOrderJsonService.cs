@@ -50,18 +50,21 @@ namespace CareHub.Services.Local
             await JsonSerializer.SerializeAsync(stream, items, JsonOptions);
         }
 
-        public async Task<MedicationOrder> CreateAsync(Guid medicationId, int requestedQuantity, string? requestedBy, string? notes)
+        public async Task<MedicationOrder> CreateAsync(Guid medicationId, int requestedQuantity, string? requestedBy, string? notes, string? medicationName = null)
         {
             var list = await LoadAsync();
 
             // Resolve medication name for display
-            string? medName = null;
-            try
+            string? medName = medicationName;
+            if (string.IsNullOrWhiteSpace(medName))
             {
-                var meds = await _medicationService.LoadAsync();
-                medName = meds.FirstOrDefault(m => m.Id == medicationId)?.MedName;
+                try
+                {
+                    var meds = await _medicationService.LoadAsync();
+                    medName = meds.FirstOrDefault(m => m.Id == medicationId)?.MedName;
+                }
+                catch { /* offline — name stays null */ }
             }
-            catch { /* offline — name stays null */ }
 
             var order = new MedicationOrder
             {
@@ -116,7 +119,7 @@ namespace CareHub.Services.Local
 
             if (newStatus == MedicationOrderStatus.Ordered)
             {
-                order.OrderedAt ??= DateTime.Now;
+                order.OrderedAt ??= DateTimeOffset.UtcNow;
 
                 // Keep these if your model supports them (you’ve been showing “by Staff” in UI)
                 order.OrderedBy ??= GetCurrentUserLabel();
@@ -124,7 +127,7 @@ namespace CareHub.Services.Local
 
             if (newStatus == MedicationOrderStatus.Received)
             {
-                order.ReceivedAt ??= DateTime.Now;
+                order.ReceivedAt ??= DateTimeOffset.UtcNow;
                 order.ReceivedBy ??= GetCurrentUserLabel();
                 order.ReceivedExpiryDate = expiryDate;
 
@@ -149,7 +152,7 @@ namespace CareHub.Services.Local
 
             if (newStatus == MedicationOrderStatus.Cancelled)
             {
-                order.CancelledAt ??= DateTime.Now;
+                order.CancelledAt ??= DateTimeOffset.UtcNow;
                 order.CancelledBy ??= GetCurrentUserLabel();
 
                 // Do not touch OrderedAt/ReceivedAt here.
@@ -158,6 +161,15 @@ namespace CareHub.Services.Local
                 // - Keeping OrderedAt is useful if it was already ordered
             }
 
+            await SaveAsync(list);
+        }
+
+        public async Task UpdateNameAsync(Guid orderId, string medicationName)
+        {
+            var list = await LoadAsync();
+            var order = list.FirstOrDefault(x => x.Id == orderId);
+            if (order == null) return;
+            order.MedicationName = medicationName;
             await SaveAsync(list);
         }
 

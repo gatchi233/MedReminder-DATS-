@@ -31,6 +31,8 @@ namespace CareHub
         Routing.RegisterRoute(nameof(ResidentReportPage), typeof(ResidentReportPage));
         Routing.RegisterRoute(nameof(ViewResidentPage), typeof(ViewResidentPage));
         Routing.RegisterRoute(nameof(MarPage), typeof(MarPage));
+        Routing.RegisterRoute(nameof(AiCareQueryPage), typeof(AiCareQueryPage));
+        Routing.RegisterRoute(nameof(AiShiftHandoffPage), typeof(AiShiftHandoffPage));
         }
 
         private bool _handlingUnsaved;

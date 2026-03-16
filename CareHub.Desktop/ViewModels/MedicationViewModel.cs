@@ -30,7 +30,6 @@ namespace CareHub.ViewModels
 
         public ObservableCollection<Medication> Medications { get; } = new();
 
-        // Inventory alert properties (read-only dashboard)
         public ObservableCollection<InventoryAlertItem> LowStockTop3 { get; } = new();
         public ObservableCollection<InventoryAlertItem> ExpiringSoonTop3 { get; } = new();
 
@@ -51,7 +50,6 @@ namespace CareHub.ViewModels
         public bool HasLowStock => LowStockCount > 0;
         public bool HasExpiringSoon => ExpiringSoonCount > 0;
 
-        // MAR dashboard properties
         public ObservableCollection<MarDashboardItem> PendingMarTop { get; } = new();
 
         private int _pendingMarCount;
@@ -216,7 +214,7 @@ namespace CareHub.ViewModels
             {
                 var parameters = new Dictionary<string, object?>
                 {
-                    ["Item"] = med  // Global inventory meds
+                    ["Item"] = med
                 };
 
                 await Shell.Current.GoToAsync(nameof(EditMedicationPage), true, parameters);
@@ -268,7 +266,6 @@ namespace CareHub.ViewModels
             }
             catch
             {
-                // ignore timer setup failures
             }
         }
 
@@ -324,7 +321,6 @@ namespace CareHub.ViewModels
             }
             catch
             {
-                // Ignore audio errors so reminder still works
             }
         #endif
         }
@@ -333,8 +329,6 @@ namespace CareHub.ViewModels
         {
             var now = DateTimeOffset.Now;
 
-            // Build usable stock per med name from global inventory batches.
-            // Usable stock = total stock − stock of expired/expiring-within-30-days batches.
             var inventoryGroups = _allMedications
                 .Where(m => m.ResidentId == null || m.ResidentId == Guid.Empty)
                 .GroupBy(m => m.MedName, StringComparer.OrdinalIgnoreCase)
@@ -355,7 +349,6 @@ namespace CareHub.ViewModels
             var usableStockByName = inventoryGroups
                 .ToDictionary(x => x.representative.MedName, x => x.usableStock, StringComparer.OrdinalIgnoreCase);
 
-            // Low stock: one row per med name, usable stock <= reorder level
             var lowStock = inventoryGroups
                 .Where(x => x.usableStock <= x.reorderLevel)
                 .OrderBy(x => x.usableStock)
@@ -373,8 +366,6 @@ namespace CareHub.ViewModels
                 });
             }
 
-            // Expiry alert: expired OR expiring within 30 days (local time)
-            // Same dedup: prefer global inventory entries over resident-assigned duplicates.
             var thirtyDaysFromNow = now.AddDays(30);
             var expiryAlertAll = _allMedications
                 .Where(m =>
@@ -415,24 +406,22 @@ namespace CareHub.ViewModels
             }
         }
 
-        public void ComputeMarDashboard(List<Medication> meds, List<MarEntry> marEntries)
+        public void ComputeMarDashboard(List<Medication> meds, List<MarEntry> marEntries, List<Resident>? residents = null)
         {
             var (_, _, fromLocal, toLocal) = MarScheduleHelper.GetTodayRange();
 
-            // Only resident-assigned meds
             var residentMeds = meds.Where(m => m.ResidentId.HasValue).ToList();
 
             var slots = MarScheduleHelper.GenerateSlots(residentMeds, fromLocal, toLocal);
             var matchedIds = new HashSet<Guid>();
             MarScheduleHelper.OverlayMarEntries(slots, marEntries, matchedIds);
 
-            // Group by resident, count pending + missed
             var groups = slots
                 .GroupBy(s => s.ResidentId)
                 .Select(g => new MarDashboardItem
                 {
                     ResidentId = g.Key,
-                    ResidentName = g.First().MedicationName, // placeholder, overwritten below
+                    ResidentName = "",
                     PendingCount = g.Count(s => s.Status == "Pending"),
                     MissedCount = g.Count(s => s.Status == "Missed")
                 })
@@ -441,11 +430,18 @@ namespace CareHub.ViewModels
                 .ThenByDescending(d => d.PendingCount)
                 .ToList();
 
-            // Resolve resident names from meds
             foreach (var item in groups)
             {
-                var med = meds.FirstOrDefault(m => m.ResidentId == item.ResidentId);
-                item.ResidentName = med?.ResidentName ?? "Unknown";
+                var resident = residents?.FirstOrDefault(r => r.Id == item.ResidentId);
+                if (resident != null)
+                {
+                    item.ResidentName = resident.ResidentName;
+                }
+                else
+                {
+                    var med = meds.FirstOrDefault(m => m.ResidentId == item.ResidentId);
+                    item.ResidentName = med?.ResidentName ?? "Unknown";
+                }
             }
 
             var totalPending = groups.Sum(g => g.PendingCount);

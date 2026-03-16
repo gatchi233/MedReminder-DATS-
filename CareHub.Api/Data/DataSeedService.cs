@@ -29,8 +29,6 @@ public static class DataSeedService
         var observations = await LoadListAsync<Observation>(Path.Combine(seedDir, "Observations.json"), jsonOptions, ct);
         var auth = config.GetSection("Auth").Get<AuthOptions>() ?? new AuthOptions();
 
-        // Add only missing rows by id so partially-seeded databases get repaired
-        // without duplicating existing records.
         if (residents.Count > 0)
         {
             var existingResidentIds = await db.Residents
@@ -55,8 +53,6 @@ public static class DataSeedService
                 .ToListAsync(ct);
             var medicationIdSet = existingMedicationIds.ToHashSet();
 
-            // Also check by (MedName, ResidentId) to prevent duplicates when
-            // the desktop app has already pushed the same medications with different IDs.
             var existingMedKeys = await db.Medications
                 .AsNoTracking()
                 .Select(x => new { x.MedName, x.ResidentId })
@@ -122,21 +118,90 @@ public static class DataSeedService
 
         if (db.ChangeTracker.HasChanges())
             await db.SaveChangesAsync(ct);
+
+        await SeedDemoMarEntriesAsync(db, ct);
+    }
+
+    private static async Task SeedDemoMarEntriesAsync(CareHubDbContext db, CancellationToken ct)
+    {
+        if (await db.MarEntries.AnyAsync(ct))
+            return;
+
+        var residentMeds = await db.Medications.AsNoTracking()
+            .Where(m => m.ResidentId.HasValue && m.ResidentId != Guid.Empty)
+            .ToListAsync(ct);
+
+        if (residentMeds.Count == 0)
+            return;
+
+        var residents = await db.Residents.AsNoTracking().ToDictionaryAsync(r => r.Id, ct);
+
+        var rng = new Random(42);
+        var statuses = new[] { "Given", "Given", "Given", "Refused", "Missed" };
+        var nurses = new[] { "Nurse Sarah", "Nurse James", "Nurse Emily" };
+        var todayLocal = DateTime.Now.Date;
+        var nowUtc = DateTimeOffset.UtcNow;
+
+        foreach (var med in residentMeds)
+        {
+            if (med.TimesPerDay <= 0) continue;
+            var residentId = med.ResidentId!.Value;
+            var residentName = residents.TryGetValue(residentId, out var r)
+                ? $"{r.ResidentFName} {r.ResidentLName}".Trim()
+                : "Unknown";
+
+            var slots = Math.Min(med.TimesPerDay, 3);
+            var baseTimes = new[] { new TimeSpan(8, 0, 0), new TimeSpan(13, 0, 0), new TimeSpan(20, 0, 0) };
+
+            for (int i = 0; i < slots; i++)
+            {
+                var scheduledLocal = todayLocal.Add(baseTimes[i]);
+
+                if (scheduledLocal > DateTime.Now)
+                    continue;
+
+                var scheduledOffset = TimeZoneInfo.Local.GetUtcOffset(scheduledLocal);
+                var scheduledUtc = new DateTimeOffset(scheduledLocal, scheduledOffset).ToUniversalTime();
+
+                var status = statuses[rng.Next(statuses.Length)];
+                var delayMinutes = status == "Given" ? rng.Next(1, 15) : 0;
+                var administeredUtc = status == "Given"
+                    ? scheduledUtc.AddMinutes(delayMinutes)
+                    : scheduledUtc;
+
+                db.MarEntries.Add(new MarEntry
+                {
+                    Id = Guid.NewGuid(),
+                    ClientRequestId = Guid.NewGuid(),
+                    ResidentId = residentId,
+                    MedicationId = med.Id,
+                    Status = status,
+                    DoseQuantity = med.Quantity > 0 ? med.Quantity : 1,
+                    DoseUnit = med.QuantityUnit ?? "tablet",
+                    ScheduledForUtc = scheduledUtc,
+                    AdministeredAtUtc = administeredUtc,
+                    RecordedBy = nurses[rng.Next(nurses.Length)],
+                    Notes = "SEED_DEMO",
+                    CreatedAtUtc = nowUtc,
+                    UpdatedAtUtc = nowUtc,
+                });
+            }
+        }
+
+        if (db.ChangeTracker.HasChanges())
+            await db.SaveChangesAsync(ct);
     }
 
     private static string? ResolveSeedDirectory(IConfiguration config, IWebHostEnvironment env)
     {
-        // Optional explicit override.
         var configured = config["SeedData:Directory"];
         if (!string.IsNullOrWhiteSpace(configured) && Directory.Exists(configured))
             return configured;
 
-        // Preferred shared location at repo root.
         var sharedData = Path.GetFullPath(Path.Combine(env.ContentRootPath, "..", "SharedData"));
         if (Directory.Exists(sharedData))
             return sharedData;
 
-        // Backward-compatible fallback to desktop raw assets.
         var desktopRaw = Path.GetFullPath(Path.Combine(env.ContentRootPath, "..", "CareHub.Desktop", "Resources", "Raw"));
         if (Directory.Exists(desktopRaw))
             return desktopRaw;

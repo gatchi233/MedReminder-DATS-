@@ -43,6 +43,20 @@
                     </Border.GestureRecognizers>
                 </Border>
 
+                <!-- EXPLAIN -->
+                <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                    <Grid ColumnDefinitions="32,Auto" Margin="0" InputTransparent="True">
+                        <Image Grid.Column="0" Source="icons8_ai_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <Border Grid.Column="1" BackgroundColor="#7C3AED" Padding="10,0" StrokeThickness="0" InputTransparent="True">
+                            <Label Text="EXPLAIN" TextColor="{StaticResource Button_Font_Primary}" FontSize="11" VerticalOptions="Center" FontAttributes="Bold"/>
+                        </Border>
+                    </Grid>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnAiExplainClicked"/>
+                    </Border.GestureRecognizers>
+                </Border>
+
                 <!-- CLOSE -->
                 <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
                     <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>

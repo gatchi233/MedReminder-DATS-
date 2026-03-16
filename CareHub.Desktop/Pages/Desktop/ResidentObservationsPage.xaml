@@ -87,6 +87,44 @@
                 </Border.GestureRecognizers>
             </Border>
 
+            <!-- AI 3-DAY TRENDS -->
+            <Border x:Name="AiTrend3Action" StrokeThickness="0" HeightRequest="28"
+                    BackgroundColor="{StaticResource Button_Icon_Background}">
+                <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                <Grid ColumnDefinitions="32,Auto" Margin="0" InputTransparent="True">
+                    <Label Grid.Column="0" Text="*" FontSize="16" FontAttributes="Bold"
+                           TextColor="#8B5CF6"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Border Grid.Column="1" BackgroundColor="#7C3AED"
+                            Padding="10,0" StrokeThickness="0" InputTransparent="True">
+                        <Label Text="AI 3-DAY" TextColor="White"
+                               FontSize="11" VerticalOptions="Center" FontAttributes="Bold"/>
+                    </Border>
+                </Grid>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnAiTrend3Clicked"/>
+                </Border.GestureRecognizers>
+            </Border>
+
+            <!-- AI 7-DAY TRENDS -->
+            <Border x:Name="AiTrend7Action" StrokeThickness="0" HeightRequest="28"
+                    BackgroundColor="{StaticResource Button_Icon_Background}">
+                <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>
+                <Grid ColumnDefinitions="32,Auto" Margin="0" InputTransparent="True">
+                    <Label Grid.Column="0" Text="*" FontSize="16" FontAttributes="Bold"
+                           TextColor="#8B5CF6"
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Border Grid.Column="1" BackgroundColor="#7C3AED"
+                            Padding="10,0" StrokeThickness="0" InputTransparent="True">
+                        <Label Text="AI 7-DAY" TextColor="White"
+                               FontSize="11" VerticalOptions="Center" FontAttributes="Bold"/>
+                    </Border>
+                </Grid>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnAiTrend7Clicked"/>
+                </Border.GestureRecognizers>
+            </Border>
+
             <!-- CLOSE — back to resident page -->
             <Border StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
                 <Border.StrokeShape><RoundRectangle CornerRadius="8"/></Border.StrokeShape>

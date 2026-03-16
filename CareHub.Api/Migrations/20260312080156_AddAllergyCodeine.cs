@@ -10,10 +10,7 @@ namespace CareHub.Api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "RecordedAt",
-                table: "Observations",
-                newName: "RecordedAtUtc");
+            // RenameColumn RecordedAt → RecordedAtUtc removed: already applied in DB
 
             migrationBuilder.AddColumn<bool>(
                 name: "AllergyCodeine",
@@ -30,10 +27,7 @@ namespace CareHub.Api.Migrations
                 name: "AllergyCodeine",
                 table: "Residents");
 
-            migrationBuilder.RenameColumn(
-                name: "RecordedAtUtc",
-                table: "Observations",
-                newName: "RecordedAt");
+            // RenameColumn RecordedAtUtc → RecordedAt removed: matches current DB state
         }
     }
 }

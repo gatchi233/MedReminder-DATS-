@@ -1,7 +1,9 @@
 using CareHub.Models;
+using CareHub.Pages.UI;
 using CareHub.Services;
 using CareHub.Services.Abstractions;
 using CareHub.Services.Remote;
+using CommunityToolkit.Maui.Views;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using System;
@@ -264,9 +266,9 @@ private Resident? _resident;
             await RunAiFeatureAsync("Trend Analysis", async ai => await ai.DetectTrendsAsync(_residentId));
         }
 
-        private async Task RunAiFeatureAsync(string title, Func<AiApiService, Task<AiResult>> action)
+        private async Task RunAiFeatureAsync(string title, Func<IAiService, Task<AiResult>> action)
         {
-            var ai = MauiProgram.Services.GetService<AiApiService>();
+            var ai = MauiProgram.Services.GetService<IAiService>();
             if (ai == null)
             {
                 await DisplayAlert("Unavailable", "AI service is not configured.", "OK");
@@ -281,11 +283,15 @@ private Resident? _resident;
             {
                 var result = await action(ai);
 
-                var message = result.Success
-                    ? $"{result.Content}\n\n--- {result.Disclaimer} ---"
-                    : result.Content;
-
-                await DisplayAlert($"AI {title}", message, "OK");
+                if (result.Success)
+                {
+                    var popup = new AiResponsePopup(title, result.Content, result.Disclaimer);
+                    await this.ShowPopupAsync(popup);
+                }
+                else
+                {
+                    await DisplayAlert("AI Error", result.Content, "OK");
+                }
             }
             catch (Exception ex)
             {

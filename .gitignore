@@ -235,3 +235,6 @@ run-a*.ps1
 *.pfx
 *.publishsettings
 orleans.codegen.cs
+
+# Local utility scripts
+seed_*.py

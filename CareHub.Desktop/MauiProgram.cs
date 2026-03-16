@@ -107,11 +107,29 @@ namespace CareHub
                 client.BaseAddress = apiBase;
                 client.Timeout = TimeSpan.FromSeconds(2);
             }).AddHttpMessageHandler<AuthTokenHandler>();
+            builder.Services.AddHttpClient<MedicationOrderApiService>(client =>
+            {
+                client.BaseAddress = apiBase;
+                client.Timeout = TimeSpan.FromSeconds(2);
+            }).AddHttpMessageHandler<AuthTokenHandler>();
             builder.Services.AddHttpClient<AiApiService>(client =>
             {
                 client.BaseAddress = apiBase;
                 client.Timeout = TimeSpan.FromSeconds(35);
             }).AddHttpMessageHandler<AuthTokenHandler>();
+
+            // AI service abstraction: tries API wrapper, falls back to mock
+            builder.Services.AddSingleton<IAiService>(sp =>
+            {
+                try
+                {
+                    var api = sp.GetService<AiApiService>();
+                    if (api != null)
+                        return new CareHub.Desktop.Services.AiServiceWrapper(api);
+                }
+                catch { }
+                return new CareHub.Desktop.Services.MockAiService();
+            });
 
             // Local JSON services
             builder.Services.AddSingleton<ResidentJsonService>();
@@ -157,7 +175,13 @@ namespace CareHub
                 return (CareHub.Services.Abstractions.IResidentService)new CareHub.Desktop.Services.ResidentService((CareHub.Services.Abstractions.IResidentService)api, (CareHub.Services.Abstractions.IResidentService)local, (CareHub.Services.Abstractions.IMedicationService)localMeds, (CareHub.Services.Abstractions.IObservationService)localObs, (CareHub.Desktop.Services.Sync.ISyncQueue)queue);
             }));
 
-            builder.Services.AddSingleton<IMedicationOrderService, MedicationOrderJsonService>();
+            // MedicationOrders: API + Local + Wrapper
+            builder.Services.AddSingleton<IMedicationOrderService>(sp =>
+            {
+                var api = sp.GetRequiredService<MedicationOrderApiService>();
+                var local = sp.GetRequiredService<MedicationOrderJsonService>();
+                return new CareHub.Desktop.Services.MedicationOrderService(api, local);
+            });
             builder.Services.AddSingleton<IStaffService, StaffJsonService>();
 
             // ViewModels
@@ -189,6 +213,8 @@ namespace CareHub
             builder.Services.AddTransient<StaffManagementPage>();
             builder.Services.AddTransient<ResidentObservationsPage>();
             builder.Services.AddTransient<MarPage>();
+            builder.Services.AddTransient<AiCareQueryPage>();
+            builder.Services.AddTransient<AiShiftHandoffPage>();
             builder.Services.AddTransient<LoginPage>();
 
 #if DEBUG

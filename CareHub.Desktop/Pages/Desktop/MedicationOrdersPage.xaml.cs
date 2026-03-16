@@ -84,7 +84,7 @@ namespace CareHub.Pages.Desktop
             var user = auth?.CurrentUser != null
                 ? $"{auth.CurrentUser.StaffName} ({auth.CurrentUser.Role})"
                 : "Unknown";
-            await VM.CreateOrderAsync(medicationId, qty, user, notes);
+            await VM.CreateOrderAsync(medicationId, qty, user, notes, name);
         }
 
         private async void OnReceiveClicked(object sender, EventArgs e)

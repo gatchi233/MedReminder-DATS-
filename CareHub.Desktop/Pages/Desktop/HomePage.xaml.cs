@@ -28,7 +28,6 @@ namespace CareHub.Pages.Desktop
         private List<MarEntry> _todayMarEntries = new();
         private static bool _demoSeeded;
 
-        // MUST be parameterless (Shell creates pages)
         public HomePage()
         {
             InitializeComponent();
@@ -46,7 +45,6 @@ namespace CareHub.Pages.Desktop
 
             BindingContext = _vm;
 
-            // Build Hour/Minute pickers in code (consistent, avoids hardcoded XAML lists)
             if (HourPicker != null)
             {
                 HourPicker.Items.Clear();
@@ -74,7 +72,6 @@ namespace CareHub.Pages.Desktop
         {
             base.OnAppearing();
 
-            // Role-based dashboard visibility
             ApplyHomepageRbac();
 
             try
@@ -83,27 +80,23 @@ namespace CareHub.Pages.Desktop
 
                 _allResidents = (await _residentService.LoadAsync())?.ToList() ?? new List<Resident>();
 
-                // Ensure packaged resident medications are in local store before loading
                 if (!_demoSeeded)
                     await _localMeds.SeedResidentMedicationsAsync(_allResidents);
 
                 _allMedications = (await _medicationService.LoadAsync())?.ToList() ?? new List<Medication>();
 
-                // Remap stale seed ResidentIds to actual resident IDs (in memory)
                 RemapStaleResidentIds(_allMedications, _allResidents);
 
                 _inventoryMeds = _allMedications
                     .Where(m => !m.ResidentId.HasValue || m.ResidentId.Value == Guid.Empty)
                     .ToList();
 
-                // Seed demo MAR entries for any meds that don't have entries yet
                 try
                 {
                     var (fromUtc, toUtc, _, _) = MarScheduleHelper.GetTodayRange();
 
                     if (!_demoSeeded)
                     {
-                        // First load this session: purge old demo entries, re-seed all
                         var allMarLocal = await _localMar.LoadAllAsync();
                         int removed = allMarLocal.RemoveAll(e => e.Notes == "SEED_DEMO");
                         if (removed > 0)
@@ -115,11 +108,10 @@ namespace CareHub.Pages.Desktop
 
                     var marEntries = await _marService.LoadAsync(null, fromUtc, toUtc);
                     _todayMarEntries = marEntries?.ToList() ?? new List<MarEntry>();
-                    _vm.ComputeMarDashboard(_allMedications, _todayMarEntries);
+                    _vm.ComputeMarDashboard(_allMedications, _todayMarEntries, _allResidents);
                 }
                 catch
                 {
-                    // MAR dashboard is non-critical — skip on failure
                 }
 
                 RunSearch();
@@ -127,7 +119,6 @@ namespace CareHub.Pages.Desktop
             }
             catch
             {
-                // Offline — show empty state, no crash
                 _allMedications ??= new List<Medication>();
                 _allResidents ??= new List<Resident>();
             }
@@ -162,7 +153,6 @@ namespace CareHub.Pages.Desktop
                 return;
             }
 
-            // Standardized route
             await Shell.Current.GoToAsync($"{nameof(ViewResidentPage)}?id={m.ResidentId.Value}");
         }
 
@@ -176,6 +166,9 @@ namespace CareHub.Pages.Desktop
             foreach (var med in meds)
             {
                 if (!med.ResidentId.HasValue)
+                    continue;
+
+                if (!MarScheduleHelper.IsDayEnabled(med, dayOfWeek))
                     continue;
 
                 var times = MarScheduleHelper.GetTimesForDay(med, dayOfWeek);
@@ -200,7 +193,6 @@ namespace CareHub.Pages.Desktop
                         ? "@ " + match.AdministeredAtUtc.ToLocalTime().ToString("h:mm tt")
                         : null;
 
-                    // Auto-miss: if scheduled time has passed by >60 min and still no MAR entry
                     if (match == null && DateTime.Now > scheduledLocal.Add(missedCutoff))
                         status = "Missed";
 
@@ -227,8 +219,9 @@ namespace CareHub.Pages.Desktop
             if (residentMeds.Count == 0) return;
 
             var rng = new Random(42);
-            var statuses = new[] { "Given", "Given", "Given", "Refused", "Missed" };
             var nurses = new[] { "Nurse Sarah", "Nurse James", "Nurse Emily" };
+
+            var slots = new Dictionary<(Guid resId, int hour), List<(Medication med, TimeSpan scheduledTime)>>();
 
             foreach (var med in residentMeds)
             {
@@ -244,15 +237,36 @@ namespace CareHub.Pages.Desktop
                     if (scheduledTime == TimeSpan.Zero) continue;
 
                     var scheduledLocal = todayLocal.Add(scheduledTime);
+                    if (scheduledLocal > DateTime.Now) continue;
 
-                    // Only seed past slots
-                    if (scheduledLocal > DateTime.Now)
-                        continue;
+                    var key = (med.ResidentId!.Value, scheduledTime.Hours);
+                    if (!slots.ContainsKey(key)) slots[key] = new();
+                    slots[key].Add((med, scheduledTime));
+                }
+            }
 
+            var slotKeys = slots.Keys.ToList();
+            int numRefused = Math.Max(1, (int)Math.Round(slotKeys.Count * 0.01));
+            int numMissed = Math.Max(1, (int)Math.Round(slotKeys.Count * 0.01));
+            var shuffled = slotKeys.OrderBy(_ => rng.Next()).ToList();
+            var refusedSlots = new HashSet<(Guid, int)>(shuffled.Take(numRefused));
+            var missedSlots = new HashSet<(Guid, int)>(shuffled.Skip(numRefused).Take(numMissed));
+
+            foreach (var (key, medList) in slots)
+            {
+                string status;
+                if (refusedSlots.Contains(key)) status = "Refused";
+                else if (missedSlots.Contains(key)) status = "Missed";
+                else status = "Given";
+
+                var nurse = nurses[rng.Next(nurses.Length)];
+
+                foreach (var (med, scheduledTime) in medList)
+                {
+                    var scheduledLocal = todayLocal.Add(scheduledTime);
                     var scheduledOffset = TimeZoneInfo.Local.GetUtcOffset(scheduledLocal);
                     var scheduledUtc = new DateTimeOffset(scheduledLocal, scheduledOffset).ToUniversalTime();
 
-                    var status = statuses[rng.Next(statuses.Length)];
                     var delayMinutes = status == "Given" ? rng.Next(1, 15) : 0;
                     var administeredUtc = status == "Given"
                         ? scheduledUtc.AddMinutes(delayMinutes)
@@ -269,7 +283,7 @@ namespace CareHub.Pages.Desktop
                         DoseUnit = med.QuantityUnit ?? "tablet",
                         ScheduledForUtc = scheduledUtc,
                         AdministeredAtUtc = administeredUtc,
-                        RecordedBy = nurses[rng.Next(nurses.Length)],
+                        RecordedBy = nurse,
                         MedicationName = med.MedName,
                         ResidentName = med.ResidentName ?? "Unknown",
                         Notes = "SEED_DEMO",
@@ -291,15 +305,74 @@ namespace CareHub.Pages.Desktop
             bool isNurse = auth.HasRole(StaffRole.Nurse);
             bool isAdmin = auth.HasRole(StaffRole.Admin);
 
-            // MAR card: Nurse only (Admin cannot do clinical tasks, CareStaff has no MAR access)
+            bool showMar = isNurse;
             if (MarCard != null)
-                MarCard.IsVisible = isNurse;
+                MarCard.IsVisible = showMar;
 
-            // Inventory cards: Admin and Nurse only (not CareStaff)
             if (LowStockCard != null)
                 LowStockCard.IsVisible = isAdmin || isNurse;
             if (ExpiryCard != null)
                 ExpiryCard.IsVisible = isAdmin || isNurse;
+
+            if (!showMar && (isAdmin || isNurse))
+            {
+                if (LowStockCard != null && ExpiryCard != null)
+                {
+                    var parentGrid = LowStockCard.Parent as Grid;
+                    if (parentGrid != null)
+                    {
+                        parentGrid.Children.Remove(LowStockCard);
+                        parentGrid.Children.Remove(ExpiryCard);
+
+                        var wrapper = new Grid
+                        {
+                            ColumnDefinitions = new ColumnDefinitionCollection
+                            {
+                                new ColumnDefinition(GridLength.Star),
+                                new ColumnDefinition(GridLength.Star)
+                            },
+                            ColumnSpacing = 16
+                        };
+
+                        Grid.SetColumn(LowStockCard, 0);
+                        Grid.SetColumnSpan(LowStockCard, 1);
+                        Grid.SetRow(LowStockCard, 0);
+                        Grid.SetRowSpan(LowStockCard, 1);
+
+                        Grid.SetColumn(ExpiryCard, 1);
+                        Grid.SetColumnSpan(ExpiryCard, 1);
+                        Grid.SetRow(ExpiryCard, 0);
+                        Grid.SetRowSpan(ExpiryCard, 1);
+
+                        wrapper.Children.Add(LowStockCard);
+                        wrapper.Children.Add(ExpiryCard);
+
+                        Grid.SetRow(wrapper, 0);
+                        Grid.SetColumn(wrapper, 0);
+                        Grid.SetColumnSpan(wrapper, 3);
+                        parentGrid.Children.Add(wrapper);
+                    }
+                }
+                if (SearchAiRow != null)
+                {
+                    Grid.SetColumn(SearchAiRow, 0);
+                    Grid.SetColumnSpan(SearchAiRow, 3);
+                }
+            }
+
+            var canUseAi = isAdmin || isNurse;
+            if (AiActionsBar != null)
+                AiActionsBar.IsVisible = canUseAi;
+        }
+
+        private async void OnAiHandoffClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync(nameof(AiShiftHandoffPage));
+        }
+
+        private async void OnAiQueryClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync(nameof(AiCareQueryPage));
         }
 
         private async void OnViewLowStockClicked(object sender, EventArgs e)
@@ -314,21 +387,15 @@ namespace CareHub.Pages.Desktop
 
         private async void OnViewMarClicked(object sender, EventArgs e)
         {
-            await Shell.Current.GoToAsync("//MarPage");
+            await Shell.Current.GoToAsync(nameof(MarPage));
         }
 
-        /// <summary>
-        /// Fix medications whose ResidentId doesn't match any loaded resident.
-        /// Builds a name-based lookup from packaged Residents.json seed IDs
-        /// to actual resident IDs, then remaps in memory.
-        /// </summary>
         private void RemapStaleResidentIds(List<Medication> meds, List<Resident> residents)
         {
             if (residents.Count == 0) return;
 
             var validIds = new HashSet<Guid>(residents.Select(r => r.Id));
 
-            // Check if any medications have unmatched ResidentIds
             var orphans = meds.Where(m =>
                 m.ResidentId.HasValue
                 && m.ResidentId.Value != Guid.Empty
@@ -336,7 +403,6 @@ namespace CareHub.Pages.Desktop
 
             if (orphans.Count == 0) return;
 
-            // Build seed-ID → resident-name lookup from packaged Residents.json
             Dictionary<Guid, string> seedIdToName;
             try
             {
@@ -349,7 +415,6 @@ namespace CareHub.Pages.Desktop
             }
             catch { return; }
 
-            // Build name → actual-ID lookup
             var nameToActualId = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
             foreach (var r in residents)
             {
@@ -394,13 +459,11 @@ namespace CareHub.Pages.Desktop
 
             foreach (var med in _allMedications)
             {
-                // Skip inventory items — they have no resident
                 if (!med.ResidentId.HasValue || med.ResidentId.Value == Guid.Empty)
                     continue;
 
                 Resident? resident = _allResidents.FirstOrDefault(r => r.Id == med.ResidentId);
 
-                // Prefer linked resident; fall back to any existing name or a placeholder.
                 med.ResidentName = resident?.ResidentName
                     ?? med.ResidentName
                     ?? "Unassigned";
@@ -412,6 +475,9 @@ namespace CareHub.Pages.Desktop
                         !fullName.Contains(residentQuery, StringComparison.OrdinalIgnoreCase))
                         continue;
                 }
+
+                if (!hasTimeSelected && !MarScheduleHelper.IsDayEnabled(med, DateTime.Today.DayOfWeek))
+                    continue;
 
                 if (hasTimeSelected)
                 {
@@ -444,8 +510,6 @@ namespace CareHub.Pages.Desktop
                 results.Add(med);
             }
 
-            // Deduplicate by (MedName, ResidentId) — keeps the first occurrence per group.
-            // This handles any existing duplicates in the API database.
             var deduped = results
                 .GroupBy(m => $"{(m.MedName ?? "").ToLowerInvariant()}|{m.ResidentId}")
                 .Select(g => g.First())

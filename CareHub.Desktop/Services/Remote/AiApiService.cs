@@ -27,6 +27,26 @@ public sealed class AiApiService
         return await PostAsync("api/ai/detect-trends", new { residentId });
     }
 
+    public async Task<AiResult> ReportDraftAsync(Guid residentId)
+    {
+        return await PostAsync("api/ai/report-draft", new { residentId });
+    }
+
+    public async Task<AiResult> ShiftHandoffAsync()
+    {
+        return await PostAsync("api/ai/shift-handoff", new { });
+    }
+
+    public async Task<AiResult> CareQueryAsync(string query, Guid? residentId = null)
+    {
+        return await PostAsync("api/ai/care-query", new { query, residentId });
+    }
+
+    public async Task<AiResult> TrendExplainAsync(Guid residentId, int days)
+    {
+        return await PostAsync("api/ai/trend-explain", new { residentId, days });
+    }
+
     private async Task<AiResult> PostAsync(string endpoint, object payload)
     {
         try

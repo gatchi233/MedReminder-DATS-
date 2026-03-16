@@ -15,7 +15,6 @@ public sealed class MarController : ControllerBase
 
     public MarController(CareHubDbContext db) => _db = db;
 
-    // GET api/mar?residentId=&fromUtc=&toUtc=&includeVoided=false
     [HttpGet]
     [Authorize(Roles = $"{Roles.Staff},{Roles.Admin},{Roles.Resident}")]
     public async Task<ActionResult<List<MarEntry>>> GetAll(
@@ -46,7 +45,6 @@ public sealed class MarController : ControllerBase
         return Ok(list);
     }
 
-    // GET api/mar/{id}
     [HttpGet("{id:guid}")]
     [Authorize(Roles = $"{Roles.Staff},{Roles.Admin},{Roles.Resident}")]
     public async Task<ActionResult<MarEntry>> GetById(Guid id, CancellationToken ct)
@@ -57,27 +55,28 @@ public sealed class MarController : ControllerBase
         return entry is null ? NotFound() : Ok(entry);
     }
 
-    // POST api/mar
     [HttpPost]
     [Authorize(Roles = Roles.Staff)]
     public async Task<ActionResult<MarEntry>> Create(
         [FromBody] CreateMarEntryRequest request,
         CancellationToken ct)
     {
-        // Idempotency: check if ClientRequestId already exists
         var existing = await _db.MarEntries.AsNoTracking()
             .FirstOrDefaultAsync(m => m.ClientRequestId == request.ClientRequestId, ct);
 
         if (existing is not null)
             return Ok(existing);
 
-        // Validate FKs up front to return clean errors instead of DB exceptions
         if (!await _db.Residents.AnyAsync(r => r.Id == request.ResidentId, ct))
             return NotFound($"Resident {request.ResidentId} not found.");
 
         var med = await _db.Medications.FindAsync(new object[] { request.MedicationId }, ct);
         if (med is null)
             return NotFound($"Medication {request.MedicationId} not found.");
+
+        var allowedStatuses = new[] { "Given", "Refused", "Held", "Missed", "NotAvailable" };
+        if (!allowedStatuses.Contains(request.Status))
+            return BadRequest($"Invalid status '{request.Status}'. Allowed: {string.Join(", ", allowedStatuses)}.");
 
         var now = DateTimeOffset.UtcNow;
 
@@ -102,10 +101,17 @@ public sealed class MarController : ControllerBase
             await using var tx = await _db.Database.BeginTransactionAsync(ct);
             try
             {
-                if (med.StockQuantity < entry.DoseQuantity)
+                var freshMed = await _db.Medications.FindAsync(new object[] { request.MedicationId }, ct);
+                if (freshMed is null)
                 {
                     await tx.RollbackAsync(ct);
-                    return Conflict($"Insufficient stock. Available: {med.StockQuantity}, requested: {entry.DoseQuantity}.");
+                    return NotFound($"Medication {request.MedicationId} not found.");
+                }
+
+                if (freshMed.StockQuantity < entry.DoseQuantity)
+                {
+                    await tx.RollbackAsync(ct);
+                    return Conflict($"Insufficient stock. Available: {freshMed.StockQuantity}, requested: {entry.DoseQuantity}.");
                 }
 
                 _db.MarEntries.Add(entry);
@@ -120,7 +126,7 @@ public sealed class MarController : ControllerBase
                     CreatedAtUtc = now,
                 });
 
-                med.StockQuantity -= entry.DoseQuantity;
+                freshMed.StockQuantity -= entry.DoseQuantity;
 
                 await _db.SaveChangesAsync(ct);
                 await tx.CommitAsync(ct);
@@ -140,7 +146,6 @@ public sealed class MarController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = entry.Id }, entry);
     }
 
-    // POST api/mar/{id}/void
     [HttpPost("{id:guid}/void")]
     [Authorize(Roles = Roles.Staff)]
     public async Task<IActionResult> Void(
@@ -171,7 +176,6 @@ public sealed class MarController : ControllerBase
             entry.VoidReason = request.Reason;
             entry.UpdatedAtUtc = now;
 
-            // If it was "Given", restore inventory atomically
             if (entry.Status == "Given")
             {
                 var existingLedger = await _db.MedicationInventoryLedgers
@@ -213,9 +217,6 @@ public sealed class MarController : ControllerBase
         }
     }
 
-    // ──────────────────── REPORTING ────────────────────
-
-    // GET api/mar/report?fromUtc=&toUtc=&residentId=
     [HttpGet("report")]
     [Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]
     public async Task<ActionResult<MarReport>> GetReport(
@@ -233,7 +234,6 @@ public sealed class MarController : ControllerBase
 
         var entries = await query.ToListAsync(ct);
 
-        // Lookup resident & medication names
         var residentIds = entries.Select(e => e.ResidentId).Distinct().ToList();
         var medIds = entries.Select(e => e.MedicationId).Distinct().ToList();
 
@@ -280,14 +280,23 @@ public sealed class MarController : ControllerBase
         });
     }
 
-    // ──────────────────── SEED DEMO DATA ────────────────────
+    [HttpDelete("all")]
+    [Authorize(Roles = Roles.Admin)]
+    public async Task<IActionResult> DeleteAll(CancellationToken ct)
+    {
+        var count = await _db.MarEntries.CountAsync(ct);
+        if (count == 0) return Ok(new { deleted = 0 });
 
-    // POST api/mar/seed-demo
+        _db.MedicationInventoryLedgers.RemoveRange(_db.MedicationInventoryLedgers);
+        _db.MarEntries.RemoveRange(_db.MarEntries);
+        await _db.SaveChangesAsync(ct);
+        return Ok(new { deleted = count });
+    }
+
     [HttpPost("seed-demo")]
     [Authorize(Roles = Roles.Admin)]
     public async Task<ActionResult> SeedDemo(CancellationToken ct)
     {
-        // Use server local time so scheduled times match what the desktop computes
         var todayLocal = DateTime.Now.Date;
         var localOffset = TimeZoneInfo.Local.GetUtcOffset(todayLocal);
         var todayStartUtc = new DateTimeOffset(todayLocal, localOffset).ToUniversalTime();
@@ -300,17 +309,16 @@ public sealed class MarController : ControllerBase
         if (meds.Count == 0)
             return BadRequest("No resident-assigned medications found to seed.");
 
-        // Delete existing demo entries for today (clean re-seed)
         var existingToday = await _db.MarEntries
             .Where(m => m.AdministeredAtUtc >= todayStartUtc && m.AdministeredAtUtc < todayStartUtc.AddDays(1))
-            .Where(m => m.Notes == "SEED_DEMO")
             .ToListAsync(ct);
         _db.MarEntries.RemoveRange(existingToday);
 
         var rng = new Random(42);
-        var statuses = new[] { "Given", "Given", "Given", "Refused", "Missed" }; // 60% Given, 20% Refused, 20% Missed
         var nurses = new[] { "Nurse Sarah", "Nurse James", "Nurse Emily" };
         var created = new List<object>();
+
+        var slots = new Dictionary<(Guid resId, int hour), List<(Medication med, TimeSpan scheduledTime)>>();
 
         foreach (var med in meds)
         {
@@ -322,16 +330,37 @@ public sealed class MarController : ControllerBase
                 var scheduledTime = times[i];
                 if (scheduledTime == TimeSpan.Zero) continue;
 
-                // Convert local scheduled time to UTC (same as desktop does)
+                var scheduledLocal = todayLocal.Add(scheduledTime);
+                if (scheduledLocal > DateTime.Now) continue;
+
+                var key = (med.ResidentId!.Value, scheduledTime.Hours);
+                if (!slots.ContainsKey(key)) slots[key] = new();
+                slots[key].Add((med, scheduledTime));
+            }
+        }
+
+        var slotKeys = slots.Keys.ToList();
+        int numRefused = Math.Max(1, (int)Math.Round(slotKeys.Count * 0.01));
+        int numMissed = Math.Max(1, (int)Math.Round(slotKeys.Count * 0.01));
+        var shuffled = slotKeys.OrderBy(_ => rng.Next()).ToList();
+        var refusedSlots = new HashSet<(Guid, int)>(shuffled.Take(numRefused));
+        var missedSlots = new HashSet<(Guid, int)>(shuffled.Skip(numRefused).Take(numMissed));
+
+        foreach (var (key, medList) in slots)
+        {
+            string status;
+            if (refusedSlots.Contains(key)) status = "Refused";
+            else if (missedSlots.Contains(key)) status = "Missed";
+            else status = "Given";
+
+            var nurse = nurses[rng.Next(nurses.Length)];
+
+            foreach (var (med, scheduledTime) in medList)
+            {
                 var scheduledLocal = todayLocal.Add(scheduledTime);
                 var scheduledOffset = TimeZoneInfo.Local.GetUtcOffset(scheduledLocal);
                 var scheduledUtc = new DateTimeOffset(scheduledLocal, scheduledOffset).ToUniversalTime();
 
-                // Only seed past slots (compare local time)
-                if (scheduledLocal > DateTime.Now)
-                    continue;
-
-                var status = statuses[rng.Next(statuses.Length)];
                 var delayMinutes = status == "Given" ? rng.Next(1, 15) : 0;
                 var administeredUtc = status == "Given"
                     ? scheduledUtc.AddMinutes(delayMinutes)
@@ -347,7 +376,7 @@ public sealed class MarController : ControllerBase
                     DoseUnit = med.QuantityUnit ?? "tablet",
                     ScheduledForUtc = scheduledUtc,
                     AdministeredAtUtc = administeredUtc,
-                    RecordedBy = nurses[rng.Next(nurses.Length)],
+                    RecordedBy = nurse,
                     Notes = "SEED_DEMO",
                     CreatedAtUtc = DateTimeOffset.UtcNow,
                     UpdatedAtUtc = DateTimeOffset.UtcNow,

@@ -29,15 +29,23 @@ public class MarService : IMarService
                 var items = await _api.LoadAsync(residentId, fromUtc, toUtc);
                 ConnectivityHelper.MarkOnline();
 
-                // Check for pending MAR sync items
+                if (_local is CareHub.Services.Local.MarJsonService localJson)
+                    await localJson.ReplaceAllAsync(items);
+
                 var pending = await _queue.GetAllAsync();
-                if (!pending.Any(x => x.EntityType == "MarEntry"))
+                var pendingMar = pending.Where(x => x.EntityType == "MarEntry").ToList();
+                if (pendingMar.Count > 0)
                 {
-                    return items;
+                    var existingIds = new HashSet<Guid>(items.Select(e => e.ClientRequestId));
+                    foreach (var p in pendingMar)
+                    {
+                        var entry = JsonSerializer.Deserialize<MarEntry>(p.PayloadJson, _jsonOptions);
+                        if (entry is not null && !existingIds.Contains(entry.ClientRequestId))
+                            items.Add(entry);
+                    }
                 }
 
-                // Pending changes exist — show local data
-                return await _local.LoadAsync(residentId, fromUtc, toUtc);
+                return items;
             }
             catch
             {
@@ -51,7 +59,6 @@ public class MarService : IMarService
 
     public async Task CreateAsync(MarEntry entry)
     {
-        // Ensure ClientRequestId is set for idempotency
         if (entry.ClientRequestId == Guid.Empty)
             entry.ClientRequestId = Guid.NewGuid();
 
@@ -73,7 +80,6 @@ public class MarService : IMarService
             }
         }
 
-        // Offline: save local + enqueue
         await _local.CreateAsync(entry);
 
         var payloadJson = JsonSerializer.Serialize(entry, _jsonOptions);
@@ -89,8 +95,6 @@ public class MarService : IMarService
 
     public async Task<int> SyncAsync()
     {
-        System.Diagnostics.Debug.WriteLine("[SYNC] MarService.SyncAsync called");
-
         if (!ConnectivityHelper.IsOnline()) return 0;
 
         var items = await _queue.GetAllAsync();
@@ -109,7 +113,6 @@ public class MarService : IMarService
                     continue;
                 }
 
-                // ClientRequestId ensures idempotent replay on the server
                 await _api.CreateAsync(entry);
 
                 await _queue.RemoveAsync(item.Id);

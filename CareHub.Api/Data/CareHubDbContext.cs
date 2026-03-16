@@ -15,6 +15,7 @@ public sealed class CareHubDbContext : DbContext
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<MarEntry> MarEntries => Set<MarEntry>();
     public DbSet<MedicationInventoryLedger> MedicationInventoryLedgers => Set<MedicationInventoryLedger>();
+    public DbSet<MedicationOrder> MedicationOrders => Set<MedicationOrder>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -77,6 +78,15 @@ public sealed class CareHubDbContext : DbContext
             .WithMany()
             .HasForeignKey(l => l.MarEntryId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // MedicationOrder
+        modelBuilder.Entity<MedicationOrder>().HasKey(x => x.Id);
+
+        modelBuilder.Entity<MedicationOrder>()
+            .HasOne(o => o.Medication)
+            .WithMany()
+            .HasForeignKey(o => o.MedicationId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Backward-compatible mapping: database column is RecordedAtUtc.
         modelBuilder.Entity<Observation>()

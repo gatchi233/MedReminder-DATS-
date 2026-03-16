@@ -1,8 +1,10 @@
 using CommunityToolkit.Maui.Views;
 using CareHub.Models;
+using CareHub.Pages.UI;
 using CareHub.Pages.UI.Popups;
 using CareHub.Services;
 using CareHub.Services.Abstractions;
+using CareHub.Services.Remote;
 using CareHub.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -98,6 +100,40 @@ namespace CareHub.Pages.Desktop
 
             await orderService.CreateAsync(med.Id, qty, user, r.Field2);
             await DisplayAlert("Created", "Order created (Status: Requested).", "OK");
+        }
+
+        private async void OnAiExplainClicked(object sender, EventArgs e)
+        {
+            var medName = VM.MedName ?? "Unknown";
+
+            var ai = MauiProgram.Services.GetService<AiApiService>();
+            if (ai == null)
+            {
+                await DisplayAlert("Unavailable", "AI service is not configured.", "OK");
+                return;
+            }
+
+            try
+            {
+                var med = VM.Batches.FirstOrDefault()?.Med;
+                var dosage = med?.Dosage;
+
+                var result = await ai.MedicationExplainAsync(medName, dosage);
+
+                if (result.Success)
+                {
+                    var popup = new AiResponsePopup(medName, result.Content, result.Disclaimer);
+                    await this.ShowPopupAsync(popup);
+                }
+                else
+                {
+                    await DisplayAlert("AI Error", result.Content, "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("AI Error", $"Could not get AI response: {ex.Message}", "OK");
+            }
         }
 
         private async void OnCloseClicked(object sender, EventArgs e)

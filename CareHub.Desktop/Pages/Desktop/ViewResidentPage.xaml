@@ -76,12 +76,11 @@
                     BackgroundColor="{StaticResource Button_Icon_Background}">
                 <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
                 <Grid ColumnDefinitions="32,Auto" Margin="0" InputTransparent="True">
-                    <Label Grid.Column="0" Text="*" FontSize="16" FontAttributes="Bold"
-                           TextColor="#8B5CF6"
+                    <Image Grid.Column="0" Source="icons8_summary_100.png" HeightRequest="16" WidthRequest="16"
                            HorizontalOptions="Center" VerticalOptions="Center"/>
                     <Border Grid.Column="1" BackgroundColor="#7C3AED"
                             Padding="10,0" StrokeThickness="0" InputTransparent="True">
-                        <Label Text="AI SUMMARY" TextColor="White"
+                        <Label Text="SUMMARY" TextColor="White"
                                FontSize="11" VerticalOptions="Center" FontAttributes="Bold"/>
                     </Border>
                 </Grid>
@@ -95,12 +94,11 @@
                     BackgroundColor="{StaticResource Button_Icon_Background}">
                 <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
                 <Grid ColumnDefinitions="32,Auto" Margin="0" InputTransparent="True">
-                    <Label Grid.Column="0" Text="*" FontSize="16" FontAttributes="Bold"
-                           TextColor="#8B5CF6"
+                    <Image Grid.Column="0" Source="icons8_trend_100.png" HeightRequest="16" WidthRequest="16"
                            HorizontalOptions="Center" VerticalOptions="Center"/>
                     <Border Grid.Column="1" BackgroundColor="#7C3AED"
                             Padding="10,0" StrokeThickness="0" InputTransparent="True">
-                        <Label Text="AI TRENDS" TextColor="White"
+                        <Label Text="TRENDS" TextColor="White"
                                FontSize="11" VerticalOptions="Center" FontAttributes="Bold"/>
                     </Border>
                 </Grid>

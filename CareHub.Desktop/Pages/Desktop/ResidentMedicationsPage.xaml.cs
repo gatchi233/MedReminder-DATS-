@@ -1,4 +1,6 @@
 using CareHub.Desktop.Models;
+using CareHub.Pages.UI;
+using CommunityToolkit.Maui.Views;
 using CareHub.Models;
 using CareHub.Services.Abstractions;
 using CareHub.Services.Remote;
@@ -333,11 +335,15 @@ namespace CareHub.Pages.Desktop
             {
                 var result = await ai.MedicationExplainAsync(med.MedName ?? "Unknown", med.Dosage);
 
-                var message = result.Success
-                    ? $"{result.Content}\n\n--- {result.Disclaimer} ---"
-                    : result.Content;
-
-                await DisplayAlert($"AI: {med.MedName}", message, "OK");
+                if (result.Success)
+                {
+                    var popup = new AiResponsePopup(med.MedName ?? "Medication", result.Content, result.Disclaimer);
+                    await this.ShowPopupAsync(popup);
+                }
+                else
+                {
+                    await DisplayAlert("AI Error", result.Content, "OK");
+                }
             }
             catch (Exception ex)
             {
