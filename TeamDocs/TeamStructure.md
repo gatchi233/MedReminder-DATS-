@@ -6,7 +6,7 @@
 
 ### Members:
 
-- Alice – Technical Lead (Backend & System Architecture)
+- Alice – Technical Lead (Backend, Desktop & System Architecture)
 - Samuel – Full-Stack Integration (Web + Mobile + API Coordination)
 
 **Responsibilities**
