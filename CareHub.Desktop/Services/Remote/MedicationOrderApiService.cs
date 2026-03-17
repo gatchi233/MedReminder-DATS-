@@ -15,7 +15,7 @@ public sealed class MedicationOrderApiService : IMedicationOrderService
     {
         try
         {
-            return await _http.GetFromJsonAsync<List<MedicationOrder>>("api/MedicationOrders")
+            return await _http.GetFromJsonAsync<List<MedicationOrder>>("api/medicationorders")
                    ?? new List<MedicationOrder>();
         }
         catch (HttpRequestException ex)
@@ -41,7 +41,7 @@ public sealed class MedicationOrderApiService : IMedicationOrderService
                 notes
             };
 
-            var resp = await _http.PostAsJsonAsync("api/MedicationOrders", payload);
+            var resp = await _http.PostAsJsonAsync("api/medicationorders", payload);
             resp.EnsureSuccessStatusCode();
 
             var created = await resp.Content.ReadFromJsonAsync<MedicationOrder>();
@@ -67,7 +67,7 @@ public sealed class MedicationOrderApiService : IMedicationOrderService
                 expiryDate
             };
 
-            var resp = await _http.PutAsJsonAsync($"api/MedicationOrders/{orderId}/status", payload);
+            var resp = await _http.PutAsJsonAsync($"api/medicationorders/{orderId}/status", payload);
             resp.EnsureSuccessStatusCode();
         }
         catch (HttpRequestException ex)
@@ -90,7 +90,7 @@ public sealed class MedicationOrderApiService : IMedicationOrderService
     {
         try
         {
-            var resp = await _http.DeleteAsync($"api/MedicationOrders/{orderId}");
+            var resp = await _http.DeleteAsync($"api/medicationorders/{orderId}");
             if (resp.StatusCode == System.Net.HttpStatusCode.NotFound)
                 return;
             resp.EnsureSuccessStatusCode();
@@ -109,7 +109,7 @@ public sealed class MedicationOrderApiService : IMedicationOrderService
     {
         try
         {
-            return await _http.GetFromJsonAsync<List<MedicationOrder>>($"api/MedicationOrders/by-medication/{medicationId}")
+            return await _http.GetFromJsonAsync<List<MedicationOrder>>($"api/medicationorders/by-medication/{medicationId}")
                    ?? new List<MedicationOrder>();
         }
         catch (HttpRequestException ex)

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CareHub.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/mar")]
 [Authorize]
 public sealed class MarController : ControllerBase
 {

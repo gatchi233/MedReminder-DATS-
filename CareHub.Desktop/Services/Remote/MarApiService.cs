@@ -15,7 +15,7 @@ public sealed class MarApiService : IMarService
     {
         try
         {
-            var url = $"api/Mar?fromUtc={fromUtc:O}&toUtc={toUtc:O}";
+            var url = $"api/mar?fromUtc={fromUtc:O}&toUtc={toUtc:O}";
             if (residentId.HasValue)
                 url += $"&residentId={residentId.Value}";
 
@@ -50,7 +50,7 @@ public sealed class MarApiService : IMarService
                 recordedBy       = entry.RecordedBy
             };
 
-            var resp = await _http.PostAsJsonAsync("api/Mar", payload);
+            var resp = await _http.PostAsJsonAsync("api/mar", payload);
             resp.EnsureSuccessStatusCode();
 
             var created = await resp.Content.ReadFromJsonAsync<MarEntry>();
