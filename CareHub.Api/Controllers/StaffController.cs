@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace CareHub.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/staff")]
 [Authorize]
 public sealed class StaffController : ControllerBase
 {

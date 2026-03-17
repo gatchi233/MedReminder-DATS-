@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace CareHub.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/observations")]
 [Authorize]
 public sealed class ObservationsController : ControllerBase
 {

@@ -571,7 +571,7 @@ function App() {
           error={error}
           authSession={authSession}
           authRole={authSession?.role}
-          canEditResidents={authSession?.role === "Admin"}
+          canEditResidents={["Admin", "Nurse"].includes(authSession?.role || "")}
           onCreateResident={handleCreateResident}
           onSaveResident={handleSaveResident}
           currentResident={currentResident}
@@ -590,7 +590,7 @@ function App() {
         <InventoryPage
           loading={loading}
           error={error}
-          canEditInventory={authSession?.role === "Admin"}
+          canEditInventory={["Admin", "Nurse"].includes(authSession?.role || "")}
           onSaveMedication={handleSaveMedication}
           displayedInventory={displayedInventory}
           pagedInventory={pagedInventory}
