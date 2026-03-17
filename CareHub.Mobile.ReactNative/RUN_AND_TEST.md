@@ -54,6 +54,46 @@ Remove-Item -Recurse -Force .\android\app\build -ErrorAction SilentlyContinue
 cmd /c npm run android
 ```
 
+If you hit CMake/Ninja loop errors (`build.ninja still dirty after 100 tries`), use a short drive path and single worker:
+
+```powershell
+cd "C:\Users\sambe\Desktop\Term 5\CSTP 2204\ProjectIdea\CareHub\CareHub.Mobile.ReactNative"
+cd android
+.\gradlew.bat --stop
+cd ..
+Get-Process java,javaw -ErrorAction SilentlyContinue | Stop-Process -Force
+Remove-Item -Recurse -Force .\android\.gradle -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force .\android\.cxx -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force .\android\app\.cxx -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force .\node_modules\react-native-screens\android\.cxx -ErrorAction SilentlyContinue
+```
+
+Also set these in `android/gradle.properties`:
+
+```properties
+org.gradle.parallel=false
+org.gradle.workers.max=1
+```
+
+Then run from a short path:
+
+```powershell
+subst X: "C:\Users\sambe\Desktop\Term 5\CSTP 2204\ProjectIdea\CareHub"
+cd X:\CareHub.Mobile.ReactNative
+cmd /c npm run android
+```
+
+If you hit NDK error (`did not have a source.properties file`), reinstall NDK:
+
+```powershell
+$SdkRoot = "C:\Users\sambe\AppData\Local\Android\Sdk"
+$SdkMgr = "C:\Program Files (x86)\Android\android-sdk\cmdline-tools\latest\bin\sdkmanager.bat"
+Remove-Item -Recurse -Force "$SdkRoot\ndk\26.1.10909125" -ErrorAction SilentlyContinue
+& $SdkMgr --sdk_root=$SdkRoot --install "ndk;26.1.10909125"
+& $SdkMgr --sdk_root=$SdkRoot --licenses
+Test-Path "$SdkRoot\ndk\26.1.10909125\source.properties"
+```
+
 ## 5) API base URL used by mobile
 
 Configured in `src/services/apiClient.js`:
@@ -89,10 +129,16 @@ Configured in `src/services/apiClient.js`:
 
 ## 7) Useful test accounts
 
-- `admin` / `admin123`
-- `nurse1` / `nurse123`
-- `carestaff1` / `care123`
-- `resident1` / `resident123`
+Allowed on mobile:
+
+- `nurse1` / `nurse123` (Nurse)
+- `carestaff1` / `care123` (General CareStaff)
+- `resident1` / `resident123` (Observer)
+- `resident2` to `resident16` / `resident123` (Observer)
+
+Blocked on mobile:
+
+- `admin` / `admin123` (Admin)
 
 ## 8) Optional iOS run (macOS only)
 
