@@ -74,6 +74,15 @@ public sealed class ObservationsController : ControllerBase
         return Ok(list);
     }
 
+    // GET api/observations/byResident/{residentId}
+    // Legacy alias kept for contract compatibility.
+    [HttpGet("byResident/{residentId:guid}")]
+    [Authorize(Roles = $"{Roles.Nurse},{Roles.GeneralCareStaff},{Roles.Observer}")]
+    public Task<ActionResult<List<Observation>>> GetByResidentIdLegacy(Guid residentId)
+    {
+        return GetByResidentId(residentId);
+    }
+
     // POST api/observations
     [HttpPost]
     [Authorize(Roles = $"{Roles.Nurse},{Roles.GeneralCareStaff}")]

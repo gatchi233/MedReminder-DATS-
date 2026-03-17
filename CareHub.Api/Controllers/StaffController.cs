@@ -37,6 +37,27 @@ public sealed class StaffController : ControllerBase
         return Ok(list.Cast<object>().ToList());
     }
 
+    // GET api/staff/{username}
+    [HttpGet("{username}")]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Observer}")]
+    public async Task<ActionResult<object>> GetByUsername(string username, CancellationToken ct)
+    {
+        var user = await _db.AppUsers
+            .AsNoTracking()
+            .Where(u => u.Role != Roles.Observer)
+            .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower(), ct);
+
+        if (user is null)
+            return NotFound();
+
+        return Ok(new
+        {
+            username = user.Username,
+            displayName = user.DisplayName,
+            role = user.Role
+        });
+    }
+
     // PUT api/staff/{username}
     [HttpPut("{username}")]
     [Authorize(Roles = Roles.Admin)]
