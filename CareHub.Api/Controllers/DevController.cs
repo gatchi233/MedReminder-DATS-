@@ -56,7 +56,7 @@ public sealed class DevController : ControllerBase
                     Username = "carestaff1",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("care123"),
                     DisplayName = "Care Staff One",
-                    Role = "CareStaff"
+                    Role = "General CareStaff"
                 }
             };
 

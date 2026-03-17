@@ -71,9 +71,9 @@ public sealed class StaffController : ControllerBase
         var role = (request.Role ?? "").Trim();
         if (!string.IsNullOrWhiteSpace(role))
         {
-            var allowed = new[] { Roles.Admin, Roles.Staff, Roles.Observer };
+            var allowed = new[] { Roles.Admin, Roles.Nurse, Roles.GeneralCareStaff, Roles.Observer };
             if (!allowed.Contains(role, StringComparer.OrdinalIgnoreCase))
-                return BadRequest("Role must be Admin, Staff, or Observer.");
+                return BadRequest("Role must be Admin, Nurse, General CareStaff, or Observer.");
 
             user.Role = role;
         }
@@ -96,10 +96,10 @@ public sealed class StaffController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             return BadRequest("Username and password are required.");
 
-        var allowed = new[] { Roles.Admin, Roles.Staff, Roles.Observer };
+        var allowed = new[] { Roles.Admin, Roles.Nurse, Roles.GeneralCareStaff, Roles.Observer };
         var role = (request.Role ?? "").Trim();
         if (!allowed.Contains(role, StringComparer.OrdinalIgnoreCase))
-            return BadRequest("Role must be Admin, Staff, or Observer.");
+            return BadRequest("Role must be Admin, Nurse, General CareStaff, or Observer.");
 
         var exists = await _db.AppUsers.AnyAsync(
             u => u.Username.ToLower() == request.Username.Trim().ToLower(), ct);
