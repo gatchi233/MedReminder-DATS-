@@ -13,8 +13,8 @@ namespace CareHub.Services
         private readonly List<Staff> _localStaff = new()
         {
             new Staff { Username = "admin",     Password = "admin123",    StaffName = "System Admin",      Role = StaffRole.Admin },
-            new Staff { Username = "staff1",   Password = "staff123",   StaffName = "Staff User",        Role = StaffRole.Nurse },
-            new Staff { Username = "observer1", Password = "observer123", StaffName = "Observer User",    Role = StaffRole.CareStaff }
+            new Staff { Username = "nurse1",    Password = "nurse123",    StaffName = "Nurse One",         Role = StaffRole.Nurse },
+            new Staff { Username = "carestaff1", Password = "care123",    StaffName = "Care Staff One",    Role = StaffRole.CareStaff }
         };
 
         public Staff? CurrentUser { get; private set; }
@@ -52,6 +52,10 @@ namespace CareHub.Services
                         AccessToken = body.GetProperty("accessToken").GetString();
                         var role = body.GetProperty("role").GetString() ?? "";
                         var displayName = body.GetProperty("displayName").GetString() ?? username;
+
+                        // Observer accounts are not allowed to use Desktop.
+                        if (role.Equals("Observer", StringComparison.OrdinalIgnoreCase))
+                            return false;
 
                         CurrentUser = new Staff
                         {
@@ -121,7 +125,7 @@ namespace CareHub.Services
             {
                 "admin" => StaffRole.Admin,
                 "nurse" or "staff" => StaffRole.Nurse,
-                "carestaff" or "observer" => StaffRole.CareStaff,
+                "general carestaff" or "carestaff" => StaffRole.CareStaff,
                 _ => StaffRole.CareStaff
             };
         }
