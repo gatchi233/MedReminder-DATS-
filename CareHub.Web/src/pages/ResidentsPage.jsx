@@ -88,7 +88,7 @@ function ResidentsPage({
     );
   }
 
-  if (authRole === "Resident") {
+  if (authRole === "Observer") {
     const resident = currentResident;
     if (!resident) {
       return (

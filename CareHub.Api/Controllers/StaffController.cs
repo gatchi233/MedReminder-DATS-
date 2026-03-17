@@ -25,7 +25,7 @@ public sealed class StaffController : ControllerBase
     {
         var list = await _db.AppUsers
             .AsNoTracking()
-            .Where(u => u.Role != Roles.Resident)
+            .Where(u => u.Role != Roles.Observer)
             .Select(u => new
             {
                 username = u.Username,

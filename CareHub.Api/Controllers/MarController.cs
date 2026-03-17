@@ -16,7 +16,7 @@ public sealed class MarController : ControllerBase
     public MarController(CareHubDbContext db) => _db = db;
 
     [HttpGet]
-    [Authorize(Roles = $"{Roles.Staff},{Roles.Admin},{Roles.Resident}")]
+    [Authorize(Roles = Roles.Nurse)]
     public async Task<ActionResult<List<MarEntry>>> GetAll(
         [FromQuery] Guid? residentId,
         [FromQuery] DateTimeOffset? fromUtc,
@@ -46,7 +46,7 @@ public sealed class MarController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize(Roles = $"{Roles.Staff},{Roles.Admin},{Roles.Resident}")]
+    [Authorize(Roles = Roles.Nurse)]
     public async Task<ActionResult<MarEntry>> GetById(Guid id, CancellationToken ct)
     {
         var entry = await _db.MarEntries.AsNoTracking()
@@ -56,7 +56,7 @@ public sealed class MarController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = Roles.Staff)]
+    [Authorize(Roles = Roles.Nurse)]
     public async Task<ActionResult<MarEntry>> Create(
         [FromBody] CreateMarEntryRequest request,
         CancellationToken ct)
@@ -150,7 +150,7 @@ public sealed class MarController : ControllerBase
     }
 
     [HttpPost("{id:guid}/void")]
-    [Authorize(Roles = Roles.Staff)]
+    [Authorize(Roles = Roles.Nurse)]
     public async Task<IActionResult> Void(
         Guid id,
         [FromBody] VoidMarEntryRequest request,
@@ -222,7 +222,7 @@ public sealed class MarController : ControllerBase
     }
 
     [HttpGet("report")]
-    [Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.Nurse},{Roles.Admin}")]
     public async Task<ActionResult<MarReport>> GetReport(
         [FromQuery] DateTimeOffset fromUtc,
         [FromQuery] DateTimeOffset toUtc,

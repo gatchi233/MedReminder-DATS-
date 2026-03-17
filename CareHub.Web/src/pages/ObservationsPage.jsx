@@ -44,7 +44,7 @@ function ObservationsPage({
 
       {activeTab === "timeline" && (
         <section className="page-shell">
-          {authRole === "Resident" && currentResident && (
+          {authRole === "Observer" && currentResident && (
             <article className="card">
               <h3>My Care Team</h3>
               <div className="list-row">

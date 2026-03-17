@@ -29,6 +29,14 @@ public sealed class MobileAuthService
                 return false;
 
             var body = await resp.Content.ReadFromJsonAsync<JsonElement>();
+            var role = body.TryGetProperty("role", out var roleEl) ? roleEl.GetString() ?? "" : "";
+            if (role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                // Platform rule: Admin cannot use mobile app.
+                AccessToken = null;
+                return false;
+            }
+
             AccessToken = body.GetProperty("accessToken").GetString();
             return !string.IsNullOrEmpty(AccessToken);
         }

@@ -42,7 +42,7 @@ public sealed class ResidentsController : ControllerBase
 
     // POST api/residents
     [HttpPost]
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Nurse}")]
     public async Task<ActionResult<Resident>> Create([FromBody] Resident resident, CancellationToken ct)
     {
         if (resident.Id == Guid.Empty)
@@ -60,7 +60,7 @@ public sealed class ResidentsController : ControllerBase
 
     // PUT api/residents/{id}
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Nurse}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] Resident resident, CancellationToken ct)
     {
         if (id != resident.Id)
@@ -82,7 +82,7 @@ public sealed class ResidentsController : ControllerBase
 
     // DELETE api/residents/{id}
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Nurse}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         var entity = await _db.Residents.FirstOrDefaultAsync(r => r.Id == id, ct);

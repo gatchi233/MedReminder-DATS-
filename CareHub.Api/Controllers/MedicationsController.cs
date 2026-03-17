@@ -56,7 +56,7 @@ public sealed class MedicationsController : ControllerBase
 
     // POST api/medications
     [HttpPost]
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Nurse}")]
     public async Task<ActionResult<Medication>> Create([FromBody] Medication med, CancellationToken ct)
     {
         if (med.Id == Guid.Empty)
@@ -72,7 +72,7 @@ public sealed class MedicationsController : ControllerBase
 
     // PUT api/medications/{id}
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Nurse}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] Medication med, CancellationToken ct)
     {
         if (id != med.Id)
@@ -98,7 +98,7 @@ public sealed class MedicationsController : ControllerBase
 
     // DELETE api/medications/{id}
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Nurse}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         var entity = await _db.Medications.FirstOrDefaultAsync(m => m.Id == id, ct);
@@ -112,7 +112,7 @@ public sealed class MedicationsController : ControllerBase
 
     // POST api/medications/{id}/adjustStock?delta=...
     [HttpPost("{id:guid}/adjustStock")]
-    [Authorize(Roles = Roles.Admin)]
+    [Authorize(Roles = $"{Roles.Admin},{Roles.Nurse}")]
     public async Task<IActionResult> AdjustStock(Guid id, [FromQuery] int delta, CancellationToken ct)
     {
         var med = await _db.Medications.FirstOrDefaultAsync(m => m.Id == id, ct);

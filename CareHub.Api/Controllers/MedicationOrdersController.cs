@@ -19,7 +19,7 @@ public sealed class MedicationOrdersController : ControllerBase
 
     // GET api/medicationorders
     [HttpGet]
-    [Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.Nurse},{Roles.Admin}")]
     public async Task<ActionResult<List<MedicationOrder>>> GetAll(CancellationToken ct)
     {
         var list = await _db.MedicationOrders.AsNoTracking()
@@ -31,7 +31,7 @@ public sealed class MedicationOrdersController : ControllerBase
 
     // GET api/medicationorders/{id}
     [HttpGet("{id:guid}")]
-    [Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.Nurse},{Roles.Admin}")]
     public async Task<ActionResult<MedicationOrder>> GetById(Guid id, CancellationToken ct)
     {
         var order = await _db.MedicationOrders.AsNoTracking()
@@ -42,7 +42,7 @@ public sealed class MedicationOrdersController : ControllerBase
 
     // GET api/medicationorders/by-medication/{medicationId}
     [HttpGet("by-medication/{medicationId:guid}")]
-    [Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.Nurse},{Roles.Admin}")]
     public async Task<ActionResult<List<MedicationOrder>>> GetByMedication(Guid medicationId, CancellationToken ct)
     {
         var list = await _db.MedicationOrders.AsNoTracking()
@@ -55,7 +55,7 @@ public sealed class MedicationOrdersController : ControllerBase
 
     // POST api/medicationorders
     [HttpPost]
-    [Authorize(Roles = Roles.Staff)]
+    [Authorize(Roles = $"{Roles.Nurse},{Roles.Admin}")]
     public async Task<ActionResult<MedicationOrder>> Create(
         [FromBody] CreateMedicationOrderRequest request,
         CancellationToken ct)
@@ -82,7 +82,7 @@ public sealed class MedicationOrdersController : ControllerBase
 
     // PUT api/medicationorders/{id}/status
     [HttpPut("{id:guid}/status")]
-    [Authorize(Roles = Roles.Staff)]
+    [Authorize(Roles = $"{Roles.Nurse},{Roles.Admin}")]
     public async Task<ActionResult<MedicationOrder>> UpdateStatus(
         Guid id,
         [FromBody] UpdateMedicationOrderStatusRequest request,
@@ -131,7 +131,7 @@ public sealed class MedicationOrdersController : ControllerBase
 
     // DELETE api/medicationorders/{id}
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = $"{Roles.Staff},{Roles.Admin}")]
+    [Authorize(Roles = $"{Roles.Nurse},{Roles.Admin}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         var order = await _db.MedicationOrders.FindAsync(new object[] { id }, ct);

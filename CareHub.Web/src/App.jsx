@@ -20,7 +20,7 @@ const ROLE_SECTIONS = {
   Admin: ["Dashboard", "Residents", "Inventory", "Staff"],
   Nurse: ["Dashboard", "Residents", "Inventory", "Observations"],
   "General CareStaff": ["Dashboard", "Residents", "Observations"],
-  Observer: ["Dashboard", "Residents", "Inventory", "Observations"],
+  Observer: ["Dashboard", "Inventory", "Observations"],
 };
 
 const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
