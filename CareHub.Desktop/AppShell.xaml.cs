@@ -24,11 +24,15 @@ namespace CareHub
         // Routes – only register sub-pages that are NOT declared as ShellContent in XAML
         Routing.RegisterRoute(nameof(EditMedicationPage), typeof(EditMedicationPage));
         Routing.RegisterRoute(nameof(EditResidentPage), typeof(EditResidentPage));
+        Routing.RegisterRoute(nameof(MedicationBatchesPage), typeof(MedicationBatchesPage));
         Routing.RegisterRoute(nameof(MedicationOrdersPage), typeof(MedicationOrdersPage));
         Routing.RegisterRoute(nameof(ResidentMedicationsPage), typeof(ResidentMedicationsPage));
         Routing.RegisterRoute(nameof(ResidentObservationsPage), typeof(ResidentObservationsPage));
         Routing.RegisterRoute(nameof(ResidentReportPage), typeof(ResidentReportPage));
         Routing.RegisterRoute(nameof(ViewResidentPage), typeof(ViewResidentPage));
+        Routing.RegisterRoute(nameof(MarPage), typeof(MarPage));
+        Routing.RegisterRoute(nameof(AiCareQueryPage), typeof(AiCareQueryPage));
+        Routing.RegisterRoute(nameof(AiShiftHandoffPage), typeof(AiShiftHandoffPage));
         }
 
         private bool _handlingUnsaved;
@@ -57,6 +61,38 @@ namespace CareHub
                     await Shell.Current.GoToAsync("//login");
                 });
                 return;
+            }
+
+            // Role-based navigation guards
+            if (auth.IsLoggedIn)
+            {
+                // Admin cannot access MAR or Observations (clinical tasks)
+                if (auth.HasRole(StaffRole.Admin))
+                {
+                    if (target.Contains("MarPage", StringComparison.OrdinalIgnoreCase) ||
+                        target.Contains("ResidentObservationsPage", StringComparison.OrdinalIgnoreCase))
+                    {
+                        args.Cancel();
+                        return;
+                    }
+                }
+
+                // CareStaff cannot access Medications, MAR, Reports, or Staff Management
+                if (auth.HasRole(StaffRole.CareStaff))
+                {
+                    if (target.Contains("MarPage", StringComparison.OrdinalIgnoreCase) ||
+                        target.Contains("MedicationInventory", StringComparison.OrdinalIgnoreCase) ||
+                        target.Contains("EditMedication", StringComparison.OrdinalIgnoreCase) ||
+                        target.Contains("MedicationBatches", StringComparison.OrdinalIgnoreCase) ||
+                        target.Contains("MedicationOrders", StringComparison.OrdinalIgnoreCase) ||
+                        target.Contains("ResidentMedications", StringComparison.OrdinalIgnoreCase) ||
+                        target.Contains("ResidentReport", StringComparison.OrdinalIgnoreCase) ||
+                        target.Contains("StaffManagement", StringComparison.OrdinalIgnoreCase))
+                    {
+                        args.Cancel();
+                        return;
+                    }
+                }
             }
 
             // Check for unsaved changes when switching tabs
@@ -134,22 +170,20 @@ namespace CareHub
         {
             if (!_auth.IsLoggedIn)
             {
-                // Hide everything except login if needed
                 if (StaffManagementItem != null)
                     StaffManagementItem.IsVisible = false;
-
+                if (MedicationInventoryItem != null)
+                    MedicationInventoryItem.IsVisible = false;
                 return;
             }
 
-            // Admin-only
+            // Staff Management: Admin only
             if (StaffManagementItem != null)
-            {
-                StaffManagementItem.IsVisible =
-                    _auth.HasRole(StaffRole.Admin);
-            }
+                StaffManagementItem.IsVisible = _auth.HasRole(StaffRole.Admin);
 
-            // You can expand later:
-            // InventoryItem.IsVisible = _auth.HasRole(StaffRole.Admin, StaffRole.Nurse);
+            // Inventory / Medications: Admin and Nurse only (not CareStaff)
+            if (MedicationInventoryItem != null)
+                MedicationInventoryItem.IsVisible = _auth.HasRole(StaffRole.Admin, StaffRole.Nurse);
         }
 
         public async Task LogoutAsync()
@@ -193,6 +227,10 @@ namespace CareHub
                 var obsSvc = MauiProgram.Services.GetService<IObservationService>() as ObservationService;
                 if (obsSvc != null)
                     total += await obsSvc.SyncAsync();
+
+                var marSvc = MauiProgram.Services.GetService<IMarService>() as MarService;
+                if (marSvc != null)
+                    total += await marSvc.SyncAsync();
 
                 var message = total > 0
                     ? $"Synced {total} record(s)"

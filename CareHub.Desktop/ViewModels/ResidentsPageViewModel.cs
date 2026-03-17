@@ -18,6 +18,24 @@ namespace CareHub.ViewModels
 
         public string NameFilter { get; private set; } = string.Empty;
 
+        private bool _sortAscending = true;
+        public bool SortAscending
+        {
+            get => _sortAscending;
+            set
+            {
+                if (_sortAscending == value) return;
+                _sortAscending = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public void ToggleSort()
+        {
+            SortAscending = !SortAscending;
+            ApplyFilters();
+        }
+
         public ObservableCollection<Resident> Residents { get; } = new();
 
         private string _statusMessage = "";
@@ -118,9 +136,9 @@ namespace CareHub.ViewModels
                 });
             }
 
-            query = query
-                .OrderBy(r => DateTime.TryParse(r.DateOfBirth, out var d) ? d : DateTime.MinValue)
-                .ThenBy(r => r.ResidentName);
+            query = _sortAscending
+                ? query.OrderBy(r => r.ResidentName)
+                : query.OrderByDescending(r => r.ResidentName);
 
             Residents.Clear();
             foreach (var r in query)

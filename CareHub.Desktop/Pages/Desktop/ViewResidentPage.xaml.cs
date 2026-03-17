@@ -1,6 +1,9 @@
 using CareHub.Models;
+using CareHub.Pages.UI;
 using CareHub.Services;
 using CareHub.Services.Abstractions;
+using CareHub.Services.Remote;
+using CommunityToolkit.Maui.Views;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using System;
@@ -50,11 +53,15 @@ private Resident? _resident;
 
             if (EditAction != null)
             {
-                // Disable the Edit action
                 EditAction.IsEnabled = canEditResident;
                 EditAction.InputTransparent = !canEditResident;
                 EditAction.Opacity = canEditResident ? 1.0 : 0.45;
             }
+
+            // AI buttons: Staff (Nurse) and Admin only
+            var canUseAi = auth?.HasRole(StaffRole.Admin, StaffRole.Nurse) ?? false;
+            if (AiSummaryAction != null) AiSummaryAction.IsVisible = canUseAi;
+            if (AiTrendsAction != null) AiTrendsAction.IsVisible = canUseAi;
 
             try
             {
@@ -129,6 +136,7 @@ private Resident? _resident;
             if (r.AllergyPenicillin) items.Add("Penicillin");
             if (r.AllergySulfa)      items.Add("Sulfa");
             if (r.AllergyAspirin)    items.Add("Aspirin");
+            if (r.AllergyCodeine)    items.Add("Codeine");
             if (!string.IsNullOrWhiteSpace(r.AllergyOtherItems))
                 items.Add(r.AllergyOtherItems);
 
@@ -139,7 +147,7 @@ private Resident? _resident;
             }
 
             foreach (var item in items)
-                AllergyBadgesLayout.Children.Add(CreateAllergyBadge(item, Color.FromArgb("#DC2626"), Colors.White));
+                AllergyBadgesLayout.Children.Add(CreateAllergyBadge(item, Color.FromArgb("#FFB6C1"), Color.FromArgb("#4A0010")));
         }
 
         private static Border CreateAllergyBadge(string text, Color backgroundColor, Color textColor)
@@ -147,13 +155,13 @@ private Resident? _resident;
             return new Border
             {
                 BackgroundColor = backgroundColor,
-                Padding = new Thickness(10, 4),
+                Padding = new Thickness(12, 6),
                 Margin = new Thickness(0, 0, 6, 6),
                 StrokeThickness = 0,
-                StrokeShape = new RoundRectangle { CornerRadius = 12 },
+                StrokeShape = new RoundRectangle { CornerRadius = 3 },
                 Content = new Label
                 {
-                    Text = text,
+                    Text = text.ToUpperInvariant(),
                     FontSize = 11,
                     FontAttributes = FontAttributes.Bold,
                     TextColor = textColor,
@@ -244,6 +252,56 @@ private Resident? _resident;
                 : ReturnTo;
 
             return $"{nameof(ViewResidentPage)}?id={_residentId}&returnTo={baseReturn}";
+        }
+
+        private async void OnAiSummaryClicked(object sender, TappedEventArgs e)
+        {
+            if (_resident == null) return;
+            await RunAiFeatureAsync("Shift Summary", async ai => await ai.ShiftSummaryAsync(_residentId));
+        }
+
+        private async void OnAiTrendsClicked(object sender, TappedEventArgs e)
+        {
+            if (_resident == null) return;
+            await RunAiFeatureAsync("Trend Analysis", async ai => await ai.DetectTrendsAsync(_residentId));
+        }
+
+        private async Task RunAiFeatureAsync(string title, Func<IAiService, Task<AiResult>> action)
+        {
+            var ai = MauiProgram.Services.GetService<IAiService>();
+            if (ai == null)
+            {
+                await DisplayAlert("Unavailable", "AI service is not configured.", "OK");
+                return;
+            }
+
+            // Show loading
+            if (AiSummaryAction != null) AiSummaryAction.IsEnabled = false;
+            if (AiTrendsAction != null) AiTrendsAction.IsEnabled = false;
+
+            try
+            {
+                var result = await action(ai);
+
+                if (result.Success)
+                {
+                    var popup = new AiResponsePopup(title, result.Content, result.Disclaimer);
+                    await this.ShowPopupAsync(popup);
+                }
+                else
+                {
+                    await DisplayAlert("AI Error", result.Content, "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("AI Error", $"Could not get AI response: {ex.Message}", "OK");
+            }
+            finally
+            {
+                if (AiSummaryAction != null) AiSummaryAction.IsEnabled = true;
+                if (AiTrendsAction != null) AiTrendsAction.IsEnabled = true;
+            }
         }
 
     }

@@ -17,6 +17,8 @@ public sealed class AuthController : ControllerBase
     }
 
     [AllowAnonymous]
+    public sealed record LoginRequest(string Username, string Password);
+
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
     {
@@ -49,10 +51,4 @@ public sealed class AuthController : ControllerBase
             residentId = User.FindFirstValue("resident_id")
         });
     }
-}
-
-public sealed class LoginRequest
-{
-    public string Username { get; set; } = "";
-    public string Password { get; set; } = "";
 }

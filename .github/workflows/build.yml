@@ -1,0 +1,82 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore CareHub.Api/CareHub.Api.csproj
+
+      - name: Build
+        run: dotnet build CareHub.Api/CareHub.Api.csproj --no-restore -c Release
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore CareHub.Tests/CareHub.Tests.csproj
+
+      - name: Test
+        run: dotnet test CareHub.Tests/CareHub.Tests.csproj --no-restore -c Release --verbosity normal
+
+  build-desktop:
+    name: Build Desktop (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui-windows
+
+      - name: Restore
+        run: dotnet restore CareHub.Desktop/CareHub.Desktop.csproj
+
+      - name: Build
+        run: dotnet build CareHub.Desktop/CareHub.Desktop.csproj --no-restore -c Release
+
+  build-mobile:
+    name: Build Mobile (Android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install MAUI workload
+        run: dotnet workload install maui-android
+
+      - name: Restore
+        run: dotnet restore CareHub.Mobile/CareHub.Mobile.csproj
+
+      - name: Build
+        run: dotnet build CareHub.Mobile/CareHub.Mobile.csproj --no-restore -c Release

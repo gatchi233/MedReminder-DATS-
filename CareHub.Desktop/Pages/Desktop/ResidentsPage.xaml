@@ -32,6 +32,20 @@
                         <TapGestureRecognizer Tapped="OnAddResidentClicked" />
                     </Border.GestureRecognizers>
                 </Border>
+                <Border x:Name="SortAction" StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="4"/>
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="32,Auto" Margin="0" InputTransparent="True">
+                        <Image Grid.Column="0" Source="icons8_sort_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <Border Grid.Column="1" BackgroundColor="{StaticResource Button_View}" Padding="10,0" StrokeThickness="0" InputTransparent="True">
+                            <Label x:Name="SortLabel" Text="A-Z" TextColor="{StaticResource Button_Font_Primary}" FontSize="11" VerticalOptions="Center" FontAttributes="Bold"/>
+                        </Border>
+                    </Grid>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnSortClicked" />
+                    </Border.GestureRecognizers>
+                </Border>
             </HorizontalStackLayout>
         </Grid>
 
@@ -63,16 +77,7 @@
                             <BoxView WidthRequest="1" HeightRequest="20" Color="{StaticResource Resident_Font_Secondary}" VerticalOptions="Center"/>
 
                             <!-- Room & Bed -->
-                            <Label FontSize="13" TextColor="{StaticResource Resident_Font_Secondary}" VerticalOptions="Center">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="Room "/>
-                                        <Span Text="{Binding RoomNumber}"/>
-                                        <Span Text=" • "/>
-                                        <Span Text="{Binding BedLabel}"/>
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
+                            <Label Text="{Binding RoomDisplay}" FontSize="13" TextColor="{StaticResource Resident_Font_Secondary}" VerticalOptions="Center"/>
                         </HorizontalStackLayout>
                     </Border>
                 </DataTemplate>

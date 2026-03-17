@@ -157,6 +157,7 @@
                                                 </Border.Triggers>
                                                 <Label Text="{Binding Role}"
                                                        FontSize="10" FontAttributes="Bold"
+                                                       TextTransform="Uppercase"
                                                        TextColor="{StaticResource Button_Font_Primary}"/>
                                             </Border>
                                         </Grid>

@@ -5,7 +5,10 @@ using CareHub.Models;
 using CareHub.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls;
+using CareHub.Services;
 using CareHub.Services.Abstractions;
+using CareHub.Services.Local;
+using CareHub.Desktop.Models;
 
 namespace CareHub.Pages.Desktop
 {
@@ -15,12 +18,16 @@ namespace CareHub.Pages.Desktop
         private readonly IMedicationService _medicationService;
         private readonly IResidentService _residentService;
         private readonly IObservationService _observationService;
+        private readonly IMarService _marService;
+        private readonly MarJsonService _localMar;
+        private readonly MedicationJsonService _localMeds;
 
         private List<Medication> _allMedications = new();
         private List<Resident> _allResidents = new();
         private List<Medication> _inventoryMeds = new();
+        private List<MarEntry> _todayMarEntries = new();
+        private static bool _demoSeeded;
 
-        // MUST be parameterless (Shell creates pages)
         public HomePage()
         {
             InitializeComponent();
@@ -32,10 +39,12 @@ namespace CareHub.Pages.Desktop
             _medicationService = services.GetRequiredService<IMedicationService>();
             _residentService = services.GetRequiredService<IResidentService>();
             _observationService = services.GetRequiredService<IObservationService>();
+            _marService = services.GetRequiredService<IMarService>();
+            _localMar = services.GetRequiredService<MarJsonService>();
+            _localMeds = services.GetRequiredService<MedicationJsonService>();
 
             BindingContext = _vm;
 
-            // Build Hour/Minute pickers in code (consistent, avoids hardcoded XAML lists)
             if (HourPicker != null)
             {
                 HourPicker.Items.Clear();
@@ -63,42 +72,68 @@ namespace CareHub.Pages.Desktop
         {
             base.OnAppearing();
 
+            ApplyHomepageRbac();
+
             try
             {
                 await _vm.InitializeAsync();
 
-                _allMedications = _vm.Medications?.ToList() ?? new List<Medication>();
                 _allResidents = (await _residentService.LoadAsync())?.ToList() ?? new List<Resident>();
+
+                if (!_demoSeeded)
+                    await _localMeds.SeedResidentMedicationsAsync(_allResidents);
+
+                _allMedications = (await _medicationService.LoadAsync())?.ToList() ?? new List<Medication>();
+
+                RemapStaleResidentIds(_allMedications, _allResidents);
+
                 _inventoryMeds = _allMedications
                     .Where(m => !m.ResidentId.HasValue || m.ResidentId.Value == Guid.Empty)
                     .ToList();
 
+                try
+                {
+                    var (fromUtc, toUtc, _, _) = MarScheduleHelper.GetTodayRange();
+
+                    if (!_demoSeeded)
+                    {
+                        var allMarLocal = await _localMar.LoadAllAsync();
+                        int removed = allMarLocal.RemoveAll(e => e.Notes == "SEED_DEMO");
+                        if (removed > 0)
+                            await _localMar.ReplaceAllAsync(allMarLocal);
+
+                        await SeedLocalMarDemoAsync();
+                        _demoSeeded = true;
+                    }
+
+                    var marEntries = await _marService.LoadAsync(null, fromUtc, toUtc);
+                    _todayMarEntries = marEntries?.ToList() ?? new List<MarEntry>();
+                    _vm.ComputeMarDashboard(_allMedications, _todayMarEntries, _allResidents);
+                }
+                catch
+                {
+                }
+
                 RunSearch();
+                _vm.ComputeAlerts();
             }
             catch
             {
-                // Offline — show empty state, no crash
                 _allMedications ??= new List<Medication>();
                 _allResidents ??= new List<Resident>();
             }
         }
 
-        private void OnResidentSearchClicked(object sender, EventArgs e) => RunSearch();
         private void OnSearchClicked(object sender, EventArgs e) => RunSearch();
 
         private void OnClearDayTimeClicked(object sender, EventArgs e)
         {
+            if (ResidentSearchEntry != null) ResidentSearchEntry.Text = string.Empty;
             if (DayPicker != null) DayPicker.SelectedIndex = -1;
             if (HourPicker != null) HourPicker.SelectedIndex = -1;
             if (MinutePicker != null) MinutePicker.SelectedIndex = -1;
 
             RunSearch();
-        }
-
-        private async void OnAddResidentClicked(object sender, EventArgs e)
-        {
-            // Standardized route
-            await Shell.Current.GoToAsync(nameof(EditResidentPage));
         }
 
         private async void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -118,38 +153,284 @@ namespace CareHub.Pages.Desktop
                 return;
             }
 
-            // Standardized route
             await Shell.Current.GoToAsync($"{nameof(ViewResidentPage)}?id={m.ResidentId.Value}");
         }
 
-        // HomePage.xaml uses CheckBox.CheckedChanged
-        private async void OnDoneCheckedChanged(object sender, CheckedChangedEventArgs e)
+        private void ApplyMarStatuses(List<Medication> meds)
         {
-            if ((sender as BindableObject)?.BindingContext is not Medication m)
-                return;
+            var today = DateTime.Today;
+            var dayOfWeek = today.DayOfWeek;
+            var matchTolerance = MarScheduleHelper.MatchTolerance;
+            var missedCutoff = TimeSpan.FromMinutes(60);
 
-            m.IsDone = e.Value;
-
-            try
+            foreach (var med in meds)
             {
-                await _medicationService.UpsertAsync(m);
+                if (!med.ResidentId.HasValue)
+                    continue;
 
-                // Deduct or restore inventory stock
-                var inventoryMatch = _inventoryMeds.FirstOrDefault(inv =>
-                    string.Equals(inv.MedName, m.MedName, StringComparison.OrdinalIgnoreCase));
+                if (!MarScheduleHelper.IsDayEnabled(med, dayOfWeek))
+                    continue;
 
-                if (inventoryMatch != null)
+                var times = MarScheduleHelper.GetTimesForDay(med, dayOfWeek);
+                int slotsToUse = Math.Max(1, Math.Min(3, med.TimesPerDay));
+
+                for (int i = 0; i < slotsToUse && i < times.Count; i++)
                 {
-                    int delta = e.Value ? -m.Quantity : m.Quantity;
-                    await _medicationService.AdjustStockAsync(inventoryMatch.Id, delta);
+                    var scheduledLocal = today.Add(times[i]);
+                    var scheduledUtc = new DateTimeOffset(scheduledLocal, TimeZoneInfo.Local.GetUtcOffset(scheduledLocal)).ToUniversalTime();
+
+                    var match = _todayMarEntries
+                        .Where(e =>
+                            !e.IsVoided &&
+                            e.MedicationId == med.Id &&
+                            e.ResidentId == med.ResidentId.Value &&
+                            Math.Abs((e.AdministeredAtUtc - scheduledUtc).TotalMinutes) <= matchTolerance.TotalMinutes)
+                        .OrderByDescending(e => e.AdministeredAtUtc)
+                        .FirstOrDefault();
+
+                    string status = match?.Status ?? "Pending";
+                    string? adminTime = match != null
+                        ? "@ " + match.AdministeredAtUtc.ToLocalTime().ToString("h:mm tt")
+                        : null;
+
+                    if (match == null && DateTime.Now > scheduledLocal.Add(missedCutoff))
+                        status = "Missed";
+
+                    switch (i)
+                    {
+                        case 0: med.Slot1Status = status; med.Slot1AdminTime = adminTime; break;
+                        case 1: med.Slot2Status = status; med.Slot2AdminTime = adminTime; break;
+                        case 2: med.Slot3Status = status; med.Slot3AdminTime = adminTime; break;
+                    }
                 }
-            }
-            catch
-            {
-                // Offline — change queued by wrapper
             }
         }
 
+
+        private async Task SeedLocalMarDemoAsync()
+        {
+            var todayLocal = DateTime.Now.Date;
+            var dayOfWeek = todayLocal.DayOfWeek;
+
+            var residentMeds = _allMedications
+                .Where(m => m.ResidentId.HasValue && m.ResidentId.Value != Guid.Empty)
+                .ToList();
+
+            if (residentMeds.Count == 0) return;
+
+            var rng = new Random(42);
+            var nurses = new[] { "Nurse Sarah", "Nurse James", "Nurse Emily" };
+
+            var slots = new Dictionary<(Guid resId, int hour), List<(Medication med, TimeSpan scheduledTime)>>();
+
+            foreach (var med in residentMeds)
+            {
+                if (!MarScheduleHelper.IsDayEnabled(med, dayOfWeek))
+                    continue;
+
+                var times = MarScheduleHelper.GetTimesForDay(med, dayOfWeek);
+                int slotsToUse = Math.Max(1, Math.Min(3, med.TimesPerDay));
+
+                for (int i = 0; i < slotsToUse && i < times.Count; i++)
+                {
+                    var scheduledTime = times[i];
+                    if (scheduledTime == TimeSpan.Zero) continue;
+
+                    var scheduledLocal = todayLocal.Add(scheduledTime);
+                    if (scheduledLocal > DateTime.Now) continue;
+
+                    var key = (med.ResidentId!.Value, scheduledTime.Hours);
+                    if (!slots.ContainsKey(key)) slots[key] = new();
+                    slots[key].Add((med, scheduledTime));
+                }
+            }
+
+            var slotKeys = slots.Keys.ToList();
+            int numRefused = Math.Max(1, (int)Math.Round(slotKeys.Count * 0.01));
+            int numMissed = Math.Max(1, (int)Math.Round(slotKeys.Count * 0.01));
+            var shuffled = slotKeys.OrderBy(_ => rng.Next()).ToList();
+            var refusedSlots = new HashSet<(Guid, int)>(shuffled.Take(numRefused));
+            var missedSlots = new HashSet<(Guid, int)>(shuffled.Skip(numRefused).Take(numMissed));
+
+            foreach (var (key, medList) in slots)
+            {
+                string status;
+                if (refusedSlots.Contains(key)) status = "Refused";
+                else if (missedSlots.Contains(key)) status = "Missed";
+                else status = "Given";
+
+                var nurse = nurses[rng.Next(nurses.Length)];
+
+                foreach (var (med, scheduledTime) in medList)
+                {
+                    var scheduledLocal = todayLocal.Add(scheduledTime);
+                    var scheduledOffset = TimeZoneInfo.Local.GetUtcOffset(scheduledLocal);
+                    var scheduledUtc = new DateTimeOffset(scheduledLocal, scheduledOffset).ToUniversalTime();
+
+                    var delayMinutes = status == "Given" ? rng.Next(1, 15) : 0;
+                    var administeredUtc = status == "Given"
+                        ? scheduledUtc.AddMinutes(delayMinutes)
+                        : scheduledUtc;
+
+                    var entry = new MarEntry
+                    {
+                        Id = Guid.NewGuid(),
+                        ClientRequestId = Guid.NewGuid(),
+                        ResidentId = med.ResidentId!.Value,
+                        MedicationId = med.Id,
+                        Status = status,
+                        DoseQuantity = med.Quantity > 0 ? med.Quantity : 1,
+                        DoseUnit = med.QuantityUnit ?? "tablet",
+                        ScheduledForUtc = scheduledUtc,
+                        AdministeredAtUtc = administeredUtc,
+                        RecordedBy = nurse,
+                        MedicationName = med.MedName,
+                        ResidentName = med.ResidentName ?? "Unknown",
+                        Notes = "SEED_DEMO",
+                        CreatedAtUtc = DateTimeOffset.UtcNow,
+                        UpdatedAtUtc = DateTimeOffset.UtcNow,
+                    };
+
+                    await _localMar.CreateAsync(entry);
+                }
+            }
+        }
+
+        private void ApplyHomepageRbac()
+        {
+            var auth = Application.Current?.Handler?.MauiContext?.Services
+                ?.GetService<AuthService>();
+            if (auth == null) return;
+
+            bool isNurse = auth.HasRole(StaffRole.Nurse);
+            bool isAdmin = auth.HasRole(StaffRole.Admin);
+
+            bool showMar = isNurse;
+            if (MarCard != null)
+                MarCard.IsVisible = showMar;
+
+            if (LowStockCard != null)
+                LowStockCard.IsVisible = isAdmin || isNurse;
+            if (ExpiryCard != null)
+                ExpiryCard.IsVisible = isAdmin || isNurse;
+
+            if (!showMar && (isAdmin || isNurse))
+            {
+                if (LowStockCard != null && ExpiryCard != null)
+                {
+                    var parentGrid = LowStockCard.Parent as Grid;
+                    if (parentGrid != null)
+                    {
+                        parentGrid.Children.Remove(LowStockCard);
+                        parentGrid.Children.Remove(ExpiryCard);
+
+                        var wrapper = new Grid
+                        {
+                            ColumnDefinitions = new ColumnDefinitionCollection
+                            {
+                                new ColumnDefinition(GridLength.Star),
+                                new ColumnDefinition(GridLength.Star)
+                            },
+                            ColumnSpacing = 16
+                        };
+
+                        Grid.SetColumn(LowStockCard, 0);
+                        Grid.SetColumnSpan(LowStockCard, 1);
+                        Grid.SetRow(LowStockCard, 0);
+                        Grid.SetRowSpan(LowStockCard, 1);
+
+                        Grid.SetColumn(ExpiryCard, 1);
+                        Grid.SetColumnSpan(ExpiryCard, 1);
+                        Grid.SetRow(ExpiryCard, 0);
+                        Grid.SetRowSpan(ExpiryCard, 1);
+
+                        wrapper.Children.Add(LowStockCard);
+                        wrapper.Children.Add(ExpiryCard);
+
+                        Grid.SetRow(wrapper, 0);
+                        Grid.SetColumn(wrapper, 0);
+                        Grid.SetColumnSpan(wrapper, 3);
+                        parentGrid.Children.Add(wrapper);
+                    }
+                }
+                if (SearchAiRow != null)
+                {
+                    Grid.SetColumn(SearchAiRow, 0);
+                    Grid.SetColumnSpan(SearchAiRow, 3);
+                }
+            }
+
+            var canUseAi = isAdmin || isNurse;
+            if (AiActionsBar != null)
+                AiActionsBar.IsVisible = canUseAi;
+        }
+
+        private async void OnAiHandoffClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync(nameof(AiShiftHandoffPage));
+        }
+
+        private async void OnAiQueryClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync(nameof(AiCareQueryPage));
+        }
+
+        private async void OnViewLowStockClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("//MedicationInventoryPage?filter=lowstock");
+        }
+
+        private async void OnViewExpiryAlertClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("//MedicationInventoryPage?filter=expiry");
+        }
+
+        private async void OnViewMarClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync(nameof(MarPage));
+        }
+
+        private void RemapStaleResidentIds(List<Medication> meds, List<Resident> residents)
+        {
+            if (residents.Count == 0) return;
+
+            var validIds = new HashSet<Guid>(residents.Select(r => r.Id));
+
+            var orphans = meds.Where(m =>
+                m.ResidentId.HasValue
+                && m.ResidentId.Value != Guid.Empty
+                && !validIds.Contains(m.ResidentId.Value)).ToList();
+
+            if (orphans.Count == 0) return;
+
+            Dictionary<Guid, string> seedIdToName;
+            try
+            {
+                using var stream = FileSystem.OpenAppPackageFileAsync("Residents.json").GetAwaiter().GetResult();
+                var seedResidents = System.Text.Json.JsonSerializer.DeserializeAsync<List<Resident>>(stream)
+                    .GetAwaiter().GetResult() ?? new List<Resident>();
+                seedIdToName = seedResidents.ToDictionary(
+                    r => r.Id,
+                    r => $"{r.ResidentFName} {r.ResidentLName}".Trim());
+            }
+            catch { return; }
+
+            var nameToActualId = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+            foreach (var r in residents)
+            {
+                var name = $"{r.ResidentFName} {r.ResidentLName}".Trim();
+                nameToActualId.TryAdd(name, r.Id);
+            }
+
+            foreach (var med in orphans)
+            {
+                if (seedIdToName.TryGetValue(med.ResidentId!.Value, out var name)
+                    && nameToActualId.TryGetValue(name, out var actualId))
+                {
+                    med.ResidentId = actualId;
+                }
+            }
+        }
 
         private void RunSearch()
         {
@@ -178,13 +459,11 @@ namespace CareHub.Pages.Desktop
 
             foreach (var med in _allMedications)
             {
-                // Skip inventory items — they have no resident
                 if (!med.ResidentId.HasValue || med.ResidentId.Value == Guid.Empty)
                     continue;
 
                 Resident? resident = _allResidents.FirstOrDefault(r => r.Id == med.ResidentId);
 
-                // Prefer linked resident; fall back to any existing name or a placeholder.
                 med.ResidentName = resident?.ResidentName
                     ?? med.ResidentName
                     ?? "Unassigned";
@@ -196,6 +475,9 @@ namespace CareHub.Pages.Desktop
                         !fullName.Contains(residentQuery, StringComparison.OrdinalIgnoreCase))
                         continue;
                 }
+
+                if (!hasTimeSelected && !MarScheduleHelper.IsDayEnabled(med, DateTime.Today.DayOfWeek))
+                    continue;
 
                 if (hasTimeSelected)
                 {
@@ -214,15 +496,30 @@ namespace CareHub.Pages.Desktop
                     if (!dayEnabled)
                         continue;
 
-                    if (med.ReminderTime != selectedTime)
+                    var times = MarScheduleHelper.GetTimesForDay(med, dayFilter.Value);
+                    int slotsToUse = Math.Max(1, Math.Min(3, med.TimesPerDay));
+                    bool timeMatch = false;
+                    for (int i = 0; i < slotsToUse && i < times.Count; i++)
+                    {
+                        if (times[i] == selectedTime) { timeMatch = true; break; }
+                    }
+                    if (!timeMatch)
                         continue;
                 }
 
                 results.Add(med);
             }
 
+            var deduped = results
+                .GroupBy(m => $"{(m.MedName ?? "").ToLowerInvariant()}|{m.ResidentId}")
+                .Select(g => g.First())
+                .ToList();
+
+            var sorted = deduped.OrderBy(x => x.ResidentName).ThenBy(x => x.MedName).ToList();
+            ApplyMarStatuses(sorted);
+
             _vm.Medications.Clear();
-            foreach (var m in results.OrderBy(x => x.ResidentName).ThenBy(x => x.MedName))
+            foreach (var m in sorted)
                 _vm.Medications.Add(m);
         }
 

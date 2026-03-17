@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using CareHub.Models;
+using CareHub.Services;
+using CareHub.Services.Abstractions;
 using CareHub.ViewModels;
 using Microsoft.Maui.Controls;
 
@@ -14,6 +17,14 @@ namespace CareHub.Pages.Desktop
             InitializeComponent();
             _vm = vm;
             BindingContext = _vm;
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            var auth = MauiProgram.Services.GetService<AuthService>();
+            var canUseAi = auth?.HasRole(StaffRole.Admin, StaffRole.Nurse) ?? false;
+            if (AiDraftAction != null) AiDraftAction.IsVisible = canUseAi;
         }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -38,6 +49,44 @@ namespace CareHub.Pages.Desktop
                     _vm.ResidentId = parsedGuid;
                     return;
                 }
+            }
+        }
+
+        private async void OnAiDraftClicked(object sender, TappedEventArgs e)
+        {
+            if (_vm.ResidentId == Guid.Empty)
+            {
+                await DisplayAlert("No Resident", "Load a resident report first.", "OK");
+                return;
+            }
+
+            var ai = MauiProgram.Services.GetService<IAiService>();
+            if (ai == null)
+            {
+                await DisplayAlert("Unavailable", "AI service is not configured.", "OK");
+                return;
+            }
+
+            AiDraftAction.IsEnabled = false;
+            AiDraftAction.Opacity = 0.5;
+            AiDraftSection.IsVisible = true;
+            AiDraftLabel.Text = "Generating AI draft...";
+
+            try
+            {
+                var result = await ai.ReportDraftAsync(_vm.ResidentId);
+                AiDraftLabel.Text = result.Success
+                    ? result.Content
+                    : $"Error: {result.Content}";
+            }
+            catch (Exception ex)
+            {
+                AiDraftLabel.Text = $"Could not generate draft: {ex.Message}";
+            }
+            finally
+            {
+                AiDraftAction.IsEnabled = true;
+                AiDraftAction.Opacity = 1.0;
             }
         }
 

@@ -1,9 +1,11 @@
+using System.Net.Http.Headers;
+using System.Text;
 using CareHub.Api.Data;
+using CareHub.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +39,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// DB
 builder.Services.AddDbContext<CareHubDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("CareHubDb")));
 builder.Services.Configure<AuthOptions>(builder.Configuration.GetSection("Auth"));
@@ -62,7 +63,6 @@ builder.Services
         };
     });
 
-// CORS (Dev only policy name kept stable for later)
 const string DevCorsPolicy = "DevCors";
 builder.Services.AddCors(options =>
 {
@@ -74,25 +74,57 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddSingleton(new AiRateLimiter(
+    globalRpm: 25,
+    globalRpd: 850,
+    perUserRpm: 8,
+    perUserRpd: 170
+));
+
+var groqKey = builder.Configuration["Groq:ApiKey"] ?? "";
+if (!string.IsNullOrWhiteSpace(groqKey))
+{
+    builder.Services.AddHttpClient<GroqAiService>(client =>
+    {
+        client.BaseAddress = new Uri("https://api.groq.com/");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", groqKey);
+        client.Timeout = TimeSpan.FromSeconds(30);
+    });
+}
+else
+{
+    builder.Services.AddHttpClient<GroqAiService>(client =>
+    {
+        client.BaseAddress = new Uri("https://api.groq.com/");
+        client.Timeout = TimeSpan.FromSeconds(5);
+    });
+}
+
 var app = builder.Build();
 
-// Ensure database is created/migrated and seed once from shared JSON source.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CareHubDbContext>();
     await db.Database.MigrateAsync();
     await db.Database.ExecuteSqlRawAsync("""
         CREATE TABLE IF NOT EXISTS "AppUsers" (
+            "Id" uuid NOT NULL,
             "Username" text NOT NULL,
-            "Password" text NOT NULL,
-            "Role" text NOT NULL,
+            "PasswordHash" text NOT NULL,
             "DisplayName" text NOT NULL,
-            "ResidentId" text NULL,
-            CONSTRAINT "PK_AppUsers" PRIMARY KEY ("Username")
+            "Role" text NOT NULL,
+            "ResidentId" uuid NULL,
+            CONSTRAINT "PK_AppUsers" PRIMARY KEY ("Id")
         );
+        CREATE UNIQUE INDEX IF NOT EXISTS "IX_AppUsers_Username" ON "AppUsers" ("Username");
     """);
 }
 await DataSeedService.SeedFromSharedJsonAsync(app.Services, app.Configuration, app.Environment);
+
+if (app.Environment.IsDevelopment())
+{
+    await MarSeeder.SeedAsync(app.Services);
+}
 
 if (!app.Environment.IsDevelopment())
 {

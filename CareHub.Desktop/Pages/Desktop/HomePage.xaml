@@ -8,85 +8,240 @@
     Title="Home"
     BackgroundColor="{StaticResource Homepage_Main_Background}">
 
-    <Grid Padding="16"
-          RowDefinitions="Auto,*"
+    <Grid Padding="24,16"
+          ColumnDefinitions="*,*,*"
+          RowDefinitions="200,Auto,*"
+          ColumnSpacing="16"
           RowSpacing="16">
 
-        <!-- ========== Row 0: Search Section (2 columns) ========== -->
-        <Grid Grid.Row="0"
-              ColumnDefinitions="*,*"
-              ColumnSpacing="16">
+        <!-- ========== PENDING MAR card (row 0, col 0) ========== -->
+        <Border x:Name="MarCard" Grid.Row="0" Grid.Column="0"
+                Stroke="{StaticResource Homepage_Card_Border}"
+                StrokeThickness="1"
+                BackgroundColor="{StaticResource Homepage_Card_Background}"
+                Padding="12">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12"/>
+            </Border.StrokeShape>
 
-            <!-- LEFT COLUMN: Search by resident -->
-            <Border Grid.Column="0"
-                    Stroke="{StaticResource Homepage_Card_Border}"
-                    StrokeThickness="1"
-                    BackgroundColor="{StaticResource Homepage_Card_Background}"
-                    Padding="12">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="12" />
-                </Border.StrokeShape>
+            <VerticalStackLayout Spacing="8">
 
-                <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
-
-                    <!-- Header with Help button -->
-                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-                        <Label Text="1. Search by resident"
-                               FontAttributes="Bold"
-                               FontSize="16"
-                               TextColor="{StaticResource Homepage_Font_Primary}"
-                               VerticalOptions="Center" />
-                    </Grid>
-
-                    <!-- Search Entry + Buttons -->
-                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-
-                        <Entry x:Name="ResidentSearchEntry"
-                               Grid.Column="0"
-                               Placeholder="Search by resident name"
-                               PlaceholderColor="{StaticResource Placeholder_Font_Secondary}"
-                               TextColor="{StaticResource Homepage_Font_Primary}"
-                               ClearButtonVisibility="WhileEditing"
-                               ReturnType="Search"
-                               Completed="OnResidentSearchClicked" />
-
-                        <!-- Search Button -->
-                        <Border Grid.Column="1" StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="4"/>
-                            </Border.StrokeShape>
-                            <Grid ColumnDefinitions="32,Auto" Margin="0" InputTransparent="True">
-                                <Image Grid.Column="0" Source="icons8_search_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
-                                <Border Grid.Column="1" BackgroundColor="{StaticResource Button_View}" Padding="10,0" StrokeThickness="0" InputTransparent="True">
-                                    <Label Text="SEARCH" TextColor="{StaticResource Button_Font_Primary}" FontSize="11" VerticalOptions="Center" FontAttributes="Bold"/>
-                                </Border>
-                            </Grid>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnResidentSearchClicked"/>
-                            </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="*,Auto">
+                    <HorizontalStackLayout Spacing="6">
+                        <Border Padding="6,3" StrokeThickness="0"
+                                BackgroundColor="{StaticResource Alert_Error}">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                            <Label Text="{Binding PendingMarCount, StringFormat='PENDING TODAY: {0}'}"
+                                   FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource Button_Font_Primary}"/>
                         </Border>
+                    </HorizontalStackLayout>
 
-                        <!-- Add Button -->
-                        <Border Grid.Column="2" StrokeThickness="0" HeightRequest="28" BackgroundColor="{StaticResource Button_Icon_Background}">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="4"/>
-                            </Border.StrokeShape>
-                            <Grid ColumnDefinitions="32,Auto" Margin="0" InputTransparent="True">
-                                <Image Grid.Column="0" Source="icons8_add_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
-                                <Border Grid.Column="1" BackgroundColor="{StaticResource Button_Add}" Padding="10,0" StrokeThickness="0" InputTransparent="True">
-                                    <Label Text="ADD" TextColor="{StaticResource Button_Font_Primary}" FontSize="11" VerticalOptions="Center" FontAttributes="Bold"/>
-                                </Border>
-                            </Grid>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnAddResidentClicked"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                    </Grid>
+                    <Border Grid.Column="1" StrokeThickness="0" HeightRequest="24"
+                            BackgroundColor="{StaticResource Button_Icon_Background}">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                        <Label Text="VIEW MAR" FontSize="9" FontAttributes="Bold"
+                               TextColor="{StaticResource Button_Font_Primary}"
+                               Padding="8,0"
+                               VerticalOptions="Center" HorizontalOptions="Center"/>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnViewMarClicked"/>
+                        </Border.GestureRecognizers>
+                    </Border>
                 </Grid>
-            </Border>
 
-            <!-- RIGHT COLUMN: Search by day & time -->
-            <Border Grid.Column="1"
+                <!-- Top residents with pending/missed -->
+                <CollectionView ItemsSource="{Binding PendingMarTop}"
+                                SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <Label Text="No pending administrations."
+                               FontSize="11" TextColor="{StaticResource Homepage_Font_Secondary}"
+                               Margin="4,0"/>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="2"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*,Auto,Auto" Padding="4,2">
+                                <Label Text="{Binding ResidentName}"
+                                       FontSize="12" FontAttributes="Bold"
+                                       TextColor="{StaticResource Homepage_Font_Primary}"
+                                       LineBreakMode="TailTruncation"
+                                       VerticalOptions="Center"/>
+                                <Border Grid.Column="1" Padding="6,2" StrokeThickness="0"
+                                        BackgroundColor="{StaticResource Alert_Warning}"
+                                        Margin="4,0"
+                                        IsVisible="{Binding PendingCount, Converter={StaticResource IntPositiveConverter}}">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                                    <Label Text="{Binding PendingCount, StringFormat='{0} pending'}"
+                                           FontSize="10" FontAttributes="Bold"
+                                           TextColor="{StaticResource Button_Font_Secondary}"/>
+                                </Border>
+                                <Border Grid.Column="2" Padding="6,2" StrokeThickness="0"
+                                        BackgroundColor="{StaticResource Alert_Error}"
+                                        IsVisible="{Binding MissedCount, Converter={StaticResource IntPositiveConverter}}">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                                    <Label Text="{Binding MissedCount, StringFormat='{0} missed'}"
+                                           FontSize="10" FontAttributes="Bold"
+                                           TextColor="{StaticResource Button_Font_Primary}"/>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ========== LOW STOCK card (row 0, col 1) ========== -->
+        <Border x:Name="LowStockCard" Grid.Row="0" Grid.Column="1"
+                Stroke="{StaticResource Homepage_Card_Border}"
+                StrokeThickness="1"
+                BackgroundColor="{StaticResource Homepage_Card_Background}"
+                Padding="12">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12"/>
+            </Border.StrokeShape>
+
+            <VerticalStackLayout Spacing="6">
+                <Grid ColumnDefinitions="*,Auto">
+                    <HorizontalStackLayout Spacing="6">
+                        <Border Padding="6,3" StrokeThickness="0"
+                                BackgroundColor="{StaticResource Alert_Error}">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                            <Label Text="{Binding LowStockCount, StringFormat='LOW STOCK: {0}'}"
+                                   FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource Button_Font_Primary}"/>
+                        </Border>
+                    </HorizontalStackLayout>
+
+                    <Border Grid.Column="1" StrokeThickness="0" HeightRequest="24"
+                            BackgroundColor="{StaticResource Button_Icon_Background}">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                        <Label Text="VIEW ALL" FontSize="9" FontAttributes="Bold"
+                               TextColor="{StaticResource Button_Font_Primary}"
+                               Padding="8,0"
+                               VerticalOptions="Center" HorizontalOptions="Center"/>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnViewLowStockClicked"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding LowStockTop3}"
+                                SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <Label Text="No low stock items."
+                               FontSize="11" TextColor="{StaticResource Homepage_Font_Secondary}"
+                               Margin="4,0"/>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="2"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*,Auto" Padding="4,1">
+                                <VerticalStackLayout Spacing="0">
+                                    <Label Text="{Binding MedName}"
+                                           FontSize="11" FontAttributes="Bold"
+                                           TextColor="{StaticResource Homepage_Font_Primary}"
+                                           TextTransform="Uppercase"
+                                           LineBreakMode="TailTruncation"/>
+                                    <Label Text="{Binding Detail}"
+                                           FontSize="10"
+                                           TextColor="{StaticResource Alert_Error}"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1"
+                                       Text="{Binding ResidentName}"
+                                       FontSize="10"
+                                       TextColor="{StaticResource Homepage_Font_Secondary}"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding ResidentName, Converter={StaticResource StringNotEmptyConverter}}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ========== EXPIRING SOON card (row 0, col 2) ========== -->
+        <Border x:Name="ExpiryCard" Grid.Row="0" Grid.Column="2"
+                Stroke="{StaticResource Homepage_Card_Border}"
+                StrokeThickness="1"
+                BackgroundColor="{StaticResource Homepage_Card_Background}"
+                Padding="12">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12"/>
+            </Border.StrokeShape>
+
+            <VerticalStackLayout Spacing="6">
+                <Grid ColumnDefinitions="*,Auto">
+                    <HorizontalStackLayout Spacing="6">
+                        <Border Padding="6,3" StrokeThickness="0"
+                                BackgroundColor="{StaticResource Alert_Warning}">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                            <Label Text="{Binding ExpiringSoonCount, StringFormat='EXPIRY ALERT: {0}'}"
+                                   FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource Button_Font_Secondary}"/>
+                        </Border>
+                    </HorizontalStackLayout>
+
+                    <Border Grid.Column="1" StrokeThickness="0" HeightRequest="24"
+                            BackgroundColor="{StaticResource Button_Icon_Background}">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                        <Label Text="VIEW ALL" FontSize="9" FontAttributes="Bold"
+                               TextColor="{StaticResource Button_Font_Primary}"
+                               Padding="8,0"
+                               VerticalOptions="Center" HorizontalOptions="Center"/>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnViewExpiryAlertClicked"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding ExpiringSoonTop3}"
+                                SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <Label Text="No expiry alerts."
+                               FontSize="11" TextColor="{StaticResource Homepage_Font_Secondary}"
+                               Margin="4,0"/>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="2"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*,Auto" Padding="4,1">
+                                <VerticalStackLayout Spacing="0">
+                                    <Label Text="{Binding MedName}"
+                                           FontSize="11" FontAttributes="Bold"
+                                           TextColor="{StaticResource Homepage_Font_Primary}"
+                                           TextTransform="Uppercase"
+                                           LineBreakMode="TailTruncation"/>
+                                    <Label Text="{Binding Detail}"
+                                           FontSize="10"
+                                           TextColor="{StaticResource Alert_Warning}"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="1"
+                                       Text="{Binding ResidentName}"
+                                       FontSize="10"
+                                       TextColor="{StaticResource Homepage_Font_Secondary}"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding ResidentName, Converter={StaticResource StringNotEmptyConverter}}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ========== Search + AI Assistant (row 1, full width) ========== -->
+        <Grid x:Name="SearchAiRow" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+              ColumnDefinitions="2*,*" ColumnSpacing="12">
+
+            <!-- ── Search card (2/3 width) ── -->
+            <Border x:Name="SearchCard" Grid.Column="0"
                     Stroke="{StaticResource Homepage_Card_Border}"
                     StrokeThickness="1"
                     BackgroundColor="{StaticResource Homepage_Card_Background}"
@@ -95,22 +250,32 @@
                     <RoundRectangle CornerRadius="12" />
                 </Border.StrokeShape>
 
-                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
 
                     <!-- Header -->
-                    <Label Grid.Row="0"
-                           Text="2. Search by day &amp; time"
-                           FontAttributes="Bold"
-                           FontSize="16"
+                    <Label Grid.Row="0" Text="SEARCH" FontAttributes="Bold"
+                           FontSize="14" CharacterSpacing="1" 
                            TextColor="{StaticResource Homepage_Font_Primary}" />
 
-                    <!-- Pickers + Buttons -->
+                    <!-- Controls row: Name | Day | Hour | Min | Search | Clear -->
                     <Grid Grid.Row="1"
-                          ColumnDefinitions="*,80,80,Auto,Auto"
+                          ColumnDefinitions="*,100,70,70,Auto,Auto"
                           ColumnSpacing="8">
 
-                        <!-- Day Picker -->
+                        <!-- Resident Name -->
                         <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Resident name" FontSize="11" TextColor="{StaticResource Homepage_Font_Primary}" />
+                            <Entry x:Name="ResidentSearchEntry"
+                                   Placeholder="Search by name"
+                                   PlaceholderColor="{StaticResource Placeholder_Font_Secondary}"
+                                   TextColor="{StaticResource Homepage_Font_Primary}"
+                                   ClearButtonVisibility="WhileEditing"
+                                   ReturnType="Search"
+                                   Completed="OnSearchClicked" />
+                        </VerticalStackLayout>
+
+                        <!-- Day Picker -->
+                        <VerticalStackLayout Grid.Column="1">
                             <Label Text="Day" FontSize="11" TextColor="{StaticResource Homepage_Font_Primary}" />
                             <Picker x:Name="DayPicker">
                                 <Picker.Items>
@@ -126,40 +291,22 @@
                         </VerticalStackLayout>
 
                         <!-- Hour Picker -->
-                        <VerticalStackLayout Grid.Column="1">
+                        <VerticalStackLayout Grid.Column="2">
                             <Label Text="Hour" FontSize="11" TextColor="{StaticResource Homepage_Font_Primary}" />
                             <Picker x:Name="HourPicker">
                                 <Picker.Items>
-                                    <x:String>0</x:String>
-                                    <x:String>1</x:String>
-                                    <x:String>2</x:String>
-                                    <x:String>3</x:String>
-                                    <x:String>4</x:String>
-                                    <x:String>5</x:String>
-                                    <x:String>6</x:String>
-                                    <x:String>7</x:String>
-                                    <x:String>8</x:String>
-                                    <x:String>9</x:String>
-                                    <x:String>10</x:String>
-                                    <x:String>11</x:String>
-                                    <x:String>12</x:String>
-                                    <x:String>13</x:String>
-                                    <x:String>14</x:String>
-                                    <x:String>15</x:String>
-                                    <x:String>16</x:String>
-                                    <x:String>17</x:String>
-                                    <x:String>18</x:String>
-                                    <x:String>19</x:String>
-                                    <x:String>20</x:String>
-                                    <x:String>21</x:String>
-                                    <x:String>22</x:String>
-                                    <x:String>23</x:String>
+                                    <x:String>0</x:String><x:String>1</x:String><x:String>2</x:String><x:String>3</x:String>
+                                    <x:String>4</x:String><x:String>5</x:String><x:String>6</x:String><x:String>7</x:String>
+                                    <x:String>8</x:String><x:String>9</x:String><x:String>10</x:String><x:String>11</x:String>
+                                    <x:String>12</x:String><x:String>13</x:String><x:String>14</x:String><x:String>15</x:String>
+                                    <x:String>16</x:String><x:String>17</x:String><x:String>18</x:String><x:String>19</x:String>
+                                    <x:String>20</x:String><x:String>21</x:String><x:String>22</x:String><x:String>23</x:String>
                                 </Picker.Items>
                             </Picker>
                         </VerticalStackLayout>
 
                         <!-- Min Picker -->
-                        <VerticalStackLayout Grid.Column="2">
+                        <VerticalStackLayout Grid.Column="3">
                             <Label Text="Min" FontSize="11" TextColor="{StaticResource Homepage_Font_Primary}" />
                             <Picker x:Name="MinutePicker">
                                 <Picker.Items>
@@ -172,7 +319,7 @@
                         </VerticalStackLayout>
 
                         <!-- Search Button -->
-                        <Border Grid.Column="3" StrokeThickness="0" HeightRequest="28" VerticalOptions="End" Margin="0,0,0,4" BackgroundColor="{StaticResource Button_Icon_Background}">
+                        <Border Grid.Column="4" StrokeThickness="0" HeightRequest="28" VerticalOptions="End" Margin="0,0,0,4" BackgroundColor="{StaticResource Button_Icon_Background}">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="4"/>
                             </Border.StrokeShape>
@@ -188,7 +335,7 @@
                         </Border>
 
                         <!-- Clear Button -->
-                        <Border Grid.Column="4" StrokeThickness="0" HeightRequest="28" VerticalOptions="End" Margin="0,0,0,4" BackgroundColor="{StaticResource Button_Icon_Background}">
+                        <Border Grid.Column="5" StrokeThickness="0" HeightRequest="28" VerticalOptions="End" Margin="0,0,0,4" BackgroundColor="{StaticResource Button_Icon_Background}">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="4"/>
                             </Border.StrokeShape>
@@ -203,20 +350,82 @@
                             </Border.GestureRecognizers>
                         </Border>
                     </Grid>
-
-                    <!-- Tip -->
-                    <Label Grid.Row="2"
-                           FontSize="10"
-                           TextColor="{StaticResource Text_Tip}"
-                           Text="Tip: Search by resident, time, or both." />
                 </Grid>
             </Border>
+
+            <!-- ── AI Assistant card (1/3 width) ── -->
+            <Border x:Name="AiActionsBar" Grid.Column="1"
+                    Stroke="#7C3AED" StrokeThickness="1"
+                    BackgroundColor="{StaticResource Homepage_Card_Background}"
+                    Padding="12">
+                <Border.StrokeShape><RoundRectangle CornerRadius="12"/></Border.StrokeShape>
+
+                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+
+                    <!-- Header -->
+                    <HorizontalStackLayout Spacing="6">
+                        <Label Text="AI ASSISTANT" FontSize="14" FontAttributes="Bold"
+                               CharacterSpacing="1" TextColor="#7C3AED"
+                               VerticalOptions="Center"/>
+                        <Label Grid.Row="1" Text="AI-generated drafts — review required"
+                               FontSize="11" FontAttributes="Italic" VerticalTextAlignment="End"
+                               TextColor="{StaticResource Homepage_Font_Secondary}"/>
+                    </HorizontalStackLayout>
+
+
+                    <!-- Buttons row — split evenly -->
+                    <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="8" VerticalOptions="End">
+
+                        <!-- SHIFT HANDOFF button -->
+                        <Border x:Name="AiHandoffAction" Grid.Column="0" StrokeThickness="0" HeightRequest="28"
+                                BackgroundColor="{StaticResource Button_Icon_Background}">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                            <Grid ColumnDefinitions="32,*" Margin="0" InputTransparent="True">
+                                <Image Grid.Column="0" Source="icons8_shift_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Border Grid.Column="1" BackgroundColor="#7C3AED" Padding="10,0" StrokeThickness="0" InputTransparent="True">
+                                    <Label Text="SHIFT HANDOFF" TextColor="White" FontSize="11" VerticalOptions="Center" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                </Border>
+                            </Grid>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnAiHandoffClicked"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+
+                        <!-- CARE QUERY button -->
+                        <Border x:Name="AiQueryAction" Grid.Column="1" StrokeThickness="0" HeightRequest="28"
+                                BackgroundColor="{StaticResource Button_Icon_Background}">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                            <Grid ColumnDefinitions="32,*" Margin="0" InputTransparent="True">
+                                <Image Grid.Column="0" Source="icons8_question_100.png" HeightRequest="16" WidthRequest="16" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Border Grid.Column="1" BackgroundColor="#7C3AED" Padding="10,0" StrokeThickness="0" InputTransparent="True">
+                                    <Label Text="CARE QUERY" TextColor="White" FontSize="11" VerticalOptions="Center" HorizontalOptions="Center" FontAttributes="Bold"/>
+                                </Border>
+                            </Grid>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnAiQueryClicked"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+
+                    </Grid>
+
+                </Grid>
+            </Border>
+
         </Grid>
 
-        <!-- ========== Row 1: Medications list ========== -->
-        <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="8">
+        <!-- ========== Row 3: Medications list (spans all columns) ========== -->
+        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                Stroke="{StaticResource Homepage_Card_Border}"
+                StrokeThickness="1"
+                BackgroundColor="{StaticResource Homepage_Card_Background}"
+                Padding="16,12">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12"/>
+            </Border.StrokeShape>
 
-            <Label Text="3. Medications"
+        <Grid RowDefinitions="Auto,*" RowSpacing="8">
+
+            <Label Text="Medications"
                    FontAttributes="Bold"
                    FontSize="18"
                    TextColor="{StaticResource Homepage_Font_Primary}" />
@@ -227,10 +436,19 @@
                             SelectionMode="Single"
                             SelectionChanged="OnSelectionChanged">
 
+                <CollectionView.EmptyView>
+                    <Label Text="No resident medications scheduled for today."
+                           FontSize="13" TextColor="{StaticResource Homepage_Font_Secondary}"
+                           Margin="4,8"/>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                </CollectionView.ItemsLayout>
+
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="model:Medication">
-                        <Border Margin="0,4"
-                                Padding="12"
+                        <Border Padding="16,12"
                                 BackgroundColor="{StaticResource Homepage_Card_Background}"
                                 Stroke="{StaticResource Accent_Teal}"
                                 StrokeThickness="1">
@@ -238,91 +456,107 @@
                                 <RoundRectangle CornerRadius="12" />
                             </Border.StrokeShape>
 
-                            <Grid ColumnDefinitions="*,Auto">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
 
-                                <!-- LEFT: All medication info -->
-                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <!-- Col 0: Resident name -->
+                                <Label Grid.Column="0"
+                                       Text="{Binding ResidentName}"
+                                       FontSize="17" FontAttributes="Bold"
+                                       TextColor="{StaticResource Homepage_Font_Primary}"
+                                       VerticalOptions="Center" />
 
-                                    <!-- Resident Name -->
-                                    <Label Text="{Binding ResidentName}"
-                                           FontSize="16"
-                                           FontAttributes="Bold"
-                                           TextColor="{StaticResource Homepage_Font_Primary}" />
+                                <!-- Col 1: Med details -->
+                                <Label Grid.Column="1" FontSize="15"
+                                       TextColor="{StaticResource Homepage_Font_Primary}"
+                                       VerticalOptions="Center"
+                                       LineBreakMode="TailTruncation">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding MedName}" FontAttributes="Bold" />
+                                            <Span Text=", " />
+                                            <Span Text="{Binding Quantity}" />
+                                            <Span Text=" " />
+                                            <Span Text="{Binding QuantityUnit}" />
+                                            <Span Text=" · " TextColor="{StaticResource Accent_Teal}" />
+                                            <Span Text="{Binding Usage}" TextColor="{StaticResource Accent_Teal}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
 
-                                    <!-- Medication Name -->
-                                    <Label Text="{Binding MedName}"
-                                           FontSize="14"
-                                           TextColor="{StaticResource Homepage_Font_Primary}" />
-
-                                    <!-- Quantity + Unit -->
-                                    <Label FontSize="13" TextColor="{StaticResource Homepage_Font_Primary}">
-                                        <Label.FormattedText>
-                                            <FormattedString>
-                                                <Span Text="Qty: " />
-                                                <Span Text="{Binding Quantity}" />
-                                                <Span Text=" " />
-                                                <Span Text="{Binding QuantityUnit}" />
-                                            </FormattedString>
-                                        </Label.FormattedText>
-                                    </Label>
-
-                                    <!-- Condition/Usage -->
-                                    <Label Text="{Binding Usage, StringFormat='For: {0}'}"
-                                           FontSize="13"
-                                           TextColor="{StaticResource Accent_Teal}" />
-
-                                    <!-- Schedule Summary (days + times) -->
-                                    <Label Text="{Binding ScheduleSummary}"
-                                           FontSize="11"
-                                           TextColor="{StaticResource Text_Tip}" />
-
-                                </VerticalStackLayout>
-
-                                <!-- RIGHT: Time + Completed checkbox -->
-                                <VerticalStackLayout Grid.Column="1"
-                                                     Spacing="10"
-                                                     VerticalOptions="Center"
-                                                     HorizontalOptions="End">
-
-                                    <!-- Time badge -->
-                                    <Border Padding="10,6"
-                                            BackgroundColor="{StaticResource Badge_Time_Background}"
-                                            HorizontalOptions="End">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="8" />
-                                        </Border.StrokeShape>
-                                        <Label Text="{Binding ReminderTime, StringFormat='{}{0:hh\\:mm}'}"
-                                               FontSize="14"
-                                               FontAttributes="Bold"
-                                               TextColor="{StaticResource Button_Font_Primary}" />
-                                    </Border>
-
-                                    <!-- Completed (bigger tap target) -->
-                                    <Border Padding="10,6"
-                                            Stroke="{StaticResource Badge_Completed_Border}"
-                                            StrokeThickness="1"
-                                            BackgroundColor="{StaticResource Badge_Completed_Background}"
-                                            HorizontalOptions="End">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="10" />
-                                        </Border.StrokeShape>
-
-                                        <HorizontalStackLayout Spacing="8"
-                                                               HorizontalOptions="End"
-                                                               VerticalOptions="Center">
-
-                                            <CheckBox IsChecked="{Binding IsDone}"
-                                                      CheckedChanged="OnDoneCheckedChanged"
-                                                      VerticalOptions="Center" />
-
-                                            <Label Text="Completed"
-                                                   FontSize="13"
+                                <!-- Col 2: Timeslot status badges -->
+                                <HorizontalStackLayout Grid.Column="2" Spacing="12"
+                                                       VerticalOptions="Center">
+                                    <!-- Slot 1 -->
+                                    <VerticalStackLayout Spacing="1">
+                                        <HorizontalStackLayout Spacing="6">
+                                            <Label Text="{Binding TodayTime1, StringFormat='{}{0:hh\\:mm}'}"
+                                                   FontSize="16" FontAttributes="Bold"
                                                    TextColor="{StaticResource Homepage_Font_Primary}"
                                                    VerticalOptions="Center" />
+                                            <Border Padding="6,2" StrokeThickness="0"
+                                                    BackgroundColor="{Binding Slot1StatusColor}"
+                                                    VerticalOptions="Center">
+                                                <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                                                <Label Text="{Binding Slot1Status}"
+                                                       FontSize="10" FontAttributes="Bold"
+                                                       TextColor="White"
+                                                       TextTransform="Uppercase"/>
+                                            </Border>
                                         </HorizontalStackLayout>
-                                    </Border>
+                                        <Label Text="{Binding Slot1AdminTime}"
+                                               FontSize="10"
+                                               TextColor="{StaticResource Homepage_Font_Secondary}"
+                                               IsVisible="{Binding Slot1HasTime}"/>
+                                    </VerticalStackLayout>
 
-                                </VerticalStackLayout>
+                                    <!-- Slot 2 -->
+                                    <VerticalStackLayout Spacing="1"
+                                                         IsVisible="{Binding HasSlot2}">
+                                        <HorizontalStackLayout Spacing="6">
+                                            <Label Text="{Binding TodayTime2, StringFormat='{}{0:hh\\:mm}'}"
+                                                   FontSize="16" FontAttributes="Bold"
+                                                   TextColor="{StaticResource Homepage_Font_Primary}"
+                                                   VerticalOptions="Center" />
+                                            <Border Padding="6,2" StrokeThickness="0"
+                                                    BackgroundColor="{Binding Slot2StatusColor}"
+                                                    VerticalOptions="Center">
+                                                <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                                                <Label Text="{Binding Slot2Status}"
+                                                       FontSize="10" FontAttributes="Bold"
+                                                       TextColor="White"
+                                                       TextTransform="Uppercase"/>
+                                            </Border>
+                                        </HorizontalStackLayout>
+                                        <Label Text="{Binding Slot2AdminTime}"
+                                               FontSize="10"
+                                               TextColor="{StaticResource Homepage_Font_Secondary}"
+                                               IsVisible="{Binding Slot2HasTime}"/>
+                                    </VerticalStackLayout>
+
+                                    <!-- Slot 3 -->
+                                    <VerticalStackLayout Spacing="1"
+                                                         IsVisible="{Binding HasSlot3}">
+                                        <HorizontalStackLayout Spacing="6">
+                                            <Label Text="{Binding TodayTime3, StringFormat='{}{0:hh\\:mm}'}"
+                                                   FontSize="16" FontAttributes="Bold"
+                                                   TextColor="{StaticResource Homepage_Font_Primary}"
+                                                   VerticalOptions="Center" />
+                                            <Border Padding="6,2" StrokeThickness="0"
+                                                    BackgroundColor="{Binding Slot3StatusColor}"
+                                                    VerticalOptions="Center">
+                                                <Border.StrokeShape><RoundRectangle CornerRadius="4"/></Border.StrokeShape>
+                                                <Label Text="{Binding Slot3Status}"
+                                                       FontSize="10" FontAttributes="Bold"
+                                                       TextColor="White"
+                                                       TextTransform="Uppercase"/>
+                                            </Border>
+                                        </HorizontalStackLayout>
+                                        <Label Text="{Binding Slot3AdminTime}"
+                                               FontSize="10"
+                                               TextColor="{StaticResource Homepage_Font_Secondary}"
+                                               IsVisible="{Binding Slot3HasTime}"/>
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
 
                             </Grid>
                         </Border>
@@ -330,6 +564,7 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </Grid>
+        </Border>
 
     </Grid>
 </pages:AuthPage>

@@ -2,11 +2,19 @@
 using System.Text.Json.Serialization;
 using CareHub.Models;
 using CareHub.Services.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CareHub.Services.Local
 {
     public class MedicationOrderJsonService : IMedicationOrderService
     {
+        private static string GetCurrentUserLabel()
+        {
+            var auth = MauiProgram.Services.GetService<AuthService>();
+            if (auth?.CurrentUser == null) return "Unknown";
+            return $"{auth.CurrentUser.StaffName} ({auth.CurrentUser.Role})";
+        }
+
         private readonly string _filePath;
         private readonly IMedicationService _medicationService;
 
@@ -42,14 +50,27 @@ namespace CareHub.Services.Local
             await JsonSerializer.SerializeAsync(stream, items, JsonOptions);
         }
 
-        public async Task<MedicationOrder> CreateAsync(Guid medicationId, int requestedQuantity, string? requestedBy, string? notes)
+        public async Task<MedicationOrder> CreateAsync(Guid medicationId, int requestedQuantity, string? requestedBy, string? notes, string? medicationName = null)
         {
             var list = await LoadAsync();
+
+            // Resolve medication name for display
+            string? medName = medicationName;
+            if (string.IsNullOrWhiteSpace(medName))
+            {
+                try
+                {
+                    var meds = await _medicationService.LoadAsync();
+                    medName = meds.FirstOrDefault(m => m.Id == medicationId)?.MedName;
+                }
+                catch { /* offline — name stays null */ }
+            }
 
             var order = new MedicationOrder
             {
                 Id = Guid.NewGuid(),
                 MedicationId = medicationId,
+                MedicationName = medName,
                 RequestedQuantity = requestedQuantity,
                 Status = MedicationOrderStatus.Requested,
                 RequestedAt = DateTime.UtcNow,
@@ -63,7 +84,7 @@ namespace CareHub.Services.Local
             return order;
         }
 
-        public async Task UpdateStatusAsync(Guid orderId, MedicationOrderStatus newStatus)
+        public async Task UpdateStatusAsync(Guid orderId, MedicationOrderStatus newStatus, DateTimeOffset? expiryDate = null)
         {
             var list = await LoadAsync();
             var order = list.FirstOrDefault(x => x.Id == orderId);
@@ -98,26 +119,41 @@ namespace CareHub.Services.Local
 
             if (newStatus == MedicationOrderStatus.Ordered)
             {
-                order.OrderedAt ??= DateTime.Now;
+                order.OrderedAt ??= DateTimeOffset.UtcNow;
 
                 // Keep these if your model supports them (you’ve been showing “by Staff” in UI)
-                order.OrderedBy ??= "Staff"; // TODO: supervisor login later
+                order.OrderedBy ??= GetCurrentUserLabel();
             }
 
             if (newStatus == MedicationOrderStatus.Received)
             {
-                order.ReceivedAt ??= DateTime.Now;
-                order.ReceivedBy ??= "Staff"; // TODO: staff/supervisor later
+                order.ReceivedAt ??= DateTimeOffset.UtcNow;
+                order.ReceivedBy ??= GetCurrentUserLabel();
+                order.ReceivedExpiryDate = expiryDate;
 
                 // Increase inventory only once (when transitioning into Received)
                 if (oldStatus != MedicationOrderStatus.Received)
+                {
                     await _medicationService.AdjustStockAsync(order.MedicationId, order.RequestedQuantity);
+
+                    // Update medication expiry date if provided
+                    if (expiryDate.HasValue)
+                    {
+                        var meds = await _medicationService.LoadAsync();
+                        var med = meds.FirstOrDefault(m => m.Id == order.MedicationId);
+                        if (med != null)
+                        {
+                            med.ExpiryDate = expiryDate.Value;
+                            await _medicationService.UpsertAsync(med);
+                        }
+                    }
+                }
             }
 
             if (newStatus == MedicationOrderStatus.Cancelled)
             {
-                order.CancelledAt ??= DateTime.Now;
-                order.CancelledBy ??= "Staff"; // TODO: logged-in user later
+                order.CancelledAt ??= DateTimeOffset.UtcNow;
+                order.CancelledBy ??= GetCurrentUserLabel();
 
                 // Do not touch OrderedAt/ReceivedAt here.
                 // Because:
@@ -125,6 +161,15 @@ namespace CareHub.Services.Local
                 // - Keeping OrderedAt is useful if it was already ordered
             }
 
+            await SaveAsync(list);
+        }
+
+        public async Task UpdateNameAsync(Guid orderId, string medicationName)
+        {
+            var list = await LoadAsync();
+            var order = list.FirstOrDefault(x => x.Id == orderId);
+            if (order == null) return;
+            order.MedicationName = medicationName;
             await SaveAsync(list);
         }
 

@@ -77,30 +77,65 @@ namespace CareHub
             var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5001/";
             var apiBase = new Uri(apiBaseUrl);
 
+            // Auth service (needs base URL for API login)
+            builder.Services.AddSingleton(new AuthService(apiBaseUrl));
+
             // Sync queue (registered early so all services can use it)
             builder.Services.AddSingleton<ISyncQueue, JsonSyncQueue>();
 
-            // HTTP clients for API services
+            // DelegatingHandler that attaches JWT Bearer token to every request
+            builder.Services.AddTransient<AuthTokenHandler>();
+
+            // HTTP clients for API services (all use AuthTokenHandler)
             builder.Services.AddHttpClient<ResidentApiService>(client =>
             {
                 client.BaseAddress = apiBase;
                 client.Timeout = TimeSpan.FromSeconds(2);
-            });
+            }).AddHttpMessageHandler<AuthTokenHandler>();
             builder.Services.AddHttpClient<MedicationApiService>(client =>
             {
                 client.BaseAddress = apiBase;
                 client.Timeout = TimeSpan.FromSeconds(2);
-            });
+            }).AddHttpMessageHandler<AuthTokenHandler>();
             builder.Services.AddHttpClient<ObservationApiService>(client =>
             {
                 client.BaseAddress = apiBase;
                 client.Timeout = TimeSpan.FromSeconds(2);
+            }).AddHttpMessageHandler<AuthTokenHandler>();
+            builder.Services.AddHttpClient<MarApiService>(client =>
+            {
+                client.BaseAddress = apiBase;
+                client.Timeout = TimeSpan.FromSeconds(2);
+            }).AddHttpMessageHandler<AuthTokenHandler>();
+            builder.Services.AddHttpClient<MedicationOrderApiService>(client =>
+            {
+                client.BaseAddress = apiBase;
+                client.Timeout = TimeSpan.FromSeconds(2);
+            }).AddHttpMessageHandler<AuthTokenHandler>();
+            builder.Services.AddHttpClient<AiApiService>(client =>
+            {
+                client.BaseAddress = apiBase;
+                client.Timeout = TimeSpan.FromSeconds(35);
+            }).AddHttpMessageHandler<AuthTokenHandler>();
+
+            // AI service abstraction: tries API wrapper, falls back to mock
+            builder.Services.AddSingleton<IAiService>(sp =>
+            {
+                try
+                {
+                    var api = sp.GetService<AiApiService>();
+                    if (api != null)
+                        return new CareHub.Desktop.Services.AiServiceWrapper(api);
+                }
+                catch { }
+                return new CareHub.Desktop.Services.MockAiService();
             });
 
             // Local JSON services
             builder.Services.AddSingleton<ResidentJsonService>();
             builder.Services.AddSingleton<MedicationJsonService>();
             builder.Services.AddSingleton<ObservationJsonService>();
+            builder.Services.AddSingleton<MarJsonService>();
 
             // Medications: API + Local + Wrapper
             builder.Services.AddSingleton((Func<IServiceProvider, CareHub.Services.Abstractions.IMedicationService>)(sp =>
@@ -120,6 +155,15 @@ namespace CareHub
                 return new ObservationService(api, local, queue);
             });
 
+            // MAR: API + Local + Wrapper
+            builder.Services.AddSingleton<IMarService>(sp =>
+            {
+                var api = sp.GetRequiredService<MarApiService>();
+                var local = sp.GetRequiredService<MarJsonService>();
+                var queue = sp.GetRequiredService<ISyncQueue>();
+                return new MarService(api, local, queue);
+            });
+
             // Residents: API + Local + Wrapper (registered after Meds/Obs so it can remap their IDs)
             builder.Services.AddSingleton((Func<IServiceProvider, CareHub.Services.Abstractions.IResidentService>)(sp =>
             {
@@ -131,14 +175,20 @@ namespace CareHub
                 return (CareHub.Services.Abstractions.IResidentService)new CareHub.Desktop.Services.ResidentService((CareHub.Services.Abstractions.IResidentService)api, (CareHub.Services.Abstractions.IResidentService)local, (CareHub.Services.Abstractions.IMedicationService)localMeds, (CareHub.Services.Abstractions.IObservationService)localObs, (CareHub.Desktop.Services.Sync.ISyncQueue)queue);
             }));
 
-            builder.Services.AddSingleton<IMedicationOrderService, MedicationOrderJsonService>();
+            // MedicationOrders: API + Local + Wrapper
+            builder.Services.AddSingleton<IMedicationOrderService>(sp =>
+            {
+                var api = sp.GetRequiredService<MedicationOrderApiService>();
+                var local = sp.GetRequiredService<MedicationOrderJsonService>();
+                return new CareHub.Desktop.Services.MedicationOrderService(api, local);
+            });
             builder.Services.AddSingleton<IStaffService, StaffJsonService>();
-            builder.Services.AddSingleton<AuthService>();
 
             // ViewModels
             builder.Services.AddTransient<FloorPlanViewModel>();
             builder.Services.AddTransient<HomePageViewModel>();
             builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddTransient<MedicationBatchesViewModel>();
             builder.Services.AddTransient<MedicationInventoryViewModel>();
             builder.Services.AddTransient<MedicationOrdersViewModel>();
             builder.Services.AddTransient<MedicationViewModel>();
@@ -146,12 +196,14 @@ namespace CareHub
             builder.Services.AddTransient<ResidentsPageViewModel>();
             builder.Services.AddTransient<StaffManagementViewModel>();
             builder.Services.AddTransient<ResidentObservationsViewModel>();
+            builder.Services.AddTransient<MarPageViewModel>();
 
             // Pages
             builder.Services.AddTransient<EditMedicationPage>();
             builder.Services.AddTransient<EditResidentPage>();
             builder.Services.AddTransient<FloorPlanPage>();
             builder.Services.AddTransient<HomePage>();
+            builder.Services.AddTransient<MedicationBatchesPage>();
             builder.Services.AddTransient<MedicationInventoryPage>();
             builder.Services.AddTransient<MedicationOrdersPage>();
             builder.Services.AddTransient<ResidentMedicationsPage>();
@@ -160,6 +212,9 @@ namespace CareHub
             builder.Services.AddTransient<ViewResidentPage>();
             builder.Services.AddTransient<StaffManagementPage>();
             builder.Services.AddTransient<ResidentObservationsPage>();
+            builder.Services.AddTransient<MarPage>();
+            builder.Services.AddTransient<AiCareQueryPage>();
+            builder.Services.AddTransient<AiShiftHandoffPage>();
             builder.Services.AddTransient<LoginPage>();
 
 #if DEBUG
@@ -173,6 +228,37 @@ namespace CareHub
 
             // Probe API reachability in the background (non-blocking)
             _ = ConnectivityHelper.ProbeApiInBackgroundAsync(apiBase);
+
+            // Auto-sync when connectivity is restored
+            Connectivity.Current.ConnectivityChanged += async (_, args) =>
+            {
+                if (args.NetworkAccess != NetworkAccess.Internet)
+                    return;
+
+                // Probe API first to confirm it's actually reachable
+                await ConnectivityHelper.ProbeApiInBackgroundAsync(apiBase);
+                if (!ConnectivityHelper.IsOnline())
+                    return;
+
+                try
+                {
+                    var residentSvc = Services.GetService<IResidentService>() as CareHub.Desktop.Services.ResidentService;
+                    if (residentSvc != null) await residentSvc.SyncAsync();
+
+                    var medSvc = Services.GetService<IMedicationService>() as CareHub.Desktop.Services.MedicationService;
+                    if (medSvc != null) await medSvc.SyncAsync();
+
+                    var obsSvc = Services.GetService<IObservationService>() as CareHub.Desktop.Services.ObservationService;
+                    if (obsSvc != null) await obsSvc.SyncAsync();
+
+                    var marSvc = Services.GetService<IMarService>() as CareHub.Desktop.Services.MarService;
+                    if (marSvc != null) await marSvc.SyncAsync();
+                }
+                catch
+                {
+                    // Best-effort auto-sync; manual sync button still available
+                }
+            };
 
             return app;
         }

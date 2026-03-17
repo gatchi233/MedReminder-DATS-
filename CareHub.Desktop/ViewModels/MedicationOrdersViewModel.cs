@@ -95,11 +95,34 @@ namespace CareHub.ViewModels
                 var orders = await _orderService.LoadAsync();
                 var medNameMap = meds.ToDictionary(m => m.Id, m => m.MedName);
 
+                // Backfill any orders missing MedicationName
+                var needsSave = false;
+                foreach (var o in orders)
+                {
+                    if (string.IsNullOrWhiteSpace(o.MedicationName) &&
+                        medNameMap.TryGetValue(o.MedicationId, out var resolved) &&
+                        !string.IsNullOrWhiteSpace(resolved))
+                    {
+                        o.MedicationName = resolved;
+                        needsSave = true;
+                    }
+                }
+                if (needsSave)
+                {
+                    try
+                    {
+                        // Re-save orders with backfilled names
+                        foreach (var o in orders.Where(o => !string.IsNullOrWhiteSpace(o.MedicationName)))
+                            await _orderService.UpdateNameAsync(o.Id, o.MedicationName!);
+                    }
+                    catch { /* best-effort backfill */ }
+                }
+
                 Orders.Clear();
                 foreach (var o in orders.OrderByDescending(x => x.RequestedAt))
                 {
                     medNameMap.TryGetValue(o.MedicationId, out var medName);
-                    medName ??= $"Medication #{o.MedicationId}";
+                    medName ??= o.MedicationName ?? "Unknown Medication";
                     Orders.Add(new MedicationOrderRow(o, medName));
                 }
             }
@@ -113,12 +136,12 @@ namespace CareHub.ViewModels
             }
         }
 
-        public async Task CreateOrderAsync(Guid medicationId, int qty, string? requestedBy, string? notes)
+        public async Task CreateOrderAsync(Guid medicationId, int qty, string? requestedBy, string? notes, string? medicationName = null)
         {
             if (qty <= 0) return;
             try
             {
-                await _orderService.CreateAsync(medicationId, qty, requestedBy, notes);
+                await _orderService.CreateAsync(medicationId, qty, requestedBy, notes, medicationName);
                 await LoadAsync();
             }
             catch
