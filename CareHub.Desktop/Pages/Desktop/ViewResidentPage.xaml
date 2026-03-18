@@ -184,7 +184,7 @@
                             <VerticalStackLayout Grid.Column="1" Spacing="2">
                                 <Label Text="GENDER" FontSize="10"
                                        TextColor="{StaticResource Resident_Font_Secondary}"/>
-                                <Label Text="{Binding Gender}" FontSize="13"
+                                <Label Text="{Binding GenderDisplay}" FontSize="13"
                                        TextColor="{StaticResource Resident_Font_Primary}"/>
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="2" Spacing="2">

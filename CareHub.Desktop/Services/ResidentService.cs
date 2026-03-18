@@ -38,6 +38,7 @@ public class ResidentService : IResidentService
             {
                 var apiItems = await _apiRes.LoadAsync();
                 ConnectivityHelper.MarkOnline();
+                ApplyMissingGenderByName(apiItems);
 
                 // Merge: keep local-only items that are not in the API yet.
                 var localItems = await _localRes.LoadAsync();
@@ -281,5 +282,18 @@ public class ResidentService : IResidentService
             }
         }
         catch { }
+    }
+
+    private static void ApplyMissingGenderByName(IEnumerable<Resident> residents)
+    {
+        foreach (var r in residents)
+        {
+            if (!string.IsNullOrWhiteSpace(r.Gender))
+                continue;
+
+            var inferred = Resident.InferGenderFromFirstName(r.ResidentFName);
+            if (!string.IsNullOrWhiteSpace(inferred))
+                r.Gender = inferred;
+        }
     }
 }

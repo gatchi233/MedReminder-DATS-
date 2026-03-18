@@ -100,6 +100,9 @@ namespace CareHub.Services.Local
                 var items = await JsonSerializer.DeserializeAsync<List<Medication>>(stream)
                             ?? new List<Medication>();
 
+                if (NormalizeDuplicateMedicationIds(items))
+                    await SaveAsync(items);
+
                 return items;
             }
             catch (Exception)
@@ -110,8 +113,28 @@ namespace CareHub.Services.Local
                 await using var stream = File.OpenRead(_filePath);
                 var items = await JsonSerializer.DeserializeAsync<List<Medication>>(stream)
                             ?? new List<Medication>();
+                if (NormalizeDuplicateMedicationIds(items))
+                    await SaveAsync(items);
                 return items;
             }
+        }
+
+        private static bool NormalizeDuplicateMedicationIds(List<Medication> items)
+        {
+            var seen = new HashSet<Guid>();
+            bool changed = false;
+
+            foreach (var m in items)
+            {
+                if (m.Id == Guid.Empty || seen.Contains(m.Id))
+                {
+                    m.Id = Guid.NewGuid();
+                    changed = true;
+                }
+                seen.Add(m.Id);
+            }
+
+            return changed;
         }
 
         private static async Task ResetInventoryFromPackageAsync()

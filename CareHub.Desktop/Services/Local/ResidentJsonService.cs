@@ -49,15 +49,39 @@ namespace CareHub.Services.Local
 
             try
             {
-                return JsonSerializer.Deserialize<List<Resident>>(text, options) ?? new List<Resident>();
+                var residents = JsonSerializer.Deserialize<List<Resident>>(text, options) ?? new List<Resident>();
+                if (ApplyMissingGenderByName(residents))
+                    await SaveInternalAsync(residents);
+                return residents;
             }
             catch (JsonException)
             {
                 var migrated = TryParseLegacyResidents(text);
                 if (migrated.Count > 0)
+                {
+                    ApplyMissingGenderByName(migrated);
                     await SaveInternalAsync(migrated);
+                }
                 return migrated;
             }
+        }
+
+        private static bool ApplyMissingGenderByName(List<Resident> residents)
+        {
+            bool changed = false;
+            foreach (var r in residents)
+            {
+                if (!string.IsNullOrWhiteSpace(r.Gender))
+                    continue;
+
+                var inferred = Resident.InferGenderFromFirstName(r.ResidentFName);
+                if (!string.IsNullOrWhiteSpace(inferred))
+                {
+                    r.Gender = inferred;
+                    changed = true;
+                }
+            }
+            return changed;
         }
 
         private static List<Resident> TryParseLegacyResidents(string json)

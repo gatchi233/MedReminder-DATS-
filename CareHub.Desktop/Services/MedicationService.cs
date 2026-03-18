@@ -35,6 +35,23 @@ public class MedicationService : IMedicationService
 
                 // Merge: keep local-only items that are not in the API yet.
                 var localItems = await _localMed.LoadAsync();
+
+                // If API payload omits global inventory rows, keep local inventory rows
+                // so Inventory page does not go empty after a refresh.
+                var apiHasInventory = apiItems.Any(m => m.ResidentId == null || m.ResidentId == Guid.Empty);
+                if (!apiHasInventory)
+                {
+                    var localInventory = localItems
+                        .Where(m => m.ResidentId == null || m.ResidentId == Guid.Empty)
+                        .ToList();
+
+                    foreach (var inv in localInventory)
+                    {
+                        if (!apiItems.Any(m => m.Id == inv.Id))
+                            apiItems.Add(inv);
+                    }
+                }
+
                 var apiIds = new HashSet<Guid>(apiItems.Select(m => m.Id));
                 var localOnly = localItems.Where(m => !apiIds.Contains(m.Id)).ToList();
 
@@ -68,7 +85,9 @@ public class MedicationService : IMedicationService
                 }
 
                 // Merge local fields into API items where API is missing them (non-blocking)
-                var localById = localItems.ToDictionary(m => m.Id);
+                var localById = localItems
+                    .GroupBy(m => m.Id)
+                    .ToDictionary(g => g.Key, g => g.First());
                 var toSync = new List<Medication>();
                 foreach (var apiItem in apiItems)
                 {

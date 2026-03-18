@@ -55,6 +55,28 @@ namespace CareHub.Models
         public string DateOfBirth { get; set; } = string.Empty;
         public string? Gender { get; set; } // "Male" / "Female" / "Other"
 
+        [JsonIgnore]
+        public string GenderDisplay =>
+            !string.IsNullOrWhiteSpace(Gender)
+                ? Gender!
+                : (InferGenderFromFirstName(ResidentFName) ?? "Unknown");
+
+        public static string? InferGenderFromFirstName(string? firstName)
+        {
+            if (string.IsNullOrWhiteSpace(firstName))
+                return null;
+
+            var key = firstName.Trim().ToLowerInvariant();
+            return key switch
+            {
+                "matthew" or "joseph" or "daniel" or "liam" or "david" or "henry" or "michael" or "alexander"
+                    => "Male",
+                "ella" or "evelyn" or "harper" or "victoria" or "scarlett" or "amelia" or "aria" or "abigail"
+                    => "Female",
+                _ => null
+            };
+        }
+
         // Address information
         public string? Address { get; set; }
         public string? City { get; set; }

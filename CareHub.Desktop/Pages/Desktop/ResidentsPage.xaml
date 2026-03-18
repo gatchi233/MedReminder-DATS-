@@ -73,7 +73,7 @@
                             <BoxView WidthRequest="1" HeightRequest="20" Color="{StaticResource Resident_Font_Secondary}" VerticalOptions="Center"/>
 
                             <!-- Gender -->
-                            <Label Text="{Binding Gender}" FontSize="13" TextColor="{StaticResource Resident_Font_Secondary}" VerticalOptions="Center"/>
+                            <Label Text="{Binding GenderDisplay}" FontSize="13" TextColor="{StaticResource Resident_Font_Secondary}" VerticalOptions="Center"/>
                             <BoxView WidthRequest="1" HeightRequest="20" Color="{StaticResource Resident_Font_Secondary}" VerticalOptions="Center"/>
 
                             <!-- Room & Bed -->
