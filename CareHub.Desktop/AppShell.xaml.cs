@@ -14,6 +14,7 @@ namespace CareHub
     public partial class AppShell : Shell
     {
         private AuthService? _auth;
+        private bool _redirectingToLogin;
         public AppShell()
         {
             InitializeComponent();
@@ -53,9 +54,26 @@ namespace CareHub
             if (!auth.IsLoggedIn && !target.Contains("login", StringComparison.OrdinalIgnoreCase))
             {
                 args.Cancel();
+
+                if (_redirectingToLogin)
+                    return;
+
+                _redirectingToLogin = true;
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
-                    await Shell.Current.GoToAsync("//login");
+                    try
+                    {
+                        if (Shell.Current != null)
+                            await Shell.Current.GoToAsync("//LoginPage");
+                    }
+                    catch
+                    {
+                        // Best effort; avoid crashing during startup navigation.
+                    }
+                    finally
+                    {
+                        _redirectingToLogin = false;
+                    }
                 });
                 return;
             }
@@ -132,7 +150,8 @@ namespace CareHub
         {
             base.OnNavigated(args);
 
-            // When switching to a root tab, clear all pushed sub-pages
+            // When switching tabs, pop to the section root in a single operation.
+            // Avoid repeated GoToAsync("..") loops which can be unstable on WinUI startup.
             if (args.Source == ShellNavigationSource.ShellSectionChanged)
             {
                 MainThread.BeginInvokeOnMainThread(async () =>
@@ -143,11 +162,8 @@ namespace CareHub
                         var nav = Shell.Current?.Navigation;
                         if (nav == null) return;
 
-                        // Pop all pushed pages back to root
-                        while (nav.NavigationStack.Count > 1)
-                        {
-                            await Shell.Current.GoToAsync("..");
-                        }
+                        if (nav.NavigationStack.Count > 1)
+                            await nav.PopToRootAsync(false);
                     }
                     finally
                     {
