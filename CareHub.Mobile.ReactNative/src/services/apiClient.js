@@ -140,3 +140,36 @@ export async function updateMedicationOrderStatus(orderId, statusPayload, token)
     token
   );
 }
+
+export async function aiShiftSummary(residentId, token) {
+  return apiRequest(
+    "/ai/shift-summary",
+    {
+      method: "POST",
+      body: JSON.stringify({ residentId })
+    },
+    token
+  );
+}
+
+export async function aiDetectTrends(residentId, token) {
+  return apiRequest(
+    "/ai/detect-trends",
+    {
+      method: "POST",
+      body: JSON.stringify({ residentId })
+    },
+    token
+  );
+}
+
+export async function aiCareQuery(query, residentId, token) {
+  return apiRequest(
+    "/ai/care-query",
+    {
+      method: "POST",
+      body: JSON.stringify({ query, residentId })
+    },
+    token
+  );
+}
