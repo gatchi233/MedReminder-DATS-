@@ -75,7 +75,7 @@ public class MedicationOrderService : IMedicationOrderService
                 await _api.UpdateStatusAsync(orderId, newStatus, expiryDate);
                 ConnectivityHelper.MarkOnline();
             }
-            catch
+            catch (OfflineException)
             {
                 ConnectivityHelper.MarkOffline();
             }

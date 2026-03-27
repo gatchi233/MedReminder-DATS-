@@ -20,13 +20,13 @@ public class MarService : IMarService
         _queue = queue;
     }
 
-    public async Task<List<MarEntry>> LoadAsync(Guid? residentId, DateTime fromUtc, DateTime toUtc)
+    public async Task<List<MarEntry>> LoadAsync(Guid? residentId, DateTime fromUtc, DateTime toUtc, bool includeVoided = false)
     {
         if (ConnectivityHelper.IsOnline())
         {
             try
             {
-                var items = await _api.LoadAsync(residentId, fromUtc, toUtc);
+                var items = await _api.LoadAsync(residentId, fromUtc, toUtc, includeVoided);
                 ConnectivityHelper.MarkOnline();
 
                 if (_local is CareHub.Services.Local.MarJsonService localJson)
@@ -50,11 +50,11 @@ public class MarService : IMarService
             catch
             {
                 ConnectivityHelper.MarkOffline();
-                return await _local.LoadAsync(residentId, fromUtc, toUtc);
+                return await _local.LoadAsync(residentId, fromUtc, toUtc, includeVoided);
             }
         }
 
-        return await _local.LoadAsync(residentId, fromUtc, toUtc);
+        return await _local.LoadAsync(residentId, fromUtc, toUtc, includeVoided);
     }
 
     public async Task CreateAsync(MarEntry entry)
@@ -127,5 +127,42 @@ public class MarService : IMarService
         }
 
         return success;
+    }
+
+    public async Task VoidAsync(Guid id, string? reason)
+    {
+        await _local.VoidAsync(id, reason);
+
+        if (ConnectivityHelper.IsOnline())
+        {
+            try
+            {
+                await _api.VoidAsync(id, reason);
+                ConnectivityHelper.MarkOnline();
+            }
+            catch (OfflineException)
+            {
+                ConnectivityHelper.MarkOffline();
+            }
+        }
+    }
+
+    public async Task<MarReport> GetReportAsync(DateTime fromUtc, DateTime toUtc, Guid? residentId)
+    {
+        if (ConnectivityHelper.IsOnline())
+        {
+            try
+            {
+                var report = await _api.GetReportAsync(fromUtc, toUtc, residentId);
+                ConnectivityHelper.MarkOnline();
+                return report;
+            }
+            catch (OfflineException)
+            {
+                ConnectivityHelper.MarkOffline();
+            }
+        }
+
+        return await _local.GetReportAsync(fromUtc, toUtc, residentId);
     }
 }

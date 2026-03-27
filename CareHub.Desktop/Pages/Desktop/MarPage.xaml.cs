@@ -2,7 +2,7 @@ using CareHub.ViewModels;
 
 namespace CareHub.Pages.Desktop;
 
-public partial class MarPage : ContentPage, IQueryAttributable
+public partial class MarPage : AuthPage, IQueryAttributable
 {
     private readonly MarPageViewModel _vm;
 
@@ -12,6 +12,12 @@ public partial class MarPage : ContentPage, IQueryAttributable
     {
         InitializeComponent();
         BindingContext = _vm = vm;
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await _vm.LoadAsync();
     }
 
     public async void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -32,17 +38,39 @@ public partial class MarPage : ContentPage, IQueryAttributable
                 residentId = parsed;
 
             if (residentId != Guid.Empty)
-            {
                 _vm.SetResident(residentId, string.Empty);
-            }
         }
 
-        if (query.TryGetValue("residentName", out var nameValue) && nameValue != null)
+        if (query.TryGetValue("residentName", out var nameValue) && nameValue != null &&
+            query.TryGetValue("residentId", out var residentValue) &&
+            residentValue != null)
         {
-            _vm.SetResident(_vm.ResidentId, nameValue.ToString() ?? "");
+            Guid residentIdFromQuery = residentValue is Guid g ? g : Guid.Empty;
+            if (residentIdFromQuery == Guid.Empty)
+                Guid.TryParse(residentValue.ToString(), out residentIdFromQuery);
+
+            if (residentIdFromQuery != Guid.Empty)
+                _vm.SetResident(residentIdFromQuery, nameValue.ToString() ?? "");
         }
 
         await _vm.LoadAsync();
+    }
+
+    private async void OnVoidClicked(object sender, EventArgs e)
+    {
+        var row = (sender as BindableObject)?.BindingContext as MarEntryRow;
+        if (row == null && sender is Button button)
+            row = button.CommandParameter as MarEntryRow;
+        if (row == null) return;
+
+        try
+        {
+            await _vm.VoidAsync(row);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("MAR Error", ex.Message, "OK");
+        }
     }
 
     private async void OnCloseClicked(object sender, TappedEventArgs e)

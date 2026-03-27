@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using CareHub.Desktop.Services.Sync;
 using CareHub.Models;
 using CareHub.Services.Abstractions;
+using System.Net;
 
 namespace CareHub.Services.Remote;
 
@@ -42,7 +43,7 @@ public sealed class MedicationOrderApiService : IMedicationOrderService
             };
 
             var resp = await _http.PostAsJsonAsync("api/medicationorders", payload);
-            resp.EnsureSuccessStatusCode();
+            await EnsureSuccessAsync(resp);
 
             var created = await resp.Content.ReadFromJsonAsync<MedicationOrder>();
             return created ?? throw new InvalidOperationException("API returned null after creating order.");
@@ -68,7 +69,7 @@ public sealed class MedicationOrderApiService : IMedicationOrderService
             };
 
             var resp = await _http.PutAsJsonAsync($"api/medicationorders/{orderId}/status", payload);
-            resp.EnsureSuccessStatusCode();
+            await EnsureSuccessAsync(resp);
         }
         catch (HttpRequestException ex)
         {
@@ -93,7 +94,7 @@ public sealed class MedicationOrderApiService : IMedicationOrderService
             var resp = await _http.DeleteAsync($"api/medicationorders/{orderId}");
             if (resp.StatusCode == System.Net.HttpStatusCode.NotFound)
                 return;
-            resp.EnsureSuccessStatusCode();
+            await EnsureSuccessAsync(resp);
         }
         catch (HttpRequestException ex)
         {
@@ -120,5 +121,21 @@ public sealed class MedicationOrderApiService : IMedicationOrderService
         {
             throw new OfflineException("API timeout (GetByMedicationId).", ex);
         }
+    }
+
+    private static async Task EnsureSuccessAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var message = await response.Content.ReadAsStringAsync();
+        message = string.IsNullOrWhiteSpace(message)
+            ? $"Request failed with status {(int)response.StatusCode}."
+            : message.Trim().Trim('"');
+
+        if (response.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Conflict or HttpStatusCode.NotFound)
+            throw new InvalidOperationException(message);
+
+        response.EnsureSuccessStatusCode();
     }
 }

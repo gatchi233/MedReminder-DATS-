@@ -21,12 +21,12 @@ public class MarJsonService : IMarService
         _filePath = Path.Combine(FileSystem.AppDataDirectory, "MarEntries.json");
     }
 
-    public async Task<List<MarEntry>> LoadAsync(Guid? residentId, DateTime fromUtc, DateTime toUtc)
+    public async Task<List<MarEntry>> LoadAsync(Guid? residentId, DateTime fromUtc, DateTime toUtc, bool includeVoided = false)
     {
         var all = await LoadAllAsync();
 
         return all
-            .Where(m => !m.IsVoided)
+            .Where(m => includeVoided || !m.IsVoided)
             .Where(m => residentId == null || m.ResidentId == residentId.Value)
             .Where(m => m.AdministeredAtUtc >= new DateTimeOffset(fromUtc, TimeSpan.Zero)
                      && m.AdministeredAtUtc <= new DateTimeOffset(toUtc, TimeSpan.Zero))
@@ -50,6 +50,65 @@ public class MarJsonService : IMarService
     }
 
     public Task<int> SyncAsync() => Task.FromResult(0);
+
+    public async Task VoidAsync(Guid id, string? reason)
+    {
+        var list = await LoadAllAsync();
+        var entry = list.FirstOrDefault(m => m.Id == id);
+        if (entry is null)
+            throw new InvalidOperationException("MAR entry not found.");
+
+        if (entry.IsVoided)
+            throw new InvalidOperationException("Entry is already voided.");
+
+        entry.IsVoided = true;
+        entry.VoidedAtUtc = DateTimeOffset.UtcNow;
+        entry.VoidReason = reason;
+        entry.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await SaveAsync(list);
+    }
+
+    public async Task<MarReport> GetReportAsync(DateTime fromUtc, DateTime toUtc, Guid? residentId)
+    {
+        var entries = await LoadAsync(residentId, fromUtc, toUtc, false);
+
+        var lines = entries
+            .OrderBy(e => e.ResidentName)
+            .ThenBy(e => e.AdministeredAtUtc)
+            .Select(e => new MarReportLine
+            {
+                Id = e.Id,
+                ResidentId = e.ResidentId,
+                ResidentName = e.ResidentName,
+                MedicationId = e.MedicationId,
+                MedicationName = e.MedicationName,
+                Status = e.Status,
+                DoseQuantity = e.DoseQuantity,
+                DoseUnit = e.DoseUnit,
+                ScheduledForUtc = e.ScheduledForUtc,
+                AdministeredAtUtc = e.AdministeredAtUtc,
+                RecordedBy = e.RecordedBy,
+                Notes = e.Notes
+            })
+            .ToList();
+
+        return new MarReport
+        {
+            FromUtc = new DateTimeOffset(fromUtc, TimeSpan.Zero),
+            ToUtc = new DateTimeOffset(toUtc, TimeSpan.Zero),
+            Summary = new MarReportSummary
+            {
+                TotalEntries = lines.Count,
+                GivenCount = lines.Count(l => l.Status == "Given"),
+                RefusedCount = lines.Count(l => l.Status == "Refused"),
+                MissedCount = lines.Count(l => l.Status == "Missed"),
+                HeldCount = lines.Count(l => l.Status == "Held"),
+                NotAvailableCount = lines.Count(l => l.Status == "NotAvailable")
+            },
+            Lines = lines
+        };
+    }
 
     public async Task<List<MarEntry>> LoadAllAsync()
     {

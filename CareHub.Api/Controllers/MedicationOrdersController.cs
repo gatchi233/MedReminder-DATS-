@@ -60,6 +60,9 @@ public sealed class MedicationOrdersController : ControllerBase
         [FromBody] CreateMedicationOrderRequest request,
         CancellationToken ct)
     {
+        if (request.RequestedQuantity <= 0)
+            return BadRequest("Requested quantity must be greater than 0.");
+
         if (!await _db.Medications.AnyAsync(m => m.Id == request.MedicationId, ct))
             return NotFound($"Medication {request.MedicationId} not found.");
 
@@ -88,6 +91,9 @@ public sealed class MedicationOrdersController : ControllerBase
         [FromBody] UpdateMedicationOrderStatusRequest request,
         CancellationToken ct)
     {
+        if (string.IsNullOrWhiteSpace(request.Status))
+            return BadRequest("Status is required.");
+
         if (!AllowedStatuses.Contains(request.Status))
             return BadRequest($"Invalid status '{request.Status}'. Allowed: {string.Join(", ", AllowedStatuses)}.");
 

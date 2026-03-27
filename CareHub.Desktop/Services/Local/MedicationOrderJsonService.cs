@@ -113,7 +113,7 @@ namespace CareHub.Services.Local
             };
 
             if (!isAllowed)
-                return;
+                throw new InvalidOperationException($"Cannot transition from '{oldStatus}' to '{newStatus}'.");
 
             order.Status = newStatus;
 

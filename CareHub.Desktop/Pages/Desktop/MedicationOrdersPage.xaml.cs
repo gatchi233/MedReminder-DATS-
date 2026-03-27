@@ -32,59 +32,60 @@ namespace CareHub.Pages.Desktop
 
         private async void OnNewOrderClicked(object sender, TappedEventArgs e)
         {
-            await VM.LoadAsync();
-
-            var popup = new ActionPopup();
-            popup.ConfigureNewMedOrder("NEW ORDER");
-
-            var result = await this.ShowPopupAsync(popup) as ActionPopup.PopupResult;
-            if (result?.Field1 == null) return;
-
-            var name = result.Field1;
-            var unit = result.Field2;
-            var indication = result.Field3;
-            var qtyText = result.Field4;
-            var reorderText = result.Field5;
-            var notes = result.Field6;
-
-            int qty = 0;
-            if (!string.IsNullOrWhiteSpace(qtyText))
-                int.TryParse(qtyText, out qty);
-
-            int reorderLevel = 0;
-            if (!string.IsNullOrWhiteSpace(reorderText))
-                int.TryParse(reorderText, out reorderLevel);
-
-            Guid medicationId;
-
-            // Check for existing medication with same name
-            var existing = VM.InventoryMedications
-                .FirstOrDefault(m => string.Equals(
-                    (m.MedName ?? "").Trim(), name.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-
-            if (existing != null)
+            try
             {
-                var useExisting = await DisplayAlert(
-                    "Duplicate",
-                    $"'{name}' already exists in inventory. Use existing item?",
-                    "Yes", "No");
+                await VM.LoadAsync();
 
-                if (!useExisting) return;
+                var popup = new ActionPopup();
+                popup.ConfigureNewMedOrder("NEW ORDER");
 
-                medicationId = existing.Id;
+                var result = await this.ShowPopupAsync(popup) as ActionPopup.PopupResult;
+                if (result?.Field1 == null) return;
+
+                var name = result.Field1;
+                var unit = result.Field2;
+                var indication = result.Field3;
+                var qtyText = result.Field4;
+                var reorderText = result.Field5;
+                var notes = result.Field6;
+
+                int.TryParse(qtyText, out var qty);
+                int.TryParse(reorderText, out var reorderLevel);
+
+                Guid medicationId;
+                var existing = VM.InventoryMedications
+                    .FirstOrDefault(m => string.Equals(
+                        (m.MedName ?? "").Trim(), name.Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+
+                if (existing != null)
+                {
+                    var useExisting = await DisplayAlert(
+                        "Duplicate",
+                        $"'{name}' already exists in inventory. Use existing item?",
+                        "Yes", "No");
+
+                    if (!useExisting) return;
+
+                    medicationId = existing.Id;
+                }
+                else
+                {
+                    medicationId = await VM.CreateInventoryMedicationAsync(
+                        name, reorderLevel, unit, indication);
+                }
+
+                var auth = MauiProgram.Services.GetService<AuthService>();
+                var user = auth?.CurrentUser != null
+                    ? $"{auth.CurrentUser.StaffName} ({auth.CurrentUser.Role})"
+                    : "Unknown";
+
+                await VM.CreateOrderAsync(medicationId, qty, user, notes, name);
             }
-            else
+            catch (Exception ex)
             {
-                medicationId = await VM.CreateInventoryMedicationAsync(
-                    name, reorderLevel, unit, indication);
+                await DisplayAlert("Order Error", ex.Message, "OK");
             }
-
-            var auth = MauiProgram.Services.GetService<AuthService>();
-            var user = auth?.CurrentUser != null
-                ? $"{auth.CurrentUser.StaffName} ({auth.CurrentUser.Role})"
-                : "Unknown";
-            await VM.CreateOrderAsync(medicationId, qty, user, notes, name);
         }
 
         private async void OnReceiveClicked(object sender, EventArgs e)
@@ -112,15 +113,46 @@ namespace CareHub.Pages.Desktop
 
             try
             {
-                var services = Application.Current?.Handler?.MauiContext?.Services;
-                var orderService = services?.GetRequiredService<IMedicationOrderService>();
-                if (orderService != null)
-                {
-                    await orderService.UpdateStatusAsync(row.OrderId, MedicationOrderStatus.Received, expiryDate);
-                    await VM.LoadAsync();
-                }
+                await VM.UpdateStatusAsync(row, MedicationOrderStatus.Received, expiryDate);
             }
-            catch { /* local-only service */ }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Status Error", ex.Message, "OK");
+            }
+        }
+
+        private async void OnMarkOrderedClicked(object sender, EventArgs e)
+        {
+            var row = (sender as BindableObject)?.BindingContext as MedicationOrderRow;
+            if (row == null && e is EventArgs args && sender is Button button)
+                row = button.CommandParameter as MedicationOrderRow;
+            if (row == null) return;
+
+            try
+            {
+                await VM.UpdateStatusAsync(row, MedicationOrderStatus.Ordered);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Status Error", ex.Message, "OK");
+            }
+        }
+
+        private async void OnCancelClicked(object sender, EventArgs e)
+        {
+            var row = (sender as BindableObject)?.BindingContext as MedicationOrderRow;
+            if (row == null && sender is Button button)
+                row = button.CommandParameter as MedicationOrderRow;
+            if (row == null) return;
+
+            try
+            {
+                await VM.UpdateStatusAsync(row, MedicationOrderStatus.Cancelled);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Status Error", ex.Message, "OK");
+            }
         }
 
         private async void OnCloseClicked(object sender, TappedEventArgs e) => await NavigateOutAsync();

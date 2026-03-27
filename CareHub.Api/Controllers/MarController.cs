@@ -229,6 +229,9 @@ public sealed class MarController : ControllerBase
         [FromQuery] Guid? residentId,
         CancellationToken ct)
     {
+        if (fromUtc > toUtc)
+            return BadRequest("'fromUtc' must be earlier than or equal to 'toUtc'.");
+
         var query = _db.MarEntries.AsNoTracking()
             .Where(m => !m.IsVoided)
             .Where(m => m.AdministeredAtUtc >= fromUtc && m.AdministeredAtUtc <= toUtc);
